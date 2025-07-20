@@ -1,0 +1,72 @@
+# -------------------------------
+# macOS System Files
+# -------------------------------
+
+# macOS stores folder view settings here — useless for your repo
+.DS_Store
+
+
+# -------------------------------
+# C++ Build Artifacts
+# -------------------------------
+
+# Folders often used for compiled output
+cpp/build/
+cpp/bin/
+
+# Object files (compiled from .cpp), platform-dependent
+*.o
+*.obj
+
+# Executable binaries (Linux/macOS/Windows)
+*.exe
+*.out
+
+# Static and dynamic libraries
+*.a      # Static library (Unix)
+*.so     # Shared library (Linux)
+*.dll    # Dynamic-link library (Windows)
+*.dylib  # Dynamic library (macOS)
+
+# CMake build directories and cache (used in many C++ projects)
+CMakeFiles/
+CMakeCache.txt
+
+
+# -------------------------------
+# C# (.NET) Build Artifacts
+# -------------------------------
+
+# Compiled output directories created by dotnet build
+csharp/bin/
+csharp/obj/
+
+# Visual Studio/VS Code project-specific user settings
+*.user    # Per-user project settings (Visual Studio)
+*.suo     # Solution User Options — saved user-specific solution info
+
+
+# -------------------------------
+# Python Build Artifacts & Virtual Environment
+# -------------------------------
+
+# Python virtual environment — recreated locally with `uv` or `venv`
+python/.venv/
+
+# Bytecode cache created by Python automatically
+__pycache__/
+*.pyc   # Compiled Python files
+*.pyo   # Optimized bytecode (rarely used)
+*.pyd   # Python Dynamic module (Windows)
+
+
+# -------------------------------
+# Editor & Temp Files (Common)
+# -------------------------------
+
+# Log and temp files that shouldn’t be versioned
+*.log
+*.tmp
+
+# Vim/Neovim swap files (if using Vim)
+*.swp
