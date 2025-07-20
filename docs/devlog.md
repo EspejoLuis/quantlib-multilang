@@ -8,7 +8,7 @@
     - C# folder--> csharp
     - c++ folder --> cpp
 
+- Had to do some fixing: 
+    - git remote remove origin
+    - then just using source control bar --> publish Branch
 
-# 21 July
-# 21 July
-# 21 July

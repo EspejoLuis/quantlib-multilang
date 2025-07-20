@@ -4,15 +4,16 @@ This is a personal learning project where I rewrite key components of the QuantL
 
 ## Project Structure
 
+```text
 quantlib-multilang/
-├── code-cpp/           # My C++ rewrite of QuantLib
-├── code-csharp/        # C# port of QuantLib logic
-├── code-python/        # Python implementation
-├── docs/          # Internal documentation folder
-│   └── devlog.md  # My daily notes and learning log
-├── README.md      # Project overview (public-facing)
-├── .gitignore     # Files/folders to exclude from version control
-
+├── code-cpp/
+├── code-csharp/
+├── code-python/
+├── docs/
+│   └── devlog.md
+├── README.md
+├── .gitignore
+```
 
 ## Goals
 
@@ -24,9 +25,9 @@ quantlib-multilang/
 ## Getting Started
 
 Each subfolder contains its own instructions:
-- [`cpp/`](cpp/) – build with CMake
-- [`csharp/`](csharp/) – .NET 8 class library
-- [`python/`](python/) – uses `uv` and `ruff`
+- [`code-cpp/`](code-cpp/) – build with CMake
+- [`code-csharp/`](code-csharp/) – .NET 8 class library
+- [`code-python/`](code-python/) – uses `uv` and `ruff`
 
 ## License
 
