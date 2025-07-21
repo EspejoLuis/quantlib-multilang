@@ -1,0 +1,22 @@
+# ruff.toml — Configuration for Ruff linter
+
+# Set maximum line length
+line-length = 100  # Lines longer than this will be flagged unless we ignore E501
+
+# Set the Python version Ruff should target
+target-version = "py311"  # Enables Python 3.11 syntax (e.g. match-case)
+
+[lint]
+# Rule categories to enable
+select = [
+    "E",   # pycodestyle: PEP 8 style issues (e.g., spacing, indentation)
+    "F",   # pyflakes: unused variables, undefined names
+    "I",   # isort: import sorting
+    "B",   # flake8-bugbear: common bugs and anti-patterns
+    "UP"   # pyupgrade: suggest using modern Python 3 features
+]
+
+# Rules to ignore
+ignore = [
+    "E501"  # Ignore long line warnings, since line-length is set manually
+]

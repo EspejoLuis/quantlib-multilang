@@ -51,7 +51,7 @@ csharp/obj/
 # -------------------------------
 
 # Python virtual environment — recreated locally with `uv` or `venv`
-python/.venv/
+.venv/
 
 # Bytecode cache created by Python automatically
 __pycache__/
@@ -59,6 +59,11 @@ __pycache__/
 *.pyo   # Optimized bytecode (rarely used)
 *.pyd   # Python Dynamic module (Windows)
 
+# Ruff cache
+.ruff_cache/
+
+# VS Code settings (optional: include if only project-specific settings are used)
+.vscode/
 
 # -------------------------------
 # Editor & Temp Files (Common)

@@ -27,7 +27,7 @@ quantlib-multilang/
 Each subfolder contains its own instructions:
 - [`code-cpp/`](code-cpp/) – build with CMake
 - [`code-csharp/`](code-csharp/) – .NET 8 class library
-- [`code-python/`](code-python/) – uses `uv` and `ruff`
+- [`code-python/`](code-python/) – uses `uv` and `ruff` and `polars`
 
 ## License
 
