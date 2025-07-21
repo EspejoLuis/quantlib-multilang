@@ -11,8 +11,8 @@
 # -------------------------------
 
 # Folders often used for compiled output
-cpp/build/
-cpp/bin/
+code-cpp/build/
+code-cpp/bin/
 
 # Object files (compiled from .cpp), platform-dependent
 *.o
@@ -38,8 +38,8 @@ CMakeCache.txt
 # -------------------------------
 
 # Compiled output directories created by dotnet build
-csharp/bin/
-csharp/obj/
+code-csharp/bin/
+code-csharp/obj/
 
 # Visual Studio/VS Code project-specific user settings
 *.user    # Per-user project settings (Visual Studio)
@@ -51,19 +51,19 @@ csharp/obj/
 # -------------------------------
 
 # Python virtual environment — recreated locally with `uv` or `venv`
-.venv/
+code-python/.venv/
 
 # Bytecode cache created by Python automatically
-__pycache__/
+code-python/__pycache__/
 *.pyc   # Compiled Python files
 *.pyo   # Optimized bytecode (rarely used)
 *.pyd   # Python Dynamic module (Windows)
 
 # Ruff cache
-.ruff_cache/
+code-python/.ruff_cache/
 
 # VS Code settings (optional: include if only project-specific settings are used)
-.vscode/
+code-python/.vscode/
 
 # -------------------------------
 # Editor & Temp Files (Common)

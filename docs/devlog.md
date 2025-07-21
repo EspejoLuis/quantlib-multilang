@@ -28,3 +28,7 @@
     - create setting.json in .vscode for using ruff.
     - selet the python interpreter : cmd+shift+P --> .venv should appear. If not the add it manually using the address found in `which python`
     
+- C#:
+    - `dotnet new classlib --name QuantLibCSharp --output .` to set up the C# environment
+    - build it `dotnet build`
+ 
