@@ -15,7 +15,7 @@
     - git remote remove origin
     - then just using source control bar --> publish Branch
 
-## 21 July 2025 - Day Two: setting python environment
+## 21 July 2025 - Day Two: setting python and c# environment
 
 - Python:
     - `uv venv --python=/opt/homebrew/bin/python3.11` to create the uv environemnt with python 3.11
@@ -31,4 +31,22 @@
 - C#:
     - `dotnet new classlib --name QuantLibCSharp --output .` to set up the C# environment
     - build it `dotnet build`
- 
+
+## 22 July 2025 - Day Three: setting C++ environment
+
+- C++:
+    - in code-cpp folder [`cd code-cpp`]:
+        - `mkdir src`
+        - `touch src/main.cpp`
+        - `touch CMakeLists.txt`
+    - add specs in CMakeLists.txt and example in main.ccp to test
+    - then:
+        - `mkdir build`
+        - `cd build`
+        - `cmake ..` search for a CMakeLists file in the parent folder `code-ccp`, find the source files to compile `src/main.cpp`, set up Makefile in `build` folder.
+        - `make` :
+            - compile `main.ccp` into `main.ccp.o`(object file in `CMakeFiles/quantlib_ccp.dir/src/`), `main.ccp.o.d` is created as well.
+                - `main.cpp.o` -> compiled binary blob
+                - `main.cpp.o.d` -> dependency file for header tracking
+            - link all objects into final binary `quantlib_ccp`(in `build/`).
+        - `./quantlib_cpp` execute! (from `build/`)
