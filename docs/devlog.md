@@ -7,9 +7,9 @@
 
 -  Using ChatGpt to help me with suggestiongs about structure of folders. We can have one single repo and three folders. One for each language. Then later if needed we can extract folders:
 
-    - Python folder --> [`code-python`](code-python)
-    - C# folder--> [`code-csharp`](code-csharp)
-    - c++ folder --> [`code-cpp`](code-ccp)
+    - Python folder --> [`code-python`](../code-python)
+    - C# folder--> [`code-csharp`](../code-csharp)
+    - c++ folder --> [`code-cpp`](../code-ccp)
 
 - Had to do some fixing: 
     - git remote remove origin
@@ -50,3 +50,11 @@
                 - `main.cpp.o.d` -> dependency file for header tracking
             - link all objects into final binary `quantlib_ccp`(in `build/`).
         - `./quantlib_cpp` execute! (from `build/`)
+
+- Implemenation class `Date`:
+    - C++:
+        - Defining `Date.hpp` and `Date.cpp`. To Continue
+            - Construct valid dates
+            - Print them
+            - Compare them
+            - Add/subtract days
