@@ -1,6 +1,6 @@
 # QuantLib Multilang
 
-This is a personal learning project where I rewrite key components of the QuantLib C++ library in **C++**, **C#**, and **Python**.
+This is a personal learning project where I rewrite key components of the QuantLib C++ library in **C++**, **C#**, and **Python**. I'm going to use ChatGPT to explain the library, help with the code and explain.
 
 ## Project Structure
 

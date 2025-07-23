@@ -1,3 +1,5 @@
+// Date.hpp contains only the declarations
+
 #pragma once // Include this header file only once, no matter how many times it's imported.
 #include <string>
 
@@ -33,16 +35,17 @@ namespace QuantLibCpp {
 
             /*
             The following will allow to compare dates
-            if (d1 == d2) { ... }
-            if (d1 < d2) { ... }
+                if (d1 == d2) { ... }
+                if (d1 < d2) { ... }
             Behind the scenes, this is whay is called:
-            d1.operator==(d2);
+                d1.operator==(d2);
+            
             - bool --> return type
             - const Date& other: 
                 - A reference to another Date object you're comparing to
                 - Passed by const reference:
                     - const = telling compiler we are not to modify `other`.
-                    - & = avoid copying but referecing 
+                    - & = avoid copying but referencing 
             - const --> method itself as const --> not to modify the current object
             */
             bool operator==(const Date& other) const;

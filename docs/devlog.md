@@ -19,36 +19,36 @@
 
 - Python:
     - `uv venv --python=/opt/homebrew/bin/python3.11` to create the uv environemnt with python 3.11
-    - activate environment `source .venv/bin/activate`
+    - Activate environment `source .venv/bin/activate`
     - `uv pip install -U pip setuptools wheel` to install some basic libraries
-    - create the pyproject.toml with polars version.
+    - Create the pyproject.toml with polars version.
     - `uv pip install -r pyproject` to install the content in pyproject.
-    - added ruff extension to visual studio. Check in extensions.
-    - create ruff.toml setting file.
-    - create setting.json in .vscode for using ruff.
-    - selet the python interpreter : cmd+shift+P --> .venv should appear. If not the add it manually using the address found in `which python`
+    - Added ruff extension to visual studio. Check in extensions.
+    - Create ruff.toml setting file.
+    - Create setting.json in .vscode for using ruff.
+    - Select the python interpreter : cmd+shift+P --> .venv should appear. If not the add it manually using the address found in `which python`
     
 - C#:
     - `dotnet new classlib --name QuantLibCSharp --output .` to set up the C# environment
-    - build it `dotnet build`
+    - Build it `dotnet build`
 
 ## 22 July 2025 - Day Three: setting C++ environment
 
 - C++:
-    - in code-cpp folder [`cd code-cpp`]:
+    - In [`code-cpp`](../code-cpp/) folder:
         - `mkdir src`
         - `touch src/main.cpp`
         - `touch CMakeLists.txt`
-    - add specs in CMakeLists.txt and example in main.ccp to test
-    - then:
+    - Add specs in CMakeLists.txt and example in main.ccp to test
+    - Then:
         - `mkdir build`
         - `cd build`
         - `cmake ..` search for a CMakeLists file in the parent folder `code-ccp`, find the source files to compile `src/main.cpp`, set up Makefile in `build` folder.
         - `make` :
-            - compile `main.ccp` into `main.ccp.o`(object file in `CMakeFiles/quantlib_ccp.dir/src/`), `main.ccp.o.d` is created as well.
-                - `main.cpp.o` -> compiled binary blob
-                - `main.cpp.o.d` -> dependency file for header tracking
-            - link all objects into final binary `quantlib_ccp`(in `build/`).
+            - Compile `main.ccp` into `main.ccp.o`(object file in `CMakeFiles/quantlib_ccp.dir/src/`), `main.ccp.o.d` is created as well.
+                - `main.cpp.o` -> compiled binary blob.
+                - `main.cpp.o.d` -> dependency file for header tracking.
+            - Link all objects into final binary `quantlib_ccp`(in `build/`).
         - `./quantlib_cpp` execute! (from `build/`)
 
 - Implemenation class `Date`:
@@ -58,3 +58,18 @@
             - Print them
             - Compare them
             - Add/subtract days
+
+## 23 July 2025 - Day #4: C++ Implementation Date
+
+- In [`QuantLibCpp`](../code-cpp/src/QuantLibCpp/):
+    - Implemenation class `Date`:
+        - C++:
+            - Continued defining `Date.hpp` and `Date.cpp`.
+                - Defined comparison,add/subtract. 
+                - Comment methods to better understand what they are doing.
+            - Compiled and created a pseudo test `DateExample.cpp`.
+                - g++ -std=c++17 Date.cpp DateExample.cpp -o test_date
+                - ./test_date
+
+NEXT: create a proper test (Which tests are used in Quantlib ?)
+
