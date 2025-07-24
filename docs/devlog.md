@@ -89,7 +89,7 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
         - Manually compiling from [`QuantLibCpp`](../code-cpp/src/QuantLibCpp/):
             - Compile `g++ -std=c++17 Date.cpp DateTest_catch.cpp -o date_tests` --> Compile Date and DateTest_catch and link them into an executable date_tests
             - Run `./date_tests` --> All test passed 19 assertions in 7 test cases 
-        - Compiling using cmake from [`build`](../build/):
+        - Compiling using cmake from [`build`](../code-cpp/build/):
             - `cmake ..` meaning:
                 - "Please read the CMakeLists.txt file in the parent directory (..) and generate all the build files needed (e.g., Makefile or Ninja files) here in the build/ directory"
                 - After, in build there should be `Makefile`
