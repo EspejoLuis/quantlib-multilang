@@ -42,7 +42,7 @@ namespace QuantLibCpp {
             
             - bool --> return type
             - const Date& other: 
-                - A reference to another Date object you're comparing to
+                - A reference to an'other' Date object you're comparing to
                 - Passed by const reference:
                     - const = telling compiler we are not to modify `other`.
                     - & = avoid copying but referencing 

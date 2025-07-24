@@ -30,7 +30,7 @@
     
 - C#:
     - `dotnet new classlib --name QuantLibCSharp --output .` to set up the C# environment
-    - Build it `dotnet build`
+    - Build it `dotnet build` from [`QuantLibCSharp`](../code-csharp/QuantLibCSharp/)
 
 ## 22 July 2025 - Day Three: setting C++ environment
 
@@ -95,6 +95,7 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
                 - After, in build there should be `Makefile`
             - `cmake --build .` uses `Makefile` and compiles
 
-            
+- In [`QuantLibCShapr`](../code-csharp/QuantLibCSharp/):
+    - Implementation for `Date` class:
 
 
