@@ -1,6 +1,6 @@
 # QuantLib Multilang
 
-This is a personal learning project where I rewrite key components of the QuantLib C++ library in **C++**, **C#**, and **Python**. I'm going to use ChatGPT to explain the library, help with the code and explain.
+This is a personal learning project where I rewrite key components of the QuantLib C++ library in **C++**, **C#**, **Python**, and **Rust**. I'm going to use ChatGPT to explain the library, help with the code, explain structure etc..
 
 ## Project Structure
 
@@ -9,6 +9,7 @@ quantlib-multilang/
 ├── code-cpp/
 ├── code-csharp/
 ├── code-python/
+├── code-rust/
 ├── docs/
 │   └── devlog.md
 ├── README.md
@@ -18,7 +19,7 @@ quantlib-multilang/
 ## Goals
 
 - Learn modern C++ by rebuilding QuantLib functionality
-- Practice clean design in Python and C#
+- Practice clean design in Pythonm, C#, Rust and C++ 
 - Compare idiomatic patterns across three languages
 - Understand financial instruments and pricing engines deeply
 
@@ -28,6 +29,7 @@ Each subfolder contains its own instructions:
 - [`code-cpp/`](code-cpp/) – build with CMake
 - [`code-csharp/`](code-csharp/) – .NET 9 class library
 - [`code-python/`](code-python/) – uses `uv` and `ruff` and `polars`
+- [`code-rust/`](code-rust/) – Rust library managed by Cargo
 
 ## License
 

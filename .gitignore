@@ -5,7 +5,6 @@
 # macOS stores folder view settings here — useless for your repo
 .DS_Store
 
-
 # -------------------------------
 # C++ Build Artifacts
 # -------------------------------
@@ -32,7 +31,6 @@ code-cpp/bin/
 CMakeFiles/
 CMakeCache.txt
 
-
 # -------------------------------
 # C# (.NET) Build Artifacts
 # -------------------------------
@@ -44,7 +42,6 @@ code-csharp/obj/
 # Visual Studio/VS Code project-specific user settings
 *.user    # Per-user project settings (Visual Studio)
 *.suo     # Solution User Options — saved user-specific solution info
-
 
 # -------------------------------
 # Python Build Artifacts & Virtual Environment
@@ -64,6 +61,17 @@ code-python/.ruff_cache/
 
 # VS Code settings (optional: include if only project-specific settings are used)
 code-python/.vscode/
+
+# -------------------------------
+# Rust Build Artifacts
+# -------------------------------
+
+# Compiled Rust output and intermediate artifacts
+code-rust/target/
+**/*.rs.bk
+
+# Rust-specific VS Code settings (optional)
+code-rust/.vscode/
 
 # -------------------------------
 # Editor & Temp Files (Common)

@@ -73,3 +73,10 @@
 
 NEXT: create a proper test (Which tests are used in Quantlib ?)
 
+## 24 July 2025 - Day#5: Idea
+
+Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
+    - Install it: `curl https://sh.rustup.rs -sSf | sh`
+    - Restart terminal and `source $HOME/.cargo/env`
+    - Create folder: `cargo new code-rust --lib`
+
