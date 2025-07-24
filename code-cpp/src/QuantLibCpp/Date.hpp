@@ -1,4 +1,4 @@
-// Date.hpp contains only the declarations
+// Date.hpp contains only the declarations. It's like an Interface in C#
 
 #pragma once // Include this header file only once, no matter how many times it's imported.
 #include <string>

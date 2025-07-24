@@ -31,6 +31,10 @@ code-cpp/bin/
 CMakeFiles/
 CMakeCache.txt
 
+# VS Code settings (optional: include if only project-specific settings are used)
+code-cpp/.vscode/
+
+
 # -------------------------------
 # C# (.NET) Build Artifacts
 # -------------------------------

@@ -80,3 +80,21 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
     - Restart terminal and `source $HOME/.cargo/env`
     - Create folder: `cargo new code-rust --lib`
 
+- In [`QuantLibCpp`](../code-cpp/src/QuantLibCpp/):
+    - Implemenation proper test for class `Date`:
+        - Going to use Catch2 as test framework
+        - Create [`lib`](../code-cpp/src/QuantLibCpp/lib/)
+        - Installed `curl -LO https://raw.githubusercontent.com/catchorg/Catch2/v2.x/single_include/catch2/catch.hpp` i.e. catch.hpp is t’s the entire Catch2 testing framework bundled into a single header file. From now on just need to use `#include "catch.hpp"` and start writing tests.
+        - Create `DateTest_catch.cpp`
+        - Manually compiling from [`QuantLibCpp`](../code-cpp/src/QuantLibCpp/):
+            - Compile `g++ -std=c++17 Date.cpp DateTest_catch.cpp -o date_tests` --> Compile Date and DateTest_catch and link them into an executable date_tests
+            - Run `./date_tests` --> All test passed 19 assertions in 7 test cases 
+        - Compiling using cmake from [`build`](../build/):
+            - `cmake ..` meaning:
+                - "Please read the CMakeLists.txt file in the parent directory (..) and generate all the build files needed (e.g., Makefile or Ninja files) here in the build/ directory"
+                - After, in build there should be `Makefile`
+            - `cmake --build .` uses `Makefile` and compiles
+
+            
+
+
