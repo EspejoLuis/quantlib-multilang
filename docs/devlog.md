@@ -73,7 +73,7 @@
 
 NEXT: create a proper test (Which tests are used in Quantlib ?)
 
-## 24 July 2025 - Day#5: Idea
+## 24 July 2025 - Day #5: Idea
 
 Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
     - Install it: `curl https://sh.rustup.rs -sSf | sh`
@@ -96,6 +96,25 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
             - `cmake --build .` uses `Makefile` and compiles
 
 - In [`QuantLibCShapr`](../code-csharp/QuantLibCSharp/):
-    - Implementation for `Date` class:
+    - Implementation for `Date` class
+
+## 25 July 2025 - Day #6: Idea
+
+- In [`code-csharp`](../code-csharp/):
+    - Implementation of test for `Date`:
+        - Create new test folder: `dotnet new nunit -n QuantlibCSharp.Tests`
+        - Add "ProjectReference Include=" in csproj `dotnet add QuantLibCSharp.Tests/QuantLibCSharp.Tests.csproj reference QuantLibCSharp/QuantLibCSharp.csproj`
+    - Creating solutions `dotnet new sln -n QuantLibCSharp`:
+        - Register QuantLibCSharp with the solutuion: `dotnet sln add QuantLibCSharp/QuantLibCSharp.csproj`
+        - Register QuantLibCSharp.Tests with the solution: `dotnet sln add QuantLibCSharp.Tests/QuantLibCSharp.Tests.csproj`
+        - Test --> `dotnet test QuantLibCSharp.sln` from [`code-csharp`](../code-csharp/)
 
 
+
+TO DO 
+- Function for adding/subtracting month,years not just days:
+    - What if days are more than 30/31
+    - What if days are negative ?
+    - Same for months ?
+    - What if subtracting Dates instead of just days
+- Take into account for starting a new month/year

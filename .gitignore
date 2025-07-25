@@ -40,8 +40,12 @@ code-cpp/.vscode/
 # -------------------------------
 
 # Compiled output directories created by dotnet build
-code-csharp/bin/
-code-csharp/obj/
+code-csharp/QuantLibCSharp/bin/
+code-csharp/QuantLibCSharp/obj/
+code-csharp/QuantLibCSharp.Tests/bin/
+code-csharp/QuantLibCSharp.Tests/obj/
+
+
 
 # Visual Studio/VS Code project-specific user settings
 *.user    # Per-user project settings (Visual Studio)

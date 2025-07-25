@@ -59,7 +59,7 @@ public class Date
         // ISO format (different from the C++ implementation)
         // Casting Month to int i.e. the corresponding index of the month
         // D4 --> 4 Digits
-        return $"{Year:D4}-{(Int)Month:D2}-{Day:D2}";
+        return $"{Year:D4}-{(int)Month:D2}-{Day:D2}";
     }
 
     // Nullable reference ? -> object could be null.
@@ -90,6 +90,11 @@ public class Date
         return left.Equals(right);
     }
 
+    public static bool operator !=(Date left, Date right)
+    {
+        return !(left == right);
+    }
+
     public static bool operator <(Date left, Date right)
     {
         if (left.Year != right.Year)
@@ -99,5 +104,19 @@ public class Date
         return left.Day < right.Day;
     }
 
+    public static bool operator >(Date left, Date right)
+    {
+        return !(left < right || left == right);
+    }
+
+    public static Date operator +(Date d, int days)
+    {
+        return new Date(d.Day + days, d.Month, d.Year);
+    }
+
+    public static Date operator -(Date d, int days)
+    {
+        return new Date(d.Day - days, d.Month, d.Year);
+    }
 
 }
