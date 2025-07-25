@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\QuantLibCSharp\QuantLibCSharp.csproj" />
+    <ProjectReference Include="..\..\src\QuantLibCSharp\QuantLibCSharp.csproj" />
   </ItemGroup>
 
 </Project>
