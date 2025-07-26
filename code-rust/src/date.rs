@@ -176,3 +176,35 @@ impl Sub<Date> for Date{
         serial_i32 - rhs_i32
     }
 }
+
+
+// This block will be compiled only when running cargo test
+#[cfg(test)]
+// Defines a nested test module
+mod tests {
+
+    // Bring everything from the outer scope (Date, its methods, etc.)
+    use super::*;
+
+    #[test]
+    fn creates_date_correctly() {
+        let d1 = Date::new(1, 05, 1989);
+
+        assert_eq!(d1.day, 1);
+        assert_eq!(d1.month, 05);
+        assert_eq!(d1.year, 1989);
+    }
+
+    #[test]
+    fn equality_works_when_fields_match(){
+        let d1 = Date::new(14, 5, 1989);
+        let d2 = Date::new(14, 5, 1989);
+
+        assert_eq!(d1, d2, "Dates should be equal");
+
+        let d3 = Date::new(15, 5, 1989);
+        
+        assert_ne!(d1, d3, "Dates should not be equal");
+    }
+    
+}

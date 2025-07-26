@@ -127,6 +127,16 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
                 - Subtract positive number
                 - Subtract negative number
                 - Subtract dates
+    - Started implementing Date Test class: [`date.rs`](../code-rust/src/date.rs):
+        - Unit tests in [`date.rs`](../code-rust/src/date.rs):
+            - Constructor -> Done --> `cargo test` 
+        
+        TO DO - Integration tests
+
+
+
+
+
 
 
 # TO DO 
