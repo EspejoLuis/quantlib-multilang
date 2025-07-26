@@ -15,7 +15,7 @@
     - git remote remove origin
     - then just using source control bar --> publish Branch
 
-## 21 July 2025 - Day Two: setting python and c# environment
+## 21 July 2025 - Day Two: setting python and C# environment
 
 - Python:
     - `uv venv --python=/opt/homebrew/bin/python3.11` to create the uv environemnt with python 3.11
@@ -59,7 +59,7 @@
             - Compare them
             - Add/subtract days
 
-## 23 July 2025 - Day #4: C++ Implementation Date
+## 23 July 2025 - Day #4: C++ Date Implementation
 
 - In [`QuantLibCpp`](../code-cpp/src/QuantLibCpp/):
     - Implemenation class `Date`:
@@ -73,7 +73,7 @@
 
 NEXT: create a proper test (Which tests are used in Quantlib ?)
 
-## 24 July 2025 - Day #5: Idea
+## 24 July 2025 - Day #5: Idea + C# Date Implementation 
 
 Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
     - Install it: `curl https://sh.rustup.rs -sSf | sh`
@@ -98,10 +98,10 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
 - In [`QuantLibCShapr`](../code-csharp/QuantLibCSharp/):
     - Implementation for `Date` class
 
-## 25 July 2025 - Day #6: Idea
+## 25 July 2025 - Day #6: C# Date Test Implementation
 
 - In [`code-csharp`](../code-csharp/):
-    - Implementation of test for `Date`:
+    - Implementation of test for [`DateTests.cs`](../code-csharp/tests/QuantLibCSharp.Tests/DateTests.cs):
         - Create new test folder: `dotnet new nunit -n QuantlibCSharp.Tests`
         - Add "ProjectReference Include=" in csproj `dotnet add QuantLibCSharp.Tests/QuantLibCSharp.Tests.csproj reference QuantLibCSharp/QuantLibCSharp.csproj`
     - Creating solutions `dotnet new sln -n QuantLibCSharp`:
@@ -109,12 +109,34 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
         - Register QuantLibCSharp.Tests with the solution: `dotnet sln add QuantLibCSharp.Tests/QuantLibCSharp.Tests.csproj`
         - Test --> `dotnet test QuantLibCSharp.sln` from [`code-csharp`](../code-csharp/)
 
+## 26 July 2025 - Day #7: Implementation of Date clas in Rust
+
+- In [`code-rust`](../code-rust/):
+    - Started implementing Date class: [`date.rs`](../code-rust/src/date.rs)
+        - Constructor
+        - ToString
+        - Comparison:
+            - Equal
+            - Lower
+        - Operators:
+            - To use Add, to_serial and from_serial are needed
+            - Add:
+                - Add positive number
+                - Add negative number
+            - Subtract:
+                - Subtract positive number
+                - Subtract negative number
+                - Subtract dates
 
 
-TO DO 
+# TO DO 
 - Function for adding/subtracting month,years not just days:
     - What if days are more than 30/31
     - What if days are negative ?
     - Same for months ?
     - What if subtracting Dates instead of just days
+    - Need to implement calendar logic
 - Take into account for starting a new month/year
+- Can we use DateTime in C# ? for operations with dates instead of creating our own ?
+- Rust:
+    Assumption: for now that the input is always non-negative, and that self.to_serial() + n will never underflow (negative dates will be handled later)
