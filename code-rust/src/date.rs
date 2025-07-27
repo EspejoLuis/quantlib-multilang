@@ -138,7 +138,24 @@ This (impl Add<i32> for Date) is similar to:
     - C#: public static Date operator -(Date d, int n)
 */
 
-// Add days to date
+// Add days to date (by reference)
+impl Add<i32> for &Date{
+    
+    type Output = Date;
+    // i32 means it can be NEGATIVE!
+    fn add(self, rhs: i32) -> Date {
+        let serial_i32 = self.to_serial() as i32;
+        // rhs and serial cannot be added 
+        // i32 vs u32
+        let new_serial = serial_i32 + rhs;
+        // Put Check
+        assert!(new_serial >= 0, "New date is before base date");
+
+        Date::from_serial(new_serial as u32)
+    }
+}
+
+// Add days to date (by value)
 impl Add<i32> for Date{
     
     type Output = Date;
@@ -157,7 +174,18 @@ impl Add<i32> for Date{
 
 use std::ops::Sub;
 
-// Subtract days from date
+
+/* 
+Subtract days from date
+This implementations consumes the value
+Rust has strict ownership rules. 
+When a function takes an argument by value (not by reference),
+It moves ownership of that argument into the function,
+meaning the caller can no longer use it afterward unless it's Copy.
+
+This is what's meant by "consuming" a value: 
+    it's no longer usable after that operation.
+*/
 impl Sub<i32> for Date{
     type Output = Date;
     // i32 means it can be NEGATIVE!
@@ -173,6 +201,28 @@ impl Sub<i32> for Date{
     }
 }
 
+/*
+Implementing this without & i.e. by reference:
+
+"borrowing" a value
+*/
+impl Sub<i32> for &Date{
+    type Output = Date;
+    // i32 means it can be NEGATIVE!
+    fn sub(self, rhs: i32) -> Date {
+        let serial_i32 = self.to_serial() as i32;
+        // rhs and serial cannot be added 
+        // i32 vs u32
+        let new_serial = serial_i32 - rhs;
+        // Put Check
+        assert!(new_serial >= 0, "New date is before base date");
+
+        Date::from_serial(new_serial as u32)
+    }
+}
+
+
+
 // Subtract dates
 impl Sub<Date> for Date{
     type Output = i32;
@@ -184,6 +234,7 @@ impl Sub<Date> for Date{
         serial_i32 - rhs_i32
     }
 }
+
 
 
 // This block will be compiled only when running cargo test
@@ -246,7 +297,7 @@ mod tests {
     }
 
     #[test]
-    fn add_days_works_correctly(){
+    fn add_days_by_value_works_correctly(){
         let d1 = Date::new(1, 5, 1989);
         let derived_date = d1 + 40;
 
@@ -258,12 +309,42 @@ mod tests {
     }
 
     #[test]
-    fn subtract_days_works_correctly(){
+    fn add_days_by_reference_works_correctly(){
+        // `d1` owns a Date instance
+        let d1 = Date::new(1, 5, 1989);
+        // `&d1` borrows d1 immutably 
+        // meaning d1 can be borrowed but not changed
+        let derived_date = &d1 + 40;
+
+        // We made assumption 30 days per month
+        let expected_date = Date::new(11, 6, 1989);
+
+        assert_eq!(derived_date, expected_date);
+
+    }
+
+    #[test]
+    fn subtract_days_by_value_works_correctly(){
         let d1 = Date::new(15, 5, 1989);
         // Subtracting 15 days will result in 0 May
         // Subtracitng 16 days will result in 29 May
         // so when is 30 May ?
         let derived_date = d1 - 16;
+
+        // We made assumption 30 days per month
+        let expected_date = Date::new(29, 4, 1989);
+
+        assert_eq!(derived_date, expected_date);
+
+    }
+
+    #[test]
+    fn subtract_days_by_reference_works_correctly(){
+        let d1 = Date::new(15, 5, 1989);
+        // Subtracting 15 days will result in 0 May
+        // Subtracitng 16 days will result in 29 May
+        // so when is 30 May ?
+        let derived_date = &d1 - 16;
 
         // We made assumption 30 days per month
         let expected_date = Date::new(29, 4, 1989);

@@ -20,8 +20,17 @@ fn serial_conversion_works_correctly(){
 #[test]
 fn add_then_subtract_returns_original_date_correctly(){
     let expected_date = Date::new(14, 5, 1989);
+    /*
+    Had to implement by reference add function (&)
+    by value was not enough. 
 
-    let date_add_days = expected_date + 40;
+        let a = Date::new(1, 1, 2020);
+        let c = &a + 10;  // borrow `a`
+
+        let b = Date::new(1, 1, 2020);
+        let a = b;  // ownership of `b` moved into `a`
+    */
+    let date_add_days = &expected_date + 40;
     let date_subtract_days = date_add_days - 40;
 
     assert_eq!(expected_date, date_subtract_days);
