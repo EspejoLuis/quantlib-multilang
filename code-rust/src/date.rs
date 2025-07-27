@@ -17,7 +17,12 @@ With PartialOrd and Ord:
     - PartialOrd --> Enables <, <=, >, >=
     - Ord --> Enables full ordering (like sorting)
 */
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+/*
+Using asser_eq!(d1, d1, "xxx") mean Rust will try to show the 
+value when the test fails but to do that `Debug` is needed
+*/
+
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 /*
 This can be done!
     if date1 == date2 {
@@ -27,10 +32,13 @@ This can be done!
 // defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
 pub struct Date {
     // pub --> public so they can be access by other files like main.rs
-    // unsigned 32-bit integer    
-    pub day: u32,
-    pub month: u32,
+    // unsigned 32-bit integer 
+
+    // Order below impact for example how operator < works.
+    // First field to be check is the first one below.
     pub year: u32,
+    pub month: u32,
+    pub day: u32,
 
 }
 
@@ -196,6 +204,14 @@ mod tests {
     }
 
     #[test]
+    fn display_date_correctly(){
+        let d1 = Date::new(14, 5, 1989);
+        let result = format!("{}", d1);
+
+        assert_eq!(result, "14-5-1989");
+    }
+
+    #[test]
     fn equality_works_when_fields_match(){
         let d1 = Date::new(14, 5, 1989);
         let d2 = Date::new(14, 5, 1989);
@@ -205,6 +221,84 @@ mod tests {
         let d3 = Date::new(15, 5, 1989);
         
         assert_ne!(d1, d3, "Dates should not be equal");
+        
     }
     
+    #[test]
+    fn date_comparison_works(){
+        let d1 = Date::new(14, 5, 1989);
+        let d2 = Date::new(17, 5, 1989);
+
+        assert!(d1 < d2);
+
+        let d3 = Date::new(13, 8, 1989);
+
+        /*
+        The first time it run, got an error here. Why ?
+        Because the the order of comparison was:
+            day -> month -> year.
+        The order is defined in the constructor.
+        It should be:
+            year -> month -> day
+
+        */
+        assert!(d3 > d2);
+    }
+
+    #[test]
+    fn add_days_works_correctly(){
+        let d1 = Date::new(1, 5, 1989);
+        let derived_date = d1 + 40;
+
+        // We made assumption 30 days per month
+        let expected_date = Date::new(11, 6, 1989);
+
+        assert_eq!(derived_date, expected_date);
+
+    }
+
+    #[test]
+    fn subtract_days_works_correctly(){
+        let d1 = Date::new(15, 5, 1989);
+        // Subtracting 15 days will result in 0 May
+        // Subtracitng 16 days will result in 29 May
+        // so when is 30 May ?
+        let derived_date = d1 - 16;
+
+        // We made assumption 30 days per month
+        let expected_date = Date::new(29, 4, 1989);
+
+        assert_eq!(derived_date, expected_date);
+
+    }
+
+    #[test]
+    fn subtract_dates_works_correctly(){
+        let d1 = Date::new(14, 5, 1989);
+        let d2 = Date::new(15, 5, 1989);
+
+        let derived_days = d2 - d1;
+        let expected_days = 1;
+
+        assert_eq!(derived_days, expected_days);
+    }
+
+    #[test]
+    fn to_serial_works_correctly(){
+        let d = Date::new(14, 5, 1989);
+
+        let derived_serial = d.to_serial();
+        let expected_serial = 14 + 5 * 30 + 1989 * 360;
+
+        assert_eq!(derived_serial, expected_serial);
+    }
+
+    #[test]
+    fn from_serial_works_correctly(){
+        let serial = 11 + 5 * 30 + 1989 * 360;
+        let derived_date = Date::from_serial(serial);
+        let expected_date = Date::new(11, 5, 1989);
+        
+        assert_eq!(derived_date, expected_date);
+    }
 }

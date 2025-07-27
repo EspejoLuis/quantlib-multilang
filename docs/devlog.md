@@ -115,7 +115,7 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
     - Started implementing Date class: [`date.rs`](../code-rust/src/date.rs)
         - Constructor
         - ToString
-        - Comparison:
+        - Date comparison:
             - Equal
             - Lower
         - Operators:
@@ -129,14 +129,31 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
                 - Subtract dates
     - Started implementing Date Test class: [`date.rs`](../code-rust/src/date.rs):
         - Unit tests in [`date.rs`](../code-rust/src/date.rs):
-            - Constructor -> Done --> `cargo test` 
-        
-        TO DO - Integration tests
+            - Constructor -> Done --> `cargo test` --> this compiles and runs all test targets
 
+## 27 July 2025 - Day #8: Implementation of Test Date clas in Rust
 
-
-
-
+- In [`code-rust`](../code-rust/):
+    - Started implementing Date Test class: [`date.rs`](../code-rust/src/date.rs):
+        - Unit tests:
+            - toString
+            - Equality (==)
+            - Comparison (> or <)
+            - Operators:
+                - fromSerial, toSerial
+                - Add:
+                    - days
+                - Sub:
+                    - days
+                    - Dates 
+            - Install `cargo install cargo-tarpaulin` to get tarpauling which helps to automatically check the coverage of tests and the `cargo tarpaulin --tests` will run tests, show which lines were executed and % coverage
+        - In rust unit tests live next to the code, while integration tests have their own specific folder
+        - Integration Test in folder [`tests`](../code-rust/tests/)     
+            - `cargo test --test date_integration` to run only integration tests
+            - `cargo test` to test both unit and integration tests
+            - serial_conversion_works_correctly()
+            - add_then_subtract_returns_original_date_correctly():
+                - This created some issues because i was using variable that was already moved. Need to implement Add<i32> for &Date instead of just for Date --> TODO
 
 
 # TO DO 
@@ -150,3 +167,4 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
 - Can we use DateTime in C# ? for operations with dates instead of creating our own ?
 - Rust:
     Assumption: for now that the input is always non-negative, and that self.to_serial() + n will never underflow (negative dates will be handled later)
+- Integration tests
