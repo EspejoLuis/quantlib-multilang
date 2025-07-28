@@ -109,7 +109,7 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
         - Register QuantLibCSharp.Tests with the solution: `dotnet sln add QuantLibCSharp.Tests/QuantLibCSharp.Tests.csproj`
         - Test --> `dotnet test QuantLibCSharp.sln` from [`code-csharp`](../code-csharp/)
 
-## 26 July 2025 - Day #7: Implementation of Date clas in Rust
+## 26 July 2025 - Day #7: Implementation of Date class in Rust
 
 - In [`code-rust`](../code-rust/):
     - Started implementing Date class: [`date.rs`](../code-rust/src/date.rs)
@@ -131,7 +131,7 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
         - Unit tests in [`date.rs`](../code-rust/src/date.rs):
             - Constructor -> Done --> `cargo test` --> this compiles and runs all test targets
 
-## 27 July 2025 - Day #8: Implementation of Test Date clas in Rust
+## 27 July 2025 - Day #8: Implementation of Test Date class in Rust
 
 - In [`code-rust`](../code-rust/):
     - Started implementing Date Test class: [`date.rs`](../code-rust/src/date.rs):
@@ -160,9 +160,14 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
                 - add_days_by_reference_works_correctly()
                 - add_days_by_reference_works_correctly()
             
-
+## 28 July 2025 - Day #9: Implementation of Date class in Python
+- Manullay select the .venv :
+    - `/Users/apple/github_repos/quantlib-multilang/code-python/.venv/bin/python` using cmd + shift + p
+    - This will create a .vscode at the root.
+    - Added the version into the pyproject.toml `uv pip install -r pyproject.toml` after having used `uv pip list` to see the version of what I'm using.
 
 # TO DO 
+- Date validation to avoid 30 february for c++/c#/rust. In python should be easier
 - Function for adding/subtracting month,years not just days:
     - What if days are more than 30/31
     - What if days are negative ?

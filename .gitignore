@@ -92,3 +92,6 @@ code-rust/.vscode/
 
 # Vim/Neovim swap files (if using Vim)
 *.swp
+
+# General Settings
+.vscode/
