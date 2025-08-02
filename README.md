@@ -2,7 +2,7 @@
 
 This is a personal learning project where I rewrite key components of the QuantLib C++ library in **C++**, **C#**, **Python**, and **Rust**. I'm going to use ChatGPT to explain the library, help with the code, explain structure, code correction.
 
-Link to see the daily logs: [`Devlog`](docs/devlog.md)
+Link to see the daily logs: [`Devlogs`](docs/devlogs/)
 
 ## Project Structure
 
