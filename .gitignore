@@ -70,6 +70,7 @@ code-python/.ruff_cache/
 
 # VS Code settings (optional: include if only project-specific settings are used)
 code-python/.vscode/
+code-python/src/quantlib_python.egg-info
 
 # -------------------------------
 # Rust Build Artifacts

@@ -1,6 +1,7 @@
 
-from datetime import date
+from datetime import date, timedelta
 from enum import Enum
+from typing import Union
 
 from pydantic import BaseModel, field_validator, model_validator
 
@@ -106,22 +107,31 @@ class Date(BaseModel):
     def is_leap_year(year: int) -> bool:
          return (year % 4 ==0) and (year % 100 != 0 or year % 400 ==0)
 
-    def __str__(self) -> str:
-         return f"{self.day}-{self.month.name[:3].capitalize()}-{self.year}"
-    
     def to_datetime(self) -> date:
-         return date(year=self.year,
-                     month=self.month.value,
-                     day=self.day).strftime("%d-%b-%Y")
+        return date(year=self.year,
+                    month=self.month.value,
+                    day=self.day)
 
-    #def __add__(self, days:int) -> int:
-         ## Convert date into number
-         ## Add the number
-         ## Reconvert to date
+    def __str__(self) -> str:
+         return self.to_datetime().strftime("%d-%b-%Y")
+    
+    def __add__(self, other:int) -> "Date":
+        new_date: date = self.to_datetime() + timedelta(days=other)
+        return Date(day=new_date.day, 
+                    month=new_date.month,
+                    year=new_date.year)
 
+    def __sub__(self, other:Union[int,"Date"]) -> Union["Date", int]:
+        if isinstance(other, Date):
+            delta_days: timedelta = self.to_datetime() - other.to_datetime()
+            return delta_days.days
+        elif isinstance(other,int):
+            new_date: date = self.to_datetime() - timedelta(days=other)
+            return Date(day=new_date.day,
+                        month=new_date.month,
+                        year=new_date.year)
+        else:
+             raise TypeError(f"Subtraction not implemented for type {type(other).__name__}")
+    
 
-if __name__ == '__main__':
-    d =  Date(day=26 ,month=11, year="1989")
-    print(d)
-    print(d.to_datetime())
     

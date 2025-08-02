@@ -10,7 +10,11 @@
     - `Date(day=1, month=1, year=2025)` -> ✅ auto: Month.JANUARY.
     - `Date(day=1, month="JANUARY", year=2025)` -> # ✅ auto: Month.JANUARY.
     - `Date(day=1, month=Month.JANUARY, year=2025)` -> # ✅ already correct.
-- Adding `to_datetime()`.
+- Using: 
+    - Adding `to_datetime()`.
+    - Adding `__add__`.
+    - Adding `__sub__`, implemented both the one for `int` and `Date`.
+- To install project + dependencies and dev dependencies: `uv pip install -e ".[dev]"`
 
 
 
@@ -18,8 +22,9 @@
 
 # TO DO 
 ## Python:
-    - Adding `__add__`
+    
     - Implement arithmetic like __add__(self, days: int), __sub__.- Replace the thirty_*_days lists with a cleaner lookup table or use a calendar module — optional.
+    - Do the tests
 
 
 
