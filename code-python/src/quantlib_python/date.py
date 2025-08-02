@@ -1,8 +1,11 @@
 
-from pydantic import BaseModel, field_validator, model_validator
+from datetime import date
 from enum import Enum
+
+from pydantic import BaseModel, field_validator, model_validator
+
 """
- Under the hood, pydantic gives you:
+ Pydantic gives:
 
  - Type enforcement:
  If someone tries to pass "hello" as the month, 
@@ -39,22 +42,25 @@ class Month(Enum):
 
 class Date(BaseModel):
     day: int
-    month: int
+    # Using Month in padantic is cool, automatically it does
+    # the autocercion
+    # Date(day=1, month=1, year=2025)                # ✅ auto: Month.JANUARY
+    # Date(day=1, month="JANUARY", year=2025)        # ✅ auto: Month.JANUARY
+    # Date(day=1, month=Month.JANUARY, year=2025)    # ✅ already correct
+    month: Month
     year: int
-     
-    @field_validator('month')
-    @classmethod
-    def validate_month(cls, month: int) -> int:
-        return cls.validate_range(month, "month", 1,12)
-        
+           
     @field_validator('year')
     @classmethod
     def validate_year(cls, year: int) -> int:
         return cls.validate_range(year, "year", 1950,2150)
         
     @staticmethod
-    def validate_range(value: int, name: str,
-                    low: int, high:int) -> int:
+    def validate_range(value: int, 
+                       name: str,
+                       low: int, 
+                       high:int) -> int:
+            
             if low <= value <= high:
                  return value
             raise ValueError(
@@ -64,11 +70,9 @@ class Date(BaseModel):
     @classmethod
     def validate_day(cls, data: "Date") -> "Date":
         
-        month: int = data.month
+        month: Month = data.month
         year: int = data.year
         day: int = data.day
-
-        month_enum = Month(month)
 
         thirty_days : list[Month] = [
              Month.NOVEMBER,
@@ -87,9 +91,9 @@ class Date(BaseModel):
              Month.DECEMBER
              ]
 
-        if month_enum in thirty_days:
+        if month in thirty_days:
             cls.validate_range(day, "day", 1, 30)
-        elif month_enum in thirty_one_days:
+        elif month in thirty_one_days:
             cls.validate_range(day, "day", 1, 31)
         else:
              if cls.is_leap_year(year):
@@ -102,8 +106,22 @@ class Date(BaseModel):
     def is_leap_year(year: int) -> bool:
          return (year % 4 ==0) and (year % 100 != 0 or year % 400 ==0)
 
-   
+    def __str__(self) -> str:
+         return f"{self.day}-{self.month.name[:3].capitalize()}-{self.year}"
+    
+    def to_datetime(self) -> date:
+         return date(year=self.year,
+                     month=self.month.value,
+                     day=self.day).strftime("%d-%b-%Y")
+
+    #def __add__(self, days:int) -> int:
+         ## Convert date into number
+         ## Add the number
+         ## Reconvert to date
+
+
 if __name__ == '__main__':
-    d =  Date(day="31",month="11", year="1989")
+    d =  Date(day=26 ,month=11, year="1989")
     print(d)
+    print(d.to_datetime())
     

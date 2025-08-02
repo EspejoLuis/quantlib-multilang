@@ -1,17 +1,24 @@
 # August
 
-## 1 August 2025: Continuation Implementation of Date class in Python
+## 1 August 2025: Continue Implementation of Date class in Python
 - Adding validators for month/years using `field_validator()`
 - Adding validator for day using `model_validator(mode=after)`:
     - Leap years and checks on number of days
+
+## 2 August 2025: Continue Implementation of Date class in Python
+-  Adding `__str__` and thought...isn't it better to move the month from `int` to enum `Month` ? This way will be allign with CPP which can be better in the long term. Actaully is by far better because then Pydantic automatically coerce!:
+    - `Date(day=1, month=1, year=2025)` -> ✅ auto: Month.JANUARY.
+    - `Date(day=1, month="JANUARY", year=2025)` -> # ✅ auto: Month.JANUARY.
+    - `Date(day=1, month=Month.JANUARY, year=2025)` -> # ✅ already correct.
+- Adding `to_datetime()`.
+
 
 
 
 
 # TO DO 
 ## Python:
-    - Add __str__ and to datetime 
-    - Add .to_datetime() method (if using datetime.date)
+    - Adding `__add__`
     - Implement arithmetic like __add__(self, days: int), __sub__.- Replace the thirty_*_days lists with a cleaner lookup table or use a calendar module — optional.
 
 
