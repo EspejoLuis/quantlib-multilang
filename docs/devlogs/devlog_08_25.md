@@ -16,17 +16,17 @@
     - Adding `__sub__`, implemented both the one for `int` and `Date`.
 - To install project + dependencies and dev dependencies: `uv pip install -e ".[dev]"`
 
+## 3 August 2025: Implementation of Date class tests in Python
+- Import `calendar` and `monthrange` in `validate_day` to simplify structure.
+- Check coverage using `coverage run --source=src -m pytest`
+- Creating [`unit test folder`](/code-python/tests/unit/):
+    - `coverage html` to create coverage report.
+    - `open htmlcov/index.html` to open it in the browser. On Mac.
+- Coverage 100% for units tests.
 
 
-
-
-# TO DO 
-## Python:
-    
-    - Implement arithmetic like __add__(self, days: int), __sub__.- Replace the thirty_*_days lists with a cleaner lookup table or use a calendar module — optional.
-    - Do the tests
-
-
+## TO DO
+- Python: Integration tests
 
 - Date validation to avoid 30 february for c++/c#/rust. In python should be easier
 - Function for adding/subtracting month,years not just days:

@@ -1,4 +1,5 @@
 
+from calendar import monthrange
 from datetime import date, timedelta
 from enum import Enum
 from typing import Union
@@ -70,43 +71,12 @@ class Date(BaseModel):
     @model_validator(mode="after")
     @classmethod
     def validate_day(cls, data: "Date") -> "Date":
-        
-        month: Month = data.month
-        year: int = data.year
-        day: int = data.day
 
-        thirty_days : list[Month] = [
-             Month.NOVEMBER,
-             Month.APRIL,
-             Month.JUNE,
-             Month.SEPTEMBER
-             ]
-
-        thirty_one_days: list[Month] = [
-             Month.JANUARY,
-             Month.MARCH,
-             Month.MAY,
-             Month.JULY,
-             Month.AUGUST,
-             Month.OCTOBER,
-             Month.DECEMBER
-             ]
-
-        if month in thirty_days:
-            cls.validate_range(day, "day", 1, 30)
-        elif month in thirty_one_days:
-            cls.validate_range(day, "day", 1, 31)
-        else:
-             if cls.is_leap_year(year):
-                 cls.validate_range(day, "day", 1, 29)
-             else:
-                 cls.validate_range(day, "day", 1, 28)
+        _, days_in_month = \
+            monthrange(year=data.year, month=data.month.value)
+        cls.validate_range(data.day, "day", 1, days_in_month)
         return data
-    
-    @staticmethod
-    def is_leap_year(year: int) -> bool:
-         return (year % 4 ==0) and (year % 100 != 0 or year % 400 ==0)
-
+        
     def to_datetime(self) -> date:
         return date(year=self.year,
                     month=self.month.value,
