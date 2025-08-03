@@ -5,7 +5,7 @@ from quantlib_python.date import Date
 
 def test_add_sub():
     date_created: Date = Date(day=14, month=5, year=1989)  + 15  - 13
-    date_expected : Date = Date(day=12, month=5, year=1989)
+    date_expected : Date = Date(day=16, month=5, year=1989)
     assert date_created == date_expected
 
 def test_chain_operations():

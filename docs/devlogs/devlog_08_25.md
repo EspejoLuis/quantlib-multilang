@@ -27,17 +27,20 @@
 
 
 ## TO DO
-- Python: Integration tests
 
-- Date validation to avoid 30 february for c++/c#/rust. In python should be easier
-- Function for adding/subtracting month,years not just days:
-    - What if days are more than 30/31
-    - What if days are negative ?
-    - Same for months ?
-    - What if subtracting Dates instead of just days
-    - Need to implement calendar logic
-- Take into account for starting a new month/year
-- Can we use DateTime in C# ? for operations with dates instead of creating our own ?
-- Rust:
-    Assumption: for now that the input is always non-negative, and that self.to_serial() + n will never underflow (negative dates will be handled later)
-- Integration tests
+- Unit Tests:
+    - Date validation to avoid 30 february for c++/c#/rust. In python should be easier
+    - Function for adding/subtracting month,years not just days:
+        - What if days are more than 30/31
+        - What if days are negative ?
+        - Same for months ?
+        - What if subtracting Dates instead of just days
+        - Need to implement calendar logic
+    - Take into account for starting a new month/year
+    - Can we use DateTime in C# ? for operations with dates instead of creating our own ?
+    - Rust:
+        Assumption: for now that the input is always non-negative, and that self.to_serial() + n will never underflow (negative dates will be handled later)
+- Integration tests:
+    - Rust
+    - C#
+    - C++
