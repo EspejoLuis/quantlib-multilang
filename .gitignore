@@ -77,6 +77,8 @@ code-python/.coverage
 code-python/htmlcov
 code-python/src/quantlib_python/__pycache__
 code-python/tests/unit/__pycache__
+code-python/tests/integration/__pycache__
+code-python/.pytest_cache
 
 # -------------------------------
 # Rust Build Artifacts

@@ -61,7 +61,14 @@ def test_sub_invalid_types():
     
     assert(str(exc_info.value) == \
            "Subtraction not implemented for type str")
+
+def test_add_invalid_types():
+    with pytest.raises(TypeError) as exc_info:
+        Date(day=29, month=2, year=2024) + "not int"
     
+    assert(str(exc_info.value) == \
+           "Addition not implemented for type str")
+     
 def test_validate_range():
     with pytest.raises(ValueError) as exc_info:
         Date(day=45, month=1, year=1989)
@@ -69,4 +76,11 @@ def test_validate_range():
     error = exc_info.value.errors()[0]
     assert error["msg"] == "Value error, day not valid: 45 is not between 1 and 31"
     assert error["type"] == "value_error"
+
+def test_add_across_years():
+    date_created: Date = Date(day=31, month=12, year=2024) + 1
+    date_expected: Date = Date(day=1, month=1, year=2025)
+    assert date_created == date_expected
+
+
 

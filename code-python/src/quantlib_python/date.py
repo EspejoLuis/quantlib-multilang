@@ -86,11 +86,14 @@ class Date(BaseModel):
          return self.to_datetime().strftime("%d-%b-%Y")
     
     def __add__(self, other:int) -> "Date":
-        new_date: date = self.to_datetime() + timedelta(days=other)
-        return Date(day=new_date.day, 
-                    month=new_date.month,
-                    year=new_date.year)
-
+        if isinstance(other, int):
+            new_date: date = self.to_datetime() + timedelta(days=other)
+            return Date(day=new_date.day, 
+                        month=new_date.month,
+                        year=new_date.year)
+        else:
+            raise TypeError(f"Addition not implemented for type {type(other).__name__}")
+    
     def __sub__(self, other:Union[int,"Date"]) -> Union["Date", int]:
         if isinstance(other, Date):
             delta_days: timedelta = self.to_datetime() - other.to_datetime()

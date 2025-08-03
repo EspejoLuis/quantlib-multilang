@@ -23,6 +23,7 @@
     - `coverage html` to create coverage report.
     - `open htmlcov/index.html` to open it in the browser. On Mac.
 - Coverage 100% for units tests.
+- Added integration tests.
 
 
 ## TO DO
