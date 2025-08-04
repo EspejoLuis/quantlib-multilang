@@ -1,7 +1,7 @@
 // Tell Catch2 to generate the main() function for you
 #define CATCH_CONFIG_MAIN
 
-#include "lib/catch.hpp"
+#include "../lib/catch.hpp"
 #include "Date.hpp"
 
 using namespace QuantLibCpp;

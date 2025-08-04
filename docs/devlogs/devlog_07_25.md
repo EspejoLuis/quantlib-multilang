@@ -71,8 +71,6 @@
                 - g++ -std=c++17 Date.cpp DateExample.cpp -o test_date
                 - ./test_date
 
-NEXT: create a proper test (Which tests are used in Quantlib ?)
-
 ## 24 July 2025 - Day #5: Idea + C# Date Implementation 
 
 Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:

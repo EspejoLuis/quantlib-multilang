@@ -25,9 +25,32 @@
 - Coverage 100% for units tests.
 - Added integration tests.
 
+## 4 August 2025: Implementation of coverage tests for Date class in C++
+- ALWAY RUN CMAAKE COMMAND FROM THE `build` directory.
+- Trying to get the coverage of tests in C++ using catch2:
+    - Install `brew install lcov`
+    - Add in the `CMakeLists.txt:`
+    ```cmake
+        if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+        message(STATUS "Building with coverage flags")
+        add_compile_options(--coverage)
+        add_link_options(--coverage)
+        endif()
+    ```
+    - Configure CMake for coverage: `cmake -DCMAKE_BUILD_TYPE=Coverage ..`
+    - Build: `cmake build .`
+    - Run: `./date_tests`
+    - Collect coverage data but ignore errors from system/test headers: `lcov --capture --directory . --output-file coverage.info --ignore-errors inconsistent,unsupported`
+    - Exclude system headers and test frameworks and test files: `lcov --remove coverage.info '*/tests/*' '*/lib/*' '/usr/*' '/opt/*' '/Library/*' --output-file coverage.filtered.info`
+    - Create HTML report: `genhtml coverage.filtered.info --output-directory coverage_report`
+    - Open report: `open coverage_report/index.html`
+
+   
+
+
 
 ## TO DO
-
+- C++:  - Or manually: `g++ --coverage -o test_date DateTest_catch.cpp` -> To check if it's correct.
 - Unit Tests:
     - Date validation to avoid 30 february for c++/c#/rust. In python should be easier
     - Function for adding/subtracting month,years not just days:

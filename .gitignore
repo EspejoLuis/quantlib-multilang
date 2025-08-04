@@ -12,7 +12,7 @@
 # Folders often used for compiled output
 code-cpp/build/
 code-cpp/bin/
-code-cpp/src/QuantLibCpp/lib/
+code-cpp/tests/lib/
 
 # Object files (compiled from .cpp), platform-dependent
 *.o
