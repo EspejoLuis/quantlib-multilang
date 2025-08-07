@@ -45,11 +45,19 @@
     - Create HTML report: `genhtml coverage.filtered.info --output-directory coverage_report`
     - Open report: `open coverage_report/index.html`
 
-   
-
-
+## 7 August 2025: Implementation of edge cases for Date class in C++
+    - Added leap years.
+    - Added number of days in the month.
 
 ## TO DO
+- C++:
+    ❌ Validation of inputs (e.g. no check for 30 Feb, etc.)
+    ✅  Leap year awareness
+    ❌ Overflow when adding days
+    ❌ Integration tests (we only have unit test DateTest_catch.cpp)
+    ✅  No utility like daysInMonth(month, year)
+    ❌ No conversion logic from overflowing days to next month/year
+
 - C++:  - Or manually: `g++ --coverage -o test_date DateTest_catch.cpp` -> To check if it's correct.
 - Unit Tests:
     - Date validation to avoid 30 february for c++/c#/rust. In python should be easier

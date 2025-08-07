@@ -5,22 +5,22 @@
 #include <sstream>   // for std::ostringstream
 // 	Used to control number formatting like padding (e.g., 01)
 #include <iomanip>   // for std::setw and std::setfill 
-
+#include <stdexcept>
 namespace QuantLibCpp {
 
+    Date::Date()
     // Implements the default constructor of Date
     // This ensures the object is in a known state even if the user doesn't provide input.
-    Date::Date()
         : day_(1), month_(Month::January), year_(1901) {}
 
-    // Defines the main constructor used to create a specific date
-    // Note : There is no validation yet 
     Date::Date(int day, Month month, int year)
+    // Defines the main constructor used to create a specific date
+    // Note : There is no validation yet
         : day_(day), month_(month), year_(year) {}
 
+    int Date::day() const {
     // Getters: They return a copy of the internal fields.
     // This is the definition of the methods declared in Date.hpp
-    int Date::day() const {
         return day_;
     }
 
@@ -85,13 +85,13 @@ namespace QuantLibCpp {
         return oss.str();   
     }
     
+    bool Date::operator==(const Date& other) const{
     /*
     So this 
         - if (d1 == d2)
     It's tranlated in
         - d1.operator==(d2)
     */
-    bool Date::operator==(const Date& other) const{
         return day_ == other.day_ &&
                month_ == other.month_ &&
                year_ == other.year_;
@@ -103,20 +103,44 @@ namespace QuantLibCpp {
         return day_ < other.day_ ;
     }
 
-    /*
-    NOTE: Implementation doesn’t handle:
-    - Day overflow into the next month
-    - Leap years
-    - Month/year changes
-    */
-
+    Date Date::operator+(int days) const{
     // Marked const because the current object is not modified
     // But simply a new object is return.
-    Date Date::operator+(int days) const{
         return Date(day_ + days, month_, year_);
     }
+
     Date Date::operator-(int days) const{
         return Date(day_ - days, month_, year_);
     }
 
+    bool Date::isLeap(int year){
+    // Leap Year
+    // Divisible by 4 And (not divisible by 100 or divisible by 400) --> LEAP (2000)
+    // NDivisible by 4 and (divisible by 100 and not divisible by 400) --> NOT LEAP (2100)    
+    return ((year % 4 == 0) && (year % 100 !=0 || year % 400 == 0 ));
+    }    
+
+    int Date::monthLength(Month month, int year){
+        switch (month){
+            case Month::February:
+                return isLeap(year) ? 29 : 28;
+
+            case Month::April:
+            case Month::June:
+            case Month::September:
+            case Month::November:
+                return 30;
+            case Month::January:
+            case Month::March:
+            case Month::May:
+            case Month::July:
+            case Month::August:
+            case Month::October:
+            case Month::December:
+                return 31;
+            default:
+                throw std::runtime_error("Invalid Month passed");
+                return 0;
+        }
+    }
 }

@@ -58,12 +58,16 @@ namespace QuantLibCpp {
             */
             Date operator+(int days) const;
             Date operator-(int days) const;
-        
+
         private:
 
             // These are the actual fields where data is stored.
             int day_;
             Month month_;
             int year_;
+        
+        static bool isLeap(int year);
+
+        static int monthLength(Month month, int year);
     };
 }
