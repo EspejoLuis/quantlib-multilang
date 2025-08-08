@@ -120,7 +120,7 @@ namespace QuantLibCpp {
     return ((year % 4 == 0) && (year % 100 !=0 || year % 400 == 0 ));
     }    
 
-    int Date::monthLength(Month month, int year){
+    int Date::daysInMonth(Month month, int year){
         switch (month){
             case Month::February:
                 return isLeap(year) ? 29 : 28;

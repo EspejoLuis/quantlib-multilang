@@ -3,10 +3,12 @@
 
 #include "../lib/catch.hpp"
 #include "Date.hpp"
+#include <stdexcept>
+#include <vector>
 
 using namespace QuantLibCpp;
 
-TEST_CASE("Deafult Date constructor sets correct values", "[Date]") {
+TEST_CASE("Default Date constructor sets correct values", "[Date]") {
     Date d;
     
     REQUIRE(d.day()==1);
@@ -14,7 +16,6 @@ TEST_CASE("Deafult Date constructor sets correct values", "[Date]") {
     REQUIRE(d.year()==1901);
 }
 
-//Defines a test case (can contain multiple assertions)
 TEST_CASE("Date constructor sets correct values", "[Date]") {
     Date d(15, Month::July, 1976);
 
@@ -23,7 +24,6 @@ TEST_CASE("Date constructor sets correct values", "[Date]") {
     REQUIRE(d.month()==Month::July);
     REQUIRE(d.year()==1976);
 }
-
 
 TEST_CASE("Date formatting is correct", "[Date]") {
     Date d(23, Month::May, 1787);
@@ -39,7 +39,6 @@ TEST_CASE("Equality operator works correctly", "[Date]") {
     REQUIRE_FALSE(d1 == d3);
 }
 
-
 TEST_CASE("Lower operator works correctly", "[Date]") {
     Date d1(14, Month::May, 1989);
     Date d2(15, Month::May, 1989);
@@ -52,8 +51,6 @@ TEST_CASE("Lower operator works correctly", "[Date]") {
     REQUIRE_FALSE(d3 < d1);
 }
 
-
-//TODO Add testing for month end dates
 TEST_CASE("Adding operator works correctly", "[Date]") {
     Date d1(14, Month::May, 1989);
     Date result = d1 + 17;
@@ -63,8 +60,6 @@ TEST_CASE("Adding operator works correctly", "[Date]") {
     REQUIRE(result.year() == 1989);
 }
 
-
-//TODO Add testing for month end dates
 TEST_CASE("Subtracting operator works correctly", "[Date]") {
     Date d1(14, Month::May, 1989);
     Date result = d1 - 11;
@@ -72,4 +67,63 @@ TEST_CASE("Subtracting operator works correctly", "[Date]") {
     REQUIRE(result.day() == 14 - 11);
     REQUIRE(result.month() == Month::May);
     REQUIRE(result.year() == 1989);
+}
+
+//when to use testcase method??
+TEST_CASE("Leap year rule works correctly", "[Date]"){
+    REQUIRE(Date::isLeap(1996));
+    REQUIRE(Date::isLeap(2000));
+    REQUIRE_FALSE(Date::isLeap(1900));
+    REQUIRE_FALSE(Date::isLeap(1999));
+    REQUIRE_FALSE(Date::isLeap(2100));
+}
+
+TEST_CASE("Number of days in a month works correctly", "[Date]"){
+    
+    SECTION("31-day months") {
+    std::vector<Month> monthsWith31Days = {
+        Month::January, Month::March, Month::May, Month::July,
+        Month::August, Month::October, Month::December
+    };
+    
+    /*
+    Month m	--> Each loop iteration copies the element into m.
+    Month& m --> Each loop iteration gives you a reference to the actual element (can modify original).
+    const Month& m --> Reference, but read-only — avoids copies and prevents modification.
+    auto m	Compiler --> deduces the type automatically.
+    const auto& m --> Compiler deduces type, gives a read-only reference (common for big objects).
+    */
+    for (const auto& month: monthsWith31Days) {
+        REQUIRE(Date::daysInMonth(month, 1989) == 31);
+    }
+    }
+
+    SECTION("30-day months"){
+    std::vector<Month> monthsWith30Days = {
+        Month::April, Month::June, 
+        Month::September, Month::November
+    };
+
+    for (const auto& month: monthsWith30Days){
+        REQUIRE(Date::daysInMonth(month, 1978) == 30);
+    }
+    }
+
+    SECTION("February leap"){
+        REQUIRE(Date::daysInMonth(Month::February,1996) == 29);
+        REQUIRE(Date::daysInMonth(Month::February,1999) == 28);
+        REQUIRE(Date::daysInMonth(Month::February,2000) == 29);
+        REQUIRE(Date::daysInMonth(Month::February,1900) == 28);
+        REQUIRE(Date::daysInMonth(Month::February,2100) == 28);
+    }
+
+    SECTION("Invalid month throws"){
+        REQUIRE_THROWS_AS(
+            Date::daysInMonth(static_cast<Month>(13),2019),
+            std::runtime_error);
+        
+        REQUIRE_THROWS_WITH(
+            Date::daysInMonth(static_cast<Month>(13),2019),
+            "Invalid Month passed");
+    }
 }

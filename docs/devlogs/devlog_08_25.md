@@ -49,6 +49,9 @@
     - Added leap years.
     - Added number of days in the month.
 
+## 8 August 2025: Implementation of edge cases for Date class in C++
+  - Added unit tests for `isLeap` and `daysInMonth`
+
 ## TO DO
 - C++:
     ❌ Validation of inputs (e.g. no check for 30 Feb, etc.)
