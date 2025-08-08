@@ -11,6 +11,7 @@
 
 # Folders often used for compiled output
 code-cpp/build/
+code-cpp/build-coverage/
 code-cpp/bin/
 code-cpp/tests/lib/
 

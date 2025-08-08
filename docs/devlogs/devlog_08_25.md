@@ -46,11 +46,43 @@
     - Open report: `open coverage_report/index.html`
 
 ## 7 August 2025: Implementation of edge cases for Date class in C++
-    - Added leap years.
-    - Added number of days in the month.
+- Added leap years.
+- Added number of days in the month.
 
 ## 8 August 2025: Implementation of edge cases for Date class in C++
-  - Added unit tests for `isLeap` and `daysInMonth`
+- Added unit tests for `isLeap` and `daysInMonth`
+- Creating two builds. One normal build for debug and release and one instrumented build for coverage. QuantLib itself does this.
+    - Create new build with no coverage:
+        - `cd code-ccp`
+        - `rm -rf build`
+        - Configure with build type: `cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug`
+        - Build your tests: `cmake --build build --target date_tests`
+        - Runt test from build fodler: `./date_tests`
+    - Create separate build with coverage:
+        - `cd code-ccp`
+        - Remove any old  build directory: `rm -rf build-coverage`
+        - Configure with coverage build type: `cmake -S . -B build-coverage -DCMAKE_BUILD_TYPE=Coverage`
+        - Build your tests: `cmake --build build-coverage --target date_tests`
+        - From build-coverage folder, run test: `./date_tests`
+    - Modified `CMakeLists` file.
+    - From build-coverage:
+        - `cd build-coverage` 
+        - Run `LLVM_PROFILE_FILE="date.profraw" ./date_tests`. The last commnand will create the file `date.profraw`.
+        - Terminal output: `xcrun llvm-profdata merge -sparse date.profraw -o date.profdata`
+        - Terminal report: `xcrun llvm-cov report ./date_tests -instr-profile=date.profdata`
+        - HTML report: `xcrun llvm-cov show ./date_tests -instr-profile=date.profdata -format=html -output-dir=coverage_html`
+        - Open HTML `open coverage_html/index.html` 
+    - Update the `CmakeLists` to do this:
+        - From `code-ccp`
+            - `cmake -S . -B build-coverage -DCMAKE_BUILD_TYPE=Coverage`
+            - `cmake --build build-coverage`
+            - `cmake --build build-coverage --target coverage`
+            - From build-coverage folder: `./date_tests`
+            - `open build-coverage/coverage_html/index.html `
+        - From build folder:
+            - `cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug`
+            - `cmake --build build --target date_tests`
+            - `./date_tests`
 
 ## TO DO
 - C++:
