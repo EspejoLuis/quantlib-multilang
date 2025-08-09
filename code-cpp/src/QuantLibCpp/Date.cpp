@@ -139,7 +139,57 @@ namespace QuantLibCpp {
             case Month::December:
                 return 31;
             default:
-                throw std::runtime_error("Invalid Month passed");
+                throw std::runtime_error("Invalid Month passed.");
         }
     }
+
+    void Date::validateYearRange(int year){
+    // Why void and not boolean ? void is intentional because this helper’s purpose is not 
+    // to tell if the year is valid — it’s to enforce the rule.
+        if (!(year >= 1901 && year <= 2199)){
+            throw std::out_of_range(
+                "Year " + std::to_string(year) +
+                  "not between 1901 and 2199."
+            );
+        };
+            
+    }
+
+    // Need to validate yeaer when declaring, also days !!!
+
+    void Date::normalize(){
+
+        int daysInCurrentMonth = Date::daysInMonth(month_, year_);
+
+        
+        while (day_ > daysInCurrentMonth)
+        {
+            day_  = day_ - daysInCurrentMonth ;
+            int monthNumber = static_cast<int>(month_);
+           
+            if (monthNumber == 12){
+                int nextYear = year_ + 1; 
+                Date::validateYearRange(nextYear);
+                year_ = year_ + 1;
+                month_ = static_cast<Month>(1);
+            } else 
+            {
+                month_ = static_cast<Month>(monthNumber + 1);
+            }
+            daysInCurrentMonth = Date::daysInMonth(month_, year_);
+        }
+        
+
+        while (day_ < 1)
+        {
+            /* code */
+        }
+        
+    }
+
+    void Date::addDaysToCurrentDate(int days){
+        this->day_ = this->day_ + days;
+        this->normalize();
+    }
+
 }

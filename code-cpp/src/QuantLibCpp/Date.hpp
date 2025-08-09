@@ -68,5 +68,13 @@ namespace QuantLibCpp {
             int day_;
             Month month_;
             int year_;
+
+            void normalize();
+
+            void addDaysToCurrentDate(int days);
+
+        static void validateYearRange(int year);
+
+        
     };
 }

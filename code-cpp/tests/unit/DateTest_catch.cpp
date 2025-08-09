@@ -73,7 +73,6 @@ TEST_CASE("Subtracting operator works correctly", "[Date]") {
     REQUIRE(result.year() == 1989);
 }
 
-//when to use testcase method??
 TEST_CASE("Leap year rule works correctly", "[Date]"){
     REQUIRE(Date::isLeap(1996));
     REQUIRE(Date::isLeap(2000));

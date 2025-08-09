@@ -84,7 +84,7 @@
             - `cmake --build build --target date_tests`
             - From build folder`./date_tests`
 
-## 9 August 2025: Coverage Test for C++
+## 9 August 2025: Coverage test and integration tests for Date class in C++
 - Want to run the coverage test report automatically, without too much effort. Created a run_test_with_coverage.sh file in [`scripts`](/code-cpp/scripts/). Now just do:
     - `bash code-cpp/scripts/run_test_with_coverage.sh`
 - Will do the smae for the test with no coverage (debug):
@@ -92,13 +92,18 @@
 - Difference between the two is that:
     - Coverage = Configure (Coverage) → Build binaries → Run coverage target. This is why for coverage, there is one more line to run i.e. `cmake --build build-coverage`.
     - Debug = Configure (Debug) → Build only what you need.
+- Integration test :
+    - Created empty file. Adding it to both build and build-coverage.
+    - Created new scripts and modified old ones. TOOK LONG JEEEZ! 
+    - Adding integration tests for February.....need first to have a method in Date that allows to move from one month to the next:
+        - Creating `normalize` method.
 
 
 
 
 ## TO DO
 - C++:
-    ❌ Validation of inputs (e.g. no check for 30 Feb, etc.)
+    ❌ Validation of inputs (e.g. no check for 30 Feb, etc. or for adding 11 to 30)
     ✅  Leap year awareness
     ❌ Overflow when adding days
     ❌ Integration tests (we only have unit test DateTest_catch.cpp)
