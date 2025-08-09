@@ -15,6 +15,7 @@ code-cpp/build-coverage/
 code-cpp/bin/
 code-cpp/tests/lib/
 
+
 # Object files (compiled from .cpp), platform-dependent
 *.o
 *.obj

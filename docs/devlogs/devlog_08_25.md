@@ -46,8 +46,8 @@
     - Open report: `open coverage_report/index.html`
 
 ## 7 August 2025: Implementation of edge cases for Date class in C++
-- Added leap years.
-- Added number of days in the month.
+- Added leap years: `isLeap`.
+- Added number of days in the month: `daysInMonth`.
 
 ## 8 August 2025: Implementation of edge cases for Date class in C++
 - Added unit tests for `isLeap` and `daysInMonth`
@@ -79,10 +79,22 @@
             - `cmake --build build-coverage --target coverage`
             - From build-coverage folder: `./date_tests`
             - `open build-coverage/coverage_html/index.html `
-        - From build folder:
+        - From `code-ccp`
             - `cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug`
             - `cmake --build build --target date_tests`
-            - `./date_tests`
+            - From build folder`./date_tests`
+
+## 9 August 2025: Coverage Test for C++
+- Want to run the coverage test report automatically, without too much effort. Created a run_test_with_coverage.sh file in [`scripts`](/code-cpp/scripts/). Now just do:
+    - `bash code-cpp/scripts/run_test_with_coverage.sh`
+- Will do the smae for the test with no coverage (debug):
+    - `bash code-cpp/scripts/run_test.sh`
+- Difference between the two is that:
+    - Coverage = Configure (Coverage) → Build binaries → Run coverage target. This is why for coverage, there is one more line to run i.e. `cmake --build build-coverage`.
+    - Debug = Configure (Debug) → Build only what you need.
+
+
+
 
 ## TO DO
 - C++:

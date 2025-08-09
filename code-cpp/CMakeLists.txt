@@ -28,7 +28,6 @@ target_include_directories(date_tests PRIVATE tests/lib src/QuantLibCpp)
 # Link the quantlib_cpp library into the 'date_tests' executable
 target_link_libraries(date_tests quantlib_cpp)
 
-
 # ------------------------------------------------------------------------------------
 # Only apply this configuration if the build type is explicitly set to "Coverage"
 # Usage:
@@ -50,6 +49,10 @@ if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
     target_link_options(quantlib_cpp PRIVATE -fprofile-instr-generate)
     target_link_options(date_tests   PRIVATE -fprofile-instr-generate)
 
+    # Paths/patterns to ignore from reports (tests + Catch header)
+    set(ignore_regex_tests ".*/tests/")
+    set(ignore_regex_catch "catch\\.hpp$")
+
     # --- 3) Define a custom target "coverage" to:
     #   a) Build the tests
     #   b) Run them with LLVM_PROFILE_FILE set so output goes to date.profraw
@@ -68,15 +71,29 @@ if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
         # Generate a terminal coverage summary report
         COMMAND xcrun llvm-cov report $<TARGET_FILE:date_tests>
                 -instr-profile=date.profdata
+                -ignore-filename-regex=${ignore_regex_tests}
+                -ignore-filename-regex=${ignore_regex_catch}
 
         # Create the HTML output directory
         COMMAND ${CMAKE_COMMAND} -E make_directory coverage_html
 
         # Generate a detailed HTML coverage report
+        # Added flags:
+        #   --show-line-counts-or-regions : shows per-region hit counts
+        #   --show-branches=count         : shows branch hits/misses with counts
+        #   --show-expansions              : expands macros to reveal hidden branches
         COMMAND xcrun llvm-cov show $<TARGET_FILE:date_tests>
                 -instr-profile=date.profdata
                 -format=html
                 -output-dir=coverage_html
+                -ignore-filename-regex=${ignore_regex_tests}
+                -ignore-filename-regex=${ignore_regex_catch}
+                --show-line-counts-or-regions
+                --show-branches=count
+                --show-expansions
+
+        # Optional (macOS): auto-open the report
+        COMMAND open coverage_html/index.html
 
         # Run everything from the build directory so output paths are clean
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -84,7 +101,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
         # Ensure the tests are built before running coverage
         DEPENDS date_tests
 
-        COMMENT "Running tests with LLVM coverage and generating terminal + HTML reports"
+        COMMENT "Running tests with LLVM coverage and generating terminal + HTML reports (with branch details)"
     )
 endif()
 

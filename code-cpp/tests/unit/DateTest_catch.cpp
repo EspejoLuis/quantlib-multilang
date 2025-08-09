@@ -34,9 +34,13 @@ TEST_CASE("Equality operator works correctly", "[Date]") {
     Date d1(14, Month::May, 1989);
     Date d2(14, Month::May, 1989);
     Date d3(13, Month::May, 1989);
+    Date d4(14, Month::June, 1989);
+    Date d5(14, Month::May, 2010);
 
     REQUIRE(d1 == d2);
     REQUIRE_FALSE(d1 == d3);
+    REQUIRE_FALSE(d1 == d4);
+    REQUIRE_FALSE(d1 == d5);
 }
 
 TEST_CASE("Lower operator works correctly", "[Date]") {

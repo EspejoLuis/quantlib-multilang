@@ -140,7 +140,6 @@ namespace QuantLibCpp {
                 return 31;
             default:
                 throw std::runtime_error("Invalid Month passed");
-                return 0;
         }
     }
 }
