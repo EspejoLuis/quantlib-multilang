@@ -131,6 +131,48 @@ TEST_CASE("Number of days in a month works correctly", "[Date]"){
     }
 }
 
+TEST_CASE("Validate days works correctly - throws error", "[Date]"){
+    SECTION("Upper Bound"){
+        REQUIRE_THROWS_AS(
+            Date(34, Month::January, 1989),
+            std::out_of_range);
+
+        REQUIRE_THROWS_WITH(
+            Date(34, Month::January, 1989),
+            "Day 34 not between 1 and 31");
+    }
+    SECTION("Lower Bound"){
+        REQUIRE_THROWS_AS(
+            Date(0, Month::January, 1989),
+            std::out_of_range);
+
+        REQUIRE_THROWS_WITH(
+            Date(0, Month::January, 1989),
+            "Day 0 not between 1 and 31");
+    }
+}
+
+TEST_CASE("Validate year works correctly - throws erros", "[Date]"){
+    SECTION("Lower Bound"){
+        REQUIRE_THROWS_AS(
+            Date(12,Month::December, 1200),
+            std::out_of_range);
+
+        REQUIRE_THROWS_WITH(
+            Date(12,Month::December, 1200),
+            "Year 1200 not between 1901 and 2199");
+        }
+    SECTION("Upper Bound"){
+        REQUIRE_THROWS_AS(
+            Date(12,Month::December, 3100),
+            std::out_of_range);
+
+        REQUIRE_THROWS_WITH(
+            Date(12,Month::December, 3100),
+            "Year 3100 not between 1901 and 2199");
+        }
+}
+
 TEST_CASE("Normalize method works correctly", "[Date]"){
 
     SECTION("Month - Overflow"){

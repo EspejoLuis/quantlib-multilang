@@ -102,6 +102,7 @@
 - Created a private days validator method.
 - Created the `normalize` private method:
     - Adding unit test for normalize. A LOT!  
+    - Check coverage tests. All 100% !
 
 ## TO DO
 - C++:

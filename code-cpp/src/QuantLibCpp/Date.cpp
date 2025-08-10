@@ -164,7 +164,7 @@ namespace QuantLibCpp {
         if (year < 1901 || year > 2199){
             throw std::out_of_range(
                 "Year " + std::to_string(year) +
-                  " not between 1901 and 2199."
+                  " not between 1901 and 2199"
             );
         };
             
