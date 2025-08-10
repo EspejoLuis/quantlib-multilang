@@ -51,11 +51,6 @@ namespace QuantLibCpp {
             bool operator==(const Date& other) const;
             bool operator<(const Date& other) const;
 
-            /*
-            Basic aritmetic implementation
-            Date tomorrow = today + 1;
-            Date yesterday = today - 1;
-            */
             Date operator+(int days) const;
             Date operator-(int days) const;
 
@@ -75,6 +70,7 @@ namespace QuantLibCpp {
 
         static void validateYearRange(int year);
 
+        static void validateDayInMonth(int day, Month month, int year);
         
     };
 }

@@ -13,10 +13,14 @@ namespace QuantLibCpp {
     // This ensures the object is in a known state even if the user doesn't provide input.
         : day_(1), month_(Month::January), year_(1901) {}
 
-    Date::Date(int day, Month month, int year)
+    Date::Date(int day, Month month, int year){
     // Defines the main constructor used to create a specific date
-    // Note : There is no validation yet
-        : day_(day), month_(month), year_(year) {}
+        validateYearRange(year);
+        validateDayInMonth(day, month, year);
+        day_ = day;
+        month_ = month;
+        year_ = year;
+    }
 
     int Date::day() const {
     // Getters: They return a copy of the internal fields.
@@ -106,11 +110,22 @@ namespace QuantLibCpp {
     Date Date::operator+(int days) const{
     // Marked const because the current object is not modified
     // But simply a new object is return.
-        return Date(day_ + days, month_, year_);
+        // *this means dereference the pointer to get the actual object (Date)
+        // It's making a COPY
+        /*
+        Expression	       Type	            Copy happens?	Meaning
+        this	           Date*     	        ❌ No	Pointer to current object
+        *this	           Date&	            ❌ No	Reference to current object
+        Date tmp = *this	 —	                ✅ Yes	Makes a copy via copy ctor
+        return *this;	Date& or const Date&	❌ No	Return current object by reference
+        */
+        Date tmpDate = *this; 
+        tmpDate.addDaysToCurrentDate(days);
+        return tmpDate;
     }
 
     Date Date::operator-(int days) const{
-        return Date(day_ - days, month_, year_);
+        return Date::operator+(-days);
     }
 
     bool Date::isLeap(int year){
@@ -139,38 +154,45 @@ namespace QuantLibCpp {
             case Month::December:
                 return 31;
             default:
-                throw std::runtime_error("Invalid Month passed.");
+                throw std::runtime_error("Invalid Month passed");
         }
     }
 
     void Date::validateYearRange(int year){
     // Why void and not boolean ? void is intentional because this helper’s purpose is not 
     // to tell if the year is valid — it’s to enforce the rule.
-        if (!(year >= 1901 && year <= 2199)){
+        if (year < 1901 || year > 2199){
             throw std::out_of_range(
                 "Year " + std::to_string(year) +
-                  "not between 1901 and 2199."
+                  " not between 1901 and 2199."
             );
         };
             
     }
 
-    // Need to validate yeaer when declaring, also days !!!
+    void Date::validateDayInMonth(int day, Month month, int year){
+        int daysInMonth = Date::daysInMonth(month, year);
+        if (day < 1  || day > daysInMonth){
+            throw std::out_of_range(
+                "Day " + std::to_string(day) +
+                  " not between 1 and " + std::to_string(daysInMonth)
+            );
+        }
+
+    }
 
     void Date::normalize(){
 
         int daysInCurrentMonth = Date::daysInMonth(month_, year_);
 
-        
         while (day_ > daysInCurrentMonth)
         {
             day_  = day_ - daysInCurrentMonth ;
             int monthNumber = static_cast<int>(month_);
-           
             if (monthNumber == 12){
                 int nextYear = year_ + 1; 
                 Date::validateYearRange(nextYear);
-                year_ = year_ + 1;
+                year_ = nextYear;
                 month_ = static_cast<Month>(1);
             } else 
             {
@@ -178,18 +200,30 @@ namespace QuantLibCpp {
             }
             daysInCurrentMonth = Date::daysInMonth(month_, year_);
         }
-        
 
         while (day_ < 1)
         {
-            /* code */
+            int monthNumber = static_cast<int>(month_);
+            if (monthNumber == 1){
+                int previousYear = year_ - 1;
+                Date::validateYearRange(previousYear);
+                year_ = previousYear;
+                month_ = static_cast<Month>(12);
+            } else 
+            {
+                month_ = static_cast<Month>(monthNumber - 1);
+            }
+
+            int daysInPreviousMonth = Date::daysInMonth(month_, year_);
+            day_ += daysInPreviousMonth;
         }
         
     }
 
     void Date::addDaysToCurrentDate(int days){
-        this->day_ = this->day_ + days;
-        this->normalize();
+        day_ = day_ + days;
+        normalize();
     }
+
 
 }

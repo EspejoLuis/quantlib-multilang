@@ -1,8 +1,8 @@
 #!/bin/bash
-# run_test.sh - Build and run C++ coverage for QuantLibCpp
+# run_test_unit.sh - Build and run C++ coverage for QuantLibCpp
 # Usage:
-#   ./run_test.sh          # reuse existing build
-#   ./run_test.sh --clean  # delete build and start fresh
+#   ./run_test_unit.sh          # reuse existing build
+#   ./run_test_unit.sh --clean  # delete build and start fresh
 
 set -e  # stop if any command fails
 
@@ -14,16 +14,16 @@ fi
 
 # 2. Configure (only if folder doesn't exist or was cleaned)
 if [ ! -d "build" ]; then
-    echo "Configuring build with coverage instrumentation..."
+    echo "Configuring build for debug.."
     cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 fi
 
 # 3. Build target
-echo "Running coverage..."
-cmake --build build --target date_tests
+echo "Running date_tests_unit..."
+cmake --build build --target date_tests_unit
 
 # 4. Run tests from inside build folder
-echo "Running date_tests from build/..."
+echo "Running date_tests_unit from build/..."
 cd build
-./date_tests
+./date_tests_unit
 cd ..

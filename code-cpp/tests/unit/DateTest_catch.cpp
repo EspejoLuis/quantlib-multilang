@@ -26,8 +26,8 @@ TEST_CASE("Date constructor sets correct values", "[Date]") {
 }
 
 TEST_CASE("Date formatting is correct", "[Date]") {
-    Date d(23, Month::May, 1787);
-    REQUIRE(d.toString() == "23-May-1787");
+    Date d(23, Month::May, 1902);
+    REQUIRE(d.toString() == "23-May-1902");
 }
 
 TEST_CASE("Equality operator works correctly", "[Date]") {
@@ -55,7 +55,7 @@ TEST_CASE("Lower operator works correctly", "[Date]") {
     REQUIRE_FALSE(d3 < d1);
 }
 
-TEST_CASE("Adding operator works correctly", "[Date]") {
+TEST_CASE("Adding operator works correctly - No Overflow", "[Date]") {
     Date d1(14, Month::May, 1989);
     Date result = d1 + 17;
 
@@ -128,5 +128,161 @@ TEST_CASE("Number of days in a month works correctly", "[Date]"){
         REQUIRE_THROWS_WITH(
             Date::daysInMonth(static_cast<Month>(13),2019),
             "Invalid Month passed");
+    }
+}
+
+TEST_CASE("Normalize method works correctly", "[Date]"){
+
+    SECTION("Month - Overflow"){
+        const auto [startDay, startMonth, startYear, delta, expectedDay, expectedMonth, expectedYear] =
+            GENERATE_COPY(
+                table<int, Month, int, int, int, Month, int>({
+                    {1,  Month::January,  2024, 34,  4,  Month::February, 2024},
+                    {1,  Month::May,      2023, 32,  2,  Month::June,     2023},
+                    {31, Month::January,  2024, 29, 29,  Month::February, 2024}, // leap
+                    {31, Month::January,  2023, 28, 28,  Month::February, 2023}, // non‑leap
+                    {28, Month::February, 2023,  1,  1,  Month::March,    2023}, // non‑leap Feb → Mar
+                    {29, Month::February, 2024,  1,  1,  Month::March,    2024}, // leap day → Mar 1
+                    {30, Month::January,  2024, 30, 29,  Month::February, 2024}, // leap Feb end
+                })
+            );
+
+        Date start(startDay, startMonth, startYear);
+        Date result = start + delta;
+        Date expected(expectedDay, expectedMonth, expectedYear);
+
+        CAPTURE(startDay, static_cast<int>(startMonth), startYear,
+                delta, expectedDay, static_cast<int>(expectedMonth), expectedYear,
+                result.day(), result.month(), result.year());
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Month - Underflow"){
+        const auto [startDay, startMonth, startYear, delta, expectedDay, expectedMonth, expectedYear] =
+            GENERATE_COPY(
+                table<int, Month, int, int, int, Month, int>({
+                    {1,  Month::March,    2024, -1, 29, Month::February, 2024},
+                    {1,  Month::March,    2023, -1, 28, Month::February, 2023},
+                    {31, Month::March,    2024, -31,29, Month::February, 2024}, // leap
+                    {30, Month::March,    2024, -30,29, Month::February, 2024}, // leap
+                    {15, Month::March,    2024, -20,24, Month::February, 2024}, // leap
+                })
+            );
+
+        Date start(startDay, startMonth, startYear);
+        Date result = start + delta;
+        Date expected(expectedDay, expectedMonth, expectedYear);
+
+    CAPTURE(startDay, static_cast<int>(startMonth), startYear,
+                delta, expectedDay, static_cast<int>(expectedMonth), expectedYear,
+                result.day(), result.month(), result.year());
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Year - Overflow "){
+        const auto [startDay, startMonth, startYear, delta, expectedDay, expectedMonth, expectedYear] =
+            GENERATE_COPY(
+                table<int, Month, int, int, int, Month, int>({
+                    {31, Month::December, 2023,  1,  1, Month::January, 2024},
+                    {25, Month::December, 2023, 10,  4, Month::January, 2024},
+                    {15, Month::November, 2023, 60, 14, Month::January, 2024},
+                    { 1, Month::December, 2023, 60, 30, Month::January, 2024},
+                    {30, Month::December, 2023,  2,  1, Month::January, 2024},
+                })
+            );
+
+        Date start(startDay, startMonth, startYear);
+        Date result = start + delta;
+        Date expected(expectedDay, expectedMonth, expectedYear);
+
+    CAPTURE(startDay, static_cast<int>(startMonth), startYear,
+                delta, expectedDay, static_cast<int>(expectedMonth), expectedYear,
+                result.day(), result.month(), result.year());
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Year - Underflow "){
+        const auto [startDay, startMonth, startYear, delta, expectedDay, expectedMonth, expectedYear] =
+            GENERATE_COPY(
+                table<int, Month, int, int, int, Month, int>({
+                    {1,  Month::January, 2024, -1, 31, Month::December, 2023},
+                    {5,  Month::January, 2024, -10,26, Month::December, 2023},
+                    {15, Month::January, 2024, -60,16, Month::November, 2023},
+                })
+            );
+
+        Date start(startDay, startMonth, startYear);
+        Date result = start + delta;
+        Date expected(expectedDay, expectedMonth, expectedYear);
+
+    CAPTURE(startDay, static_cast<int>(startMonth), startYear,
+                delta, expectedDay, static_cast<int>(expectedMonth), expectedYear,
+                result.day(), result.month(), result.year());
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Multi Month - Overflow "){
+        const auto [startDay, startMonth, startYear, delta, expectedDay, expectedMonth, expectedYear] =
+            GENERATE_COPY(
+                table<int, Month, int, int, int, Month, int>({
+                    {1,  Month::January, 2023, 59,  1, Month::March,  2023}, // Jan→Feb→Mar (non‑leap)
+                    {1,  Month::January, 2024, 60,  1, Month::March,  2024}, // Jan→Feb→Mar (leap)
+                    {1,  Month::January, 2023, 60,  2, Month::March,  2023}, // Jan→Feb→Mar (non‑leap)
+                    {30, Month::January, 2024, 31,  1, Month::March,  2024}, // via Feb (leap)
+                    {1,  Month::March,   2024, 60, 30, Month::April,  2024}, // Mar→Apr via full month
+                    {1,  Month::March,   2023, 60, 30, Month::April,  2023},
+                    {31, Month::March,   2024, 31,  1, Month::May,    2024}, // Mar→Apr→May
+                })
+            );
+
+        Date start(startDay, startMonth, startYear);
+        Date result = start + delta;
+        Date expected(expectedDay, expectedMonth, expectedYear);
+
+    CAPTURE(startDay, static_cast<int>(startMonth), startYear,
+                delta, expectedDay, static_cast<int>(expectedMonth), expectedYear,
+                result.day(), result.month(), result.year());
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Multi Month - Underflow "){
+        const auto [startDay, startMonth, startYear, delta, expectedDay, expectedMonth, expectedYear] =
+            GENERATE_COPY(
+                table<int, Month, int, int, int, Month, int>({
+                    {10, Month::March, 2023, -40, 29, Month::January, 2023}, // Mar→Feb→Jan
+                    { 1, Month::March, 2024, -31, 30, Month::January, 2024}, // via Feb (leap)
+                    { 1, Month::March, 2024, -60,  1, Month::January, 2024}, // Mar→Jan (2 months)
+                })
+            );
+
+        Date start(startDay, startMonth, startYear);
+        Date result = start + delta;
+        Date expected(expectedDay, expectedMonth, expectedYear);
+
+    CAPTURE(startDay, static_cast<int>(startMonth), startYear,
+                delta, expectedDay, static_cast<int>(expectedMonth), expectedYear,
+                result.day(), result.month(), result.year());
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Multi year Overflows/Underflows") {
+        const auto [startDay, startMonth, startYear, delta, expectedDay, expectedMonth, expectedYear] =
+            GENERATE_COPY(
+                table<int, Month, int, int, int, Month, int>({
+                    {25, Month::August,   2021, +300, 21, Month::June,     2022}, // big forward jump
+                    {3,  Month::July,     2013, -365,  3, Month::July,     2012}, // full year back
+                    {29, Month::February, 2020, +366,  1, Month::March,    2021}, // leap +1 year
+                    {1,  Month::January,  2000, -366, 31, Month::December, 1998}, // leap back
+                })
+            );
+
+        Date start(startDay, startMonth, startYear);
+        Date result = start + delta;
+        Date expected(expectedDay, expectedMonth, expectedYear);
+
+        CAPTURE(startDay, static_cast<int>(startMonth), startYear,
+                delta, expectedDay, static_cast<int>(expectedMonth), expectedYear,
+                result.day(), result.month(), result.year());
+        REQUIRE(result == expected);
     }
 }

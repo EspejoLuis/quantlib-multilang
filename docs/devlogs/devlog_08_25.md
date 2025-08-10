@@ -98,21 +98,24 @@
     - Adding integration tests for February.....need first to have a method in Date that allows to move from one month to the next:
         - Creating `normalize` method.
 
-
-
+## 10 August 2025: Validation methods for Date class in C++
+- Created a private days validator method.
+- Created the `normalize` private method:
+    - Adding unit test for normalize. A LOT!  
 
 ## TO DO
 - C++:
-    ❌ Validation of inputs (e.g. no check for 30 Feb, etc. or for adding 11 to 30)
-    ✅  Leap year awareness
-    ❌ Overflow when adding days
+    ❌ Check coverage. Some issue 
+    ✅ Validation of inputs (e.g. no check for 30 Feb, etc. or for adding 11 to 30)
+    ✅ Leap year awareness
+    ✅ Overflow when adding days
     ❌ Integration tests (we only have unit test DateTest_catch.cpp)
     ✅  No utility like daysInMonth(month, year)
-    ❌ No conversion logic from overflowing days to next month/year
+    ✅ No conversion logic from overflowing days to next month/year
 
 - C++:  - Or manually: `g++ --coverage -o test_date DateTest_catch.cpp` -> To check if it's correct.
 - Unit Tests:
-    - Date validation to avoid 30 february for c++/c#/rust. In python should be easier
+    - Date validation to avoid 30 february for C++/C#/Rust. In python should be easier
     - Function for adding/subtracting month,years not just days:
         - What if days are more than 30/31
         - What if days are negative ?
