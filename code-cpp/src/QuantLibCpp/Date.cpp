@@ -113,11 +113,11 @@ namespace QuantLibCpp {
         // *this means dereference the pointer to get the actual object (Date)
         // It's making a COPY
         /*
-        Expression	       Type	            Copy happens?	Meaning
-        this	           Date*     	        ❌ No	Pointer to current object
-        *this	           Date&	            ❌ No	Reference to current object
-        Date tmp = *this	 —	                ✅ Yes	Makes a copy via copy ctor
-        return *this;	Date& or const Date&	❌ No	Return current object by reference
+        Expression --> Type -->	Copy happens? --> Meaning
+        this --> Date* -->  ❌ No --> Pointer to current object
+        *this --> Date&	--> ❌ No --> Reference to current object
+        Date tmp = *this --> —	--> ✅ Yes --> Makes a copy via copy ctor
+        return *this; --> Date& or const Date& --> ❌ No --> Return current object by reference
         */
         Date tmpDate = *this; 
         tmpDate.addDaysToCurrentDate(days);

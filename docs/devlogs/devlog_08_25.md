@@ -105,32 +105,24 @@
     - Check coverage tests. All 100% !
 
 ## 11 August 2025: Integration tests for Date class in C++
-- Added 2 integration tests for date class. Testing range limit i.e. `validateYearRange` and `toString()`.
+- Added 3 integration tests for date class:
+    - Testing range limit i.e. `validateYearRange()` and `toString()`.
+    - Testing year roll over.
+- Done all the following points:
+    - ✅ Check coverage. Some issue 
+    - ✅ Validation of inputs (e.g. no check for 30 Feb, etc. or for adding 11 to 30)
+    - ✅ Leap year awareness
+    - ✅ Overflow when adding days
+    - ✅ Integration tests
+    - ✅ No utility like daysInMonth(month, year)
+    - ✅ No conversion logic from overflowing days to next month/year
 
 
-- C++:
-    ✅ Check coverage. Some issue 
-    ✅ Validation of inputs (e.g. no check for 30 Feb, etc. or for adding 11 to 30)
-    ✅ Leap year awareness
-    ✅ Overflow when adding days
-    ❌ Integration tests (we only have unit test DateTest_catch.cpp)
-    ✅ No utility like daysInMonth(month, year)
-    ✅ No conversion logic from overflowing days to next month/year
+# TODO:
+- Date:
+    - Rust: Review
+    - C#: Review
+    - Python: Review 
 
-- C++:  - Or manually: `g++ --coverage -o test_date DateTest_catch.cpp` -> To check if it's correct.
-- Unit Tests:
-    - Date validation to avoid 30 february for C++/C#/Rust. In python should be easier
-    - Function for adding/subtracting month,years not just days:
-        - What if days are more than 30/31
-        - What if days are negative ?
-        - Same for months ?
-        - What if subtracting Dates instead of just days
-        - Need to implement calendar logic
-    - Take into account for starting a new month/year
-    - Can we use DateTime in C# ? for operations with dates instead of creating our own ?
-    - Rust:
-        Assumption: for now that the input is always non-negative, and that self.to_serial() + n will never underflow (negative dates will be handled later)
-- Integration tests:
-    - Rust
-    - C#
-    - C++
+- Date Parser:
+    - Given string create Date

@@ -13,7 +13,7 @@ TEST_CASE("Date end to end add/sub", "[Date]"){
     REQUIRE(dateCreated == dateExpected);
 }
 
-TEST_CASE("Range limit", "Date"){
+TEST_CASE("Range limit", "[Date]"){
     SECTION("Upper bound + toString"){
         Date d(31, Month::December, 2199);
 
@@ -29,4 +29,22 @@ TEST_CASE("Range limit", "Date"){
         REQUIRE_THROWS_AS(d - 1,
             std::out_of_range);
     }
+
+    SECTION("Safe year rollover "){
+        Date originalDate(30, Month::December, 2024);
+        REQUIRE(originalDate.toString() == "30-Dec-2024");
+
+        Date dateCreated = originalDate + 3;
+        Date dateExpected(2, Month::January, 2025);
+        REQUIRE(dateExpected.toString() == "02-Jan-2025");
+       
+        REQUIRE(originalDate < dateExpected);
+        REQUIRE(dateCreated == dateExpected);
+
+        Date newDate = dateExpected - 3;
+        REQUIRE(newDate.toString() == "30-Dec-2024");
+        REQUIRE(newDate == originalDate);
+
+    }
+
 }
