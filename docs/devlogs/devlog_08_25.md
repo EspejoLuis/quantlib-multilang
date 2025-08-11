@@ -116,12 +116,24 @@
     - ✅ Integration tests
     - ✅ No utility like daysInMonth(month, year)
     - ✅ No conversion logic from overflowing days to next month/year
+- Reviewing C#
+
 
 
 # TODO:
 - Date:
+    - C#: Review:
+        - ❌ Validation of inputs (e.g. no check for 30 Feb, etc. or for adding 11 to 30)
+        - ❌ Leap year awareness
+        - ❌ Overflow when adding days
+        - ❌ Integration tests
+        - ❌ No utility like daysInMonth(month, year)
+        - ❌ No conversion logic from overflowing days to next month/year
+        - ❌ Check coverage. Some issue 
+    - C++:
+        - ❌ operator > 
     - Rust: Review
-    - C#: Review
+    
     - Python: Review 
 
 - Date Parser:

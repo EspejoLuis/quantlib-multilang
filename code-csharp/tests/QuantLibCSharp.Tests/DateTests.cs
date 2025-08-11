@@ -8,7 +8,7 @@ public class DataTests
 {
     /*
     In C++, you need to create a default constructor otherwise
-    it will not compile
+    it will not compile. But not in C#
     */
     //[Test]
     //public void DefaultConstuctor_SetsCorrectValues()
