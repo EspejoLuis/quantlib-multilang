@@ -1,8 +1,8 @@
 #!/bin/bash
-# run_integration.sh - Build and run C++ integration tests (Debug)
+# run_test_integration.sh - Build and run C++ integration tests (Debug)
 # Usage:
-#   ./run_integration.sh          # reuse existing build
-#   ./run_integration.sh --clean  # delete build and start fresh
+#   ./run_test_integration.sh          # reuse existing build
+#   ./run_test_integration.sh --clean  # delete build and start fresh
 
 set -e
 
@@ -20,8 +20,8 @@ fi
 
 # 3) Build integration test target
 echo "Building date_integration..."
-cmake --build build --target date_integration
+cmake --build build --target date_tests_integration
 
 # 4) Run integration tests
-echo "Running date_integration from build/..."
-(cd build && ./date_integration)
+echo "Running date_tests_integration from build/..."
+(cd build && ./date_tests_integration)

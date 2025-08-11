@@ -104,14 +104,17 @@
     - Adding unit test for normalize. A LOT!  
     - Check coverage tests. All 100% !
 
-## TO DO
+## 11 August 2025: Integration tests for Date class in C++
+- Added 2 integration tests for date class. Testing range limit i.e. `validateYearRange` and `toString()`.
+
+
 - C++:
-    ❌ Check coverage. Some issue 
+    ✅ Check coverage. Some issue 
     ✅ Validation of inputs (e.g. no check for 30 Feb, etc. or for adding 11 to 30)
     ✅ Leap year awareness
     ✅ Overflow when adding days
     ❌ Integration tests (we only have unit test DateTest_catch.cpp)
-    ✅  No utility like daysInMonth(month, year)
+    ✅ No utility like daysInMonth(month, year)
     ✅ No conversion logic from overflowing days to next month/year
 
 - C++:  - Or manually: `g++ --coverage -o test_date DateTest_catch.cpp` -> To check if it's correct.
