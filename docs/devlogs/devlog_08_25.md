@@ -118,6 +118,10 @@
     - ✅ No conversion logic from overflowing days to next month/year
 - Reviewing C#
 
+## 112August 2025: C# 
+- Instead of using System.DateTime, going to use System.DateOnly. Not aiming at doing intraday valuation so time is not really needed just Date:
+    - Modified the code accordingly
+
 
 
 # TODO:
@@ -126,15 +130,21 @@
         - ❌ Validation of inputs (e.g. no check for 30 Feb, etc. or for adding 11 to 30)
         - ❌ Leap year awareness
         - ❌ Overflow when adding days
-        - ❌ Integration tests
+        - ❌ Add unit tests
+        - ❌ Integration tests.
         - ❌ No utility like daysInMonth(month, year)
         - ❌ No conversion logic from overflowing days to next month/year
         - ❌ Check coverage. Some issue 
+        - Null cases???
     - C++:
         - ❌ operator > 
+        - ❌ opeartor - for two dates
+        - ❌ Enf of month/IsEndOfMonth
+        - ❌ Different
     - Rust: Review
     
-    - Python: Review 
+    - Python: Review:
+        - We are using datetime + day,month,year. Is it correct ? should we store just datime so as to have one soruce of true ?
 
 - Date Parser:
     - Given string create Date
