@@ -49,8 +49,6 @@ if [[ -f "$REPORT_INDEX" ]]; then
   echo "[coverage] Report ready: $REPORT_INDEX"
   if command -v open >/dev/null 2>&1; then
     open "$REPORT_INDEX"
-  elif command -v xdg-open >/dev/null 2>&1; then
-    xdg-open "$REPORT_INDEX"
   else
     echo "[coverage] Please open in your browser: $REPORT_INDEX"
   fi
