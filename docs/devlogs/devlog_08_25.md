@@ -119,10 +119,12 @@
 - Reviewing C#
 
 ## 12 August 2025: C# 
+
 - Instead of using System.DateTime, going to use System.DateOnly. Not aiming at doing intraday valuation so time is not really needed just Date:
     - Modified the code accordingly
 
 ## 13 August 2025: C# 
+
 - Checked test: `dotnet test QuantLibCSharp.sln`.
 - Adding a coverage tool also for C#:
     ```
@@ -141,15 +143,11 @@
     dotnet new tool-manifest
     dotnet tool install dotnet-reportgenerator-globaltool
     ```
-- Run `dotnet tool run reportgenerator -reports:"tests/QuantLibCSharp.Tests/TestResults/**/coverage.cobertura.xml
-"  -targetdir:"CoverageReport" -reporttypes:"Html;TextSummary"`
+- Run `dotnet tool run reportgenerator -reports:"tests/QuantLibCSharp.Tests/TestResults/**/coverage.cobertura.xml"  -targetdir:"CoverageReport" -reporttypes:"Html;TextSummary"`
+- Created a bash file in [scripts](/code-csharp/scripts/)
+- Added units tests! Many. Only `GetHashCode` missing.
 
 
-
-
-
-
-- Can it be done direclty from C# root doing dotnet test QuantLibCSharp.sln 
 # TODO:
 - Date:
     - C#: Review:
@@ -157,6 +155,7 @@
         - ❌ Leap year awareness
         - ❌ Overflow when adding days
         - ❌ Add unit tests
+        - ❌ Divide unit test when expecation is true or false
         - ❌ Integration tests.
         - ❌ No utility like daysInMonth(month, year)
         - ❌ No conversion logic from overflowing days to next month/year

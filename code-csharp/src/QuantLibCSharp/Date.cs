@@ -79,7 +79,7 @@ public class Date : IEquatable<Date>
         // Can be used for EndOfMonth/IsEndOfMonth   
         return DateTime.DaysInMonth(year, (int)month);
     }
-    public static bool operator ==(Date left, Date right)
+    public static bool operator ==(Date? left, Date? right)
     {
         // In C#, all operator overloads must be static — by language design
         // They are not tied to an instance
@@ -95,7 +95,7 @@ public class Date : IEquatable<Date>
 
         return left.Equals(right);
     }
-    public static bool operator !=(Date left, Date right)
+    public static bool operator !=(Date? left, Date? right)
     {
         return !(left == right);
     }
