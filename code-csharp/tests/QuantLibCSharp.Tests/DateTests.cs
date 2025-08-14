@@ -39,7 +39,7 @@ public class DataTests
         //Act
         var result = d.ToString();
         //Assert
-        Assert.That(result, Is.EqualTo("1989-05-14"));
+        Assert.That(result, Is.EqualTo("14-May-1989"));
     }
     [Test]
     public void Equality_Works()
@@ -78,6 +78,7 @@ public class DataTests
         Assert.That(result3, Is.True);
         Assert.That(result4, Is.False);
     }
+    [Test]
     public void NotEquality_Works()
     {
         //Arrange 
@@ -131,7 +132,7 @@ public class DataTests
     {
         //Arrange
         var d1 = new Date(14, Month.May, 1989);
-        
+
         //Act
         var result = d1 - 11;
         //Assert
@@ -139,7 +140,6 @@ public class DataTests
         Assert.That(result.Month, Is.EqualTo(Month.May));
         Assert.That(result.Year, Is.EqualTo(1989));
     }
-   
 }
 
 

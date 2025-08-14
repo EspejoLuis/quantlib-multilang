@@ -15,7 +15,6 @@ code-cpp/build-coverage/
 code-cpp/bin/
 code-cpp/tests/lib/
 
-
 # Object files (compiled from .cpp), platform-dependent
 *.o
 *.obj
@@ -42,17 +41,20 @@ code-cpp/.vscode/
 # C# (.NET) Build Artifacts
 # -------------------------------
 
-# Compiled output directories created by dotnet build
-code-csharp/src/QuantLibCSharp/bin/
-code-csharp/src/QuantLibCSharp/obj/
-code-csharp/tests/QuantLibCSharp.Tests/bin/
-code-csharp/tests/QuantLibCSharp.Tests/obj/
-
-
-
 # Visual Studio/VS Code project-specific user settings
 *.user    # Per-user project settings (Visual Studio)
 *.suo     # Solution User Options — saved user-specific solution info
+
+# --- C# build + test outputs ---
+**/bin/
+**/obj/
+**/TestResults/
+**/CoverageReport/
+
+# VS/coverlet coverage files
+*.coverage
+*.coveragexml
+coverage.cobertura.xml
 
 # -------------------------------
 # Python Build Artifacts & Virtual Environment

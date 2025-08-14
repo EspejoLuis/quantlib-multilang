@@ -1,4 +1,6 @@
-﻿//Not needed anymore to do namespace QuantLibCSharp{} !
+﻿using System.Globalization;
+
+//Not needed anymore to do namespace QuantLibCSharp{} !
 namespace QuantLibCSharp;
 
 public enum Month
@@ -17,7 +19,7 @@ public enum Month
     December
 }
 
-public class Date: IEquatable<Date>
+public class Date : IEquatable<Date>
 {
     private readonly DateOnly _dateonly;
     public int Day { get; }
@@ -53,7 +55,7 @@ public class Date: IEquatable<Date>
         return new Date(newDate.Day, (Month)newDate.Month, newDate.Year);
     }
     public static Date operator -(Date date, int days)
-    {   
+    {
         // No new needed here.
         return date + (-days);
     }
@@ -81,11 +83,12 @@ public class Date: IEquatable<Date>
     {
         // In C#, all operator overloads must be static — by language design
         // They are not tied to an instance
-
         //“Are these two variables pointing to the exact same object instance?”
-        if (object.ReferenceEquals(left, right)) {
+        if (object.ReferenceEquals(left, right))
+        {
             return true;
-            };   
+        }
+        ;
 
         if (left is null || right is null)
             return false;
@@ -102,11 +105,14 @@ public class Date: IEquatable<Date>
         // Nullable reference ? -> object could be null.
         // The check below defined what to do in case is null
         // If obj is not a Date, return false; otherwise, treat it as a Date and call it other
-        if (obj is Date other){ 
+        if (obj is Date other)
+        {
             return _dateonly.Equals(other._dateonly);
-        } else {
+        }
+        else
+        {
             return false;
-        } 
+        }
     }
     public bool Equals(Date? date)
     {
@@ -135,4 +141,3 @@ public class Date: IEquatable<Date>
         return !(left < right || left == right);
     }
 }
-

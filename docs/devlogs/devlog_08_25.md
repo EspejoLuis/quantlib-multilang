@@ -57,7 +57,7 @@
         - `rm -rf build`
         - Configure with build type: `cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug`
         - Build your tests: `cmake --build build --target date_tests`
-        - Runt test from build fodler: `./date_tests`
+        - Runt test from build folder: `./date_tests`
     - Create separate build with coverage:
         - `cd code-ccp`
         - Remove any old  build directory: `rm -rf build-coverage`
@@ -118,12 +118,38 @@
     - ✅ No conversion logic from overflowing days to next month/year
 - Reviewing C#
 
-## 112August 2025: C# 
+## 12 August 2025: C# 
 - Instead of using System.DateTime, going to use System.DateOnly. Not aiming at doing intraday valuation so time is not really needed just Date:
     - Modified the code accordingly
 
+## 13 August 2025: C# 
+- Checked test: `dotnet test QuantLibCSharp.sln`.
+- Adding a coverage tool also for C#:
+    ```
+    cd code-csharp/QuantLibCSharp.Tests
+    dotnet add package coverlet.collector
+    dotnet build
+    ```
+- From test folder:
+    ```
+    cd code-csharp/QuantLibCSharp.Tests
+    dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults
+    ```
+- From c# root:
+    ```
+    cd code-csharp
+    dotnet new tool-manifest
+    dotnet tool install dotnet-reportgenerator-globaltool
+    ```
+- Run `dotnet tool run reportgenerator -reports:"tests/QuantLibCSharp.Tests/TestResults/**/coverage.cobertura.xml
+"  -targetdir:"CoverageReport" -reporttypes:"Html;TextSummary"`
 
 
+
+
+
+
+- Can it be done direclty from C# root doing dotnet test QuantLibCSharp.sln 
 # TODO:
 - Date:
     - C#: Review:

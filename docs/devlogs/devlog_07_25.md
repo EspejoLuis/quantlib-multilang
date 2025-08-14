@@ -159,7 +159,7 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway:
                 - add_days_by_reference_works_correctly()
             
 ## 28 July 2025 - Day #9: Implementation of Date class in Python
-- Manullay select the .venv :
+- Manually select the .venv :
     - `/Users/apple/github_repos/quantlib-multilang/code-python/.venv/bin/python` using cmd + shift + p
     - This will create a .vscode at the root.
     - Added the version into the pyproject.toml `uv pip install -r pyproject.toml` after having used `uv pip list` to see the version of what I'm using.
