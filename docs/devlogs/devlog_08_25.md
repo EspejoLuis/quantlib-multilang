@@ -118,12 +118,12 @@
     - ✅ No conversion logic from overflowing days to next month/year
 - Reviewing C#
 
-## 12 August 2025: C# 
+## 12 August 2025: C# Unit Test
 
 - Instead of using System.DateTime, going to use System.DateOnly. Not aiming at doing intraday valuation so time is not really needed just Date:
     - Modified the code accordingly
 
-## 13 August 2025: C# 
+## 13 August 2025: C# Unit Test
 
 - Checked test: `dotnet test QuantLibCSharp.sln`.
 - Adding a coverage tool also for C#:
@@ -147,6 +147,8 @@
 - Created a bash file in [scripts](/code-csharp/scripts/)
 - Added units tests! Many. Only `GetHashCode` missing.
 
+## 14 August 2025: C# Unit Test
+- Completed 100% unit tests.
 
 # TODO:
 - Date:
