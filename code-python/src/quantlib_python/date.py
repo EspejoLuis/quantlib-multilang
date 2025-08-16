@@ -1,4 +1,3 @@
-
 from calendar import monthrange
 from datetime import date, timedelta
 from enum import Enum
@@ -28,6 +27,7 @@ from pydantic import BaseModel, field_validator, model_validator
         self.year = year
 """
 
+
 class Month(Enum):
     JANUARY = 1
     FEBRUARY = 2
@@ -42,6 +42,7 @@ class Month(Enum):
     NOVEMBER = 11
     DECEMBER = 12
 
+
 class Date(BaseModel):
     day: int
     # Using Month in padantic is cool, automatically it does
@@ -51,60 +52,44 @@ class Date(BaseModel):
     # Date(day=1, month=Month.JANUARY, year=2025)    # ✅ already correct
     month: Month
     year: int
-           
-    @field_validator('year')
+
+    @field_validator("year")
     @classmethod
     def validate_year(cls, year: int) -> int:
-        return cls.validate_range(year, "year", 1950,2150)
-        
+        return cls.validate_range(value=year, name="year", low=1950, high=2150)
+
     @staticmethod
-    def validate_range(value: int, 
-                       name: str,
-                       low: int, 
-                       high:int) -> int:
-            
-            if low <= value <= high:
-                 return value
-            raise ValueError(
-                 f"{name} not valid: {value} is not between {low} and {high}")
+    def validate_range(value: int, name: str, low: int, high: int) -> int:
+        if low <= value <= high:
+            return value
+        raise ValueError(f"{name} not valid: {value} is not between {low} and {high}")
 
     @model_validator(mode="after")
     @classmethod
     def validate_day(cls, data: "Date") -> "Date":
-
-        _, days_in_month = \
-            monthrange(year=data.year, month=data.month.value)
-        cls.validate_range(data.day, "day", 1, days_in_month)
+        _, days_in_month = monthrange(year=data.year, month=data.month.value)
+        cls.validate_range(value=data.day, name="day", low=1, high=days_in_month)
         return data
-        
+
     def to_datetime(self) -> date:
-        return date(year=self.year,
-                    month=self.month.value,
-                    day=self.day)
+        return date(year=self.year, month=self.month.value, day=self.day)
 
     def __str__(self) -> str:
-         return self.to_datetime().strftime("%d-%b-%Y")
-    
-    def __add__(self, other:int) -> "Date":
+        return self.to_datetime().strftime("%d-%b-%Y")
+
+    def __add__(self, other: int) -> "Date":
         if isinstance(other, int):
             new_date: date = self.to_datetime() + timedelta(days=other)
-            return Date(day=new_date.day, 
-                        month=new_date.month,
-                        year=new_date.year)
+            return Date(day=new_date.day, month=new_date.month, year=new_date.year)
         else:
             raise TypeError(f"Addition not implemented for type {type(other).__name__}")
-    
-    def __sub__(self, other:Union[int,"Date"]) -> Union["Date", int]:
+
+    def __sub__(self, other: Union[int, "Date"]) -> Union["Date", int]:
         if isinstance(other, Date):
             delta_days: timedelta = self.to_datetime() - other.to_datetime()
             return delta_days.days
-        elif isinstance(other,int):
+        elif isinstance(other, int):
             new_date: date = self.to_datetime() - timedelta(days=other)
-            return Date(day=new_date.day,
-                        month=new_date.month,
-                        year=new_date.year)
+            return Date(day=new_date.day, month=new_date.month, year=new_date.year)
         else:
-             raise TypeError(f"Subtraction not implemented for type {type(other).__name__}")
-    
-
-    
+            raise TypeError(f"Subtraction not implemented for type {type(other).__name__}")
