@@ -166,7 +166,9 @@
     - Updated the scripts to manually run coverage reports
     - Integration Tests:
         - In Unit Tests there were tests that should have been put in integration.
-
+- Python:
+    - Structured better the tests (integration and unit)
+    - Created scripts files to run tests automatically with coverage. Testing covers already but wanted to do it manually
 
 # TODO:
 - Date:
