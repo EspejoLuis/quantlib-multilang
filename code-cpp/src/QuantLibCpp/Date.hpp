@@ -10,67 +10,76 @@ namespace QuantLibCpp {
     - Start at 1
     - Allows more control
     */
-    enum class Month{
-        January= 1, February, March, April, May, June,
-        July, August, September, October, November, December
+    enum class Month {
+        January = 1,
+        February,
+        March,
+        April,
+        May,
+        June,
+        July,
+        August,
+        September,
+        October,
+        November,
+        December
     };
 
-    class Date{
-        public:
-            //Default Constructor
-            Date(); 
+    class Date {
+      public:
+        // Default Constructor
+        Date();
 
-            // The main constructor: allows a user to create any valid date
-            Date(int day, Month month, int year); 
-            
-            // These are getters for the private member variables.
-            // const because they will not modify the object.
-            // This is just the declaration of the method but not the definition.
-            int day() const;
-            Month month() const;
-            int year() const;
+        // The main constructor: allows a user to create any valid date
+        Date(int day, Month month, int year);
 
-            // Returns a string for date
-            std::string toString() const; 
+        // These are getters for the private member variables.
+        // const because they will not modify the object.
+        // This is just the declaration of the method but not the definition.
+        int day() const;
+        Month month() const;
+        int year() const;
 
-            /*
-            The following will allow to compare dates
-                if (d1 == d2) { ... }
-                if (d1 < d2) { ... }
-            Behind the scenes, this is whay is called:
-                d1.operator==(d2);
-            
-            - bool --> return type
-            - const Date& other: 
-                - A reference to an'other' Date object you're comparing to
-                - Passed by const reference:
-                    - const = telling compiler we are not to modify `other`.
-                    - & = avoid copying but referencing 
-            - const --> method itself as const --> not to modify the current object
-            */
-            bool operator==(const Date& other) const;
-            bool operator<(const Date& other) const;
+        // Returns a string for date
+        std::string toString() const;
 
-            Date operator+(int days) const;
-            Date operator-(int days) const;
+        /*
+        The following will allow to compare dates
+            if (d1 == d2) { ... }
+            if (d1 < d2) { ... }
+        Behind the scenes, this is whay is called:
+            d1.operator==(d2);
+
+        - bool --> return type
+        - const Date& other:
+            - A reference to an'other' Date object you're comparing to
+            - Passed by const reference:
+                - const = telling compiler we are not to modify `other`.
+                - & = avoid copying but referencing
+        - const --> method itself as const --> not to modify the current object
+        */
+        bool operator==(const Date& other) const;
+        bool operator<(const Date& other) const;
+
+        Date operator+(int days) const;
+        Date operator-(int days) const;
 
         static bool isLeap(int year);
 
         static int daysInMonth(Month month, int year);
-        
-        private:
-            // These are the actual fields where data is stored.
-            int day_;
-            Month month_;
-            int year_;
 
-            void normalize();
+      private:
+        // These are the actual fields where data is stored.
+        int day_;
+        Month month_;
+        int year_;
 
-            void addDaysToCurrentDate(int days);
+        void normalize();
+
+        void addDaysToCurrentDate(int days);
 
         static void validateYearRange(int year);
 
         static void validateDayInMonth(int day, Month month, int year);
-        
     };
 }

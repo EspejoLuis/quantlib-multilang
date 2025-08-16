@@ -182,7 +182,8 @@
     - Created scripts files to run tests automatically with coverage. Testing covers already but wanted to do it manually
 - Rust:
     - Reviewing code written before to refresh memory
-
+- C++:
+    - Installled `clang-format` as extension to have formatting when saving the file.
 
 # TODO:
 - Date:
