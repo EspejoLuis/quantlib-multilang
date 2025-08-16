@@ -166,23 +166,37 @@
     - Updated the scripts to manually run coverage reports
     - Integration Tests:
         - In Unit Tests there were tests that should have been put in integration.
+    - Review:
+        - ✅ Validation of inputs --> is it in DateOnly
+        - ✅ Leap year awareness
+        - ✅ Overflow when adding days --> DateOnly
+        - ✅ Add unit tests
+        - ✅ Divide unit test when expecation is true or false
+        - ✅ Integration tests.
+        - ✅ No utility like daysInMonth(month, year)
+        - ✅ No conversion logic from overflowing days to next month/year --> DateOnly
+        - ✅ Check coverage. Some issue 
+        - ✅ Null cases???
 - Python:
     - Structured better the tests (integration and unit)
     - Created scripts files to run tests automatically with coverage. Testing covers already but wanted to do it manually
+- Rust:
+    - Reviewing code written before to refresh memory
+
 
 # TODO:
 - Date:
-    - C#: Review:
-        - ❌ Validation of inputs (e.g. no check for 30 Feb, etc. or for adding 11 to 30)
-        - ❌ Leap year awareness
-        - ❌ Overflow when adding days
-        - ❌ Add unit tests
-        - ❌ Divide unit test when expecation is true or false
-        - ❌ Integration tests.
-        - ❌ No utility like daysInMonth(month, year)
-        - ❌ No conversion logic from overflowing days to next month/year
-        - ❌ Check coverage. Some issue 
-        - Null cases???
+    - Rust:
+        - ❌  Validation of inputs --> is it in DateOnly
+        - ❌  Leap year awareness
+        - ❌  Overflow when adding days --> DateOnly
+        - ❌  Add unit tests
+        - ❌  Divide unit test when expecation is true or false
+        - ❌  Integration tests.
+        - ❌  No utility like daysInMonth(month, year)
+        - ❌  No conversion logic from overflowing days to next month/year --> DateOnly
+        - ❌  Check coverage. Some issue 
+        - ❌  Null cases
     - C++:
         - ❌ operator > 
         - ❌ opeartor - for two dates

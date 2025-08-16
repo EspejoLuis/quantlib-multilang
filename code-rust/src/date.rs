@@ -6,10 +6,10 @@ if all fiels are equal then true
 
 PartialEq vs Eq:
     - PartialEq gives == and != logic
-    - Eq: does not give anything more but 
+    - Eq: does not give anything more but
         confirms that == logic behaves mathematically sensibly
         For example a == a can be false if a is Nan. By saying Eq
-        that possibility is excluded a priori. 
+        that possibility is excluded a priori.
 */
 
 /*
@@ -18,7 +18,7 @@ With PartialOrd and Ord:
     - Ord --> Enables full ordering (like sorting)
 */
 /*
-Using asser_eq!(d1, d1, "xxx") mean Rust will try to show the 
+Using asser_eq!(d1, d1, "xxx") mean Rust will try to show the
 value when the test fails but to do that `Debug` is needed
 */
 
@@ -32,14 +32,13 @@ This can be done!
 // defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
 pub struct Date {
     // pub --> public so they can be access by other files like main.rs
-    // unsigned 32-bit integer 
+    // unsigned 32-bit integer
 
     // Order below impact for example how operator < works.
     // First field to be check is the first one below.
     pub year: u32,
     pub month: u32,
     pub day: u32,
-
 }
 
 // Implementation block i.e. to have a constructor
@@ -47,7 +46,7 @@ impl Date {
     pub fn new(day: u32, month: u32, year: u32) -> Date {
         /*
         This uses Rust's field init shorthand:
-        since the parameter names (defined in new) 
+        since the parameter names (defined in new)
         match the field names (define in Date)
         no need to write:
 
@@ -56,20 +55,20 @@ impl Date {
                 month: month,
                 year: year,
             }
-        */        
-        Date {day, month, year}
+        */
+        Date { day, month, year }
     }
 
     /*
-    Rust does not have built-in calendar logic in std 
-        - like Python’s datetime 
+    Rust does not have built-in calendar logic in std
+        - like Python’s datetime
         - or C#’s DateTime.
     To make operator + work, two methods need to be implemented:
         - A method to_serial() that gives an integer day count.
         - A method from_serial(n: u32) -> Date that builds a date from that count.
     */
 
-    pub fn to_serial(&self) -> u32{
+    pub fn to_serial(&self) -> u32 {
         // Assum each month has 30 days and each year has 360 days.
         // This avoids needing leap year or real calendar logic for now.
         self.year * 360 + self.month * 30 + self.day
@@ -87,9 +86,6 @@ impl Date {
 
         Date::new(day, month, year)
     }
-
-
-
 }
 
 use std::fmt;
@@ -110,7 +106,7 @@ impl fmt::Display for Date {
         - Borrowing the Date (just like this in C#/C++), but immutably (& means read-only).
     - f: &mut fmt::Formatter:
         - f is just the name of the variable
-            - It is a Formatter object (a string buffer similar to ostringstrem in C++). 
+            - It is a Formatter object (a string buffer similar to ostringstrem in C++).
         - &mut is a mutable reference, i.e. f it's mutable and it can be written on.
             - It could be &T or &mut T. Like in C++ there is const T& and T&
     - -> fmt::Result:
@@ -139,13 +135,12 @@ This (impl Add<i32> for Date) is similar to:
 */
 
 // Add days to date (by reference)
-impl Add<i32> for &Date{
-    
+impl Add<i32> for &Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn add(self, rhs: i32) -> Date {
         let serial_i32 = self.to_serial() as i32;
-        // rhs and serial cannot be added 
+        // rhs and serial cannot be added
         // i32 vs u32
         let new_serial = serial_i32 + rhs;
         // Put Check
@@ -156,13 +151,12 @@ impl Add<i32> for &Date{
 }
 
 // Add days to date (by value)
-impl Add<i32> for Date{
-    
+impl Add<i32> for Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn add(self, rhs: i32) -> Date {
         let serial_i32 = self.to_serial() as i32;
-        // rhs and serial cannot be added 
+        // rhs and serial cannot be added
         // i32 vs u32
         let new_serial = serial_i32 + rhs;
         // Put Check
@@ -174,24 +168,23 @@ impl Add<i32> for Date{
 
 use std::ops::Sub;
 
-
-/* 
+/*
 Subtract days from date
 This implementations consumes the value
-Rust has strict ownership rules. 
+Rust has strict ownership rules.
 When a function takes an argument by value (not by reference),
 It moves ownership of that argument into the function,
 meaning the caller can no longer use it afterward unless it's Copy.
 
-This is what's meant by "consuming" a value: 
+This is what's meant by "consuming" a value:
     it's no longer usable after that operation.
 */
-impl Sub<i32> for Date{
+impl Sub<i32> for Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn sub(self, rhs: i32) -> Date {
         let serial_i32 = self.to_serial() as i32;
-        // rhs and serial cannot be added 
+        // rhs and serial cannot be added
         // i32 vs u32
         let new_serial = serial_i32 - rhs;
         // Put Check
@@ -206,12 +199,12 @@ Implementing this without & i.e. by reference:
 
 "borrowing" a value
 */
-impl Sub<i32> for &Date{
+impl Sub<i32> for &Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn sub(self, rhs: i32) -> Date {
         let serial_i32 = self.to_serial() as i32;
-        // rhs and serial cannot be added 
+        // rhs and serial cannot be added
         // i32 vs u32
         let new_serial = serial_i32 - rhs;
         // Put Check
@@ -221,10 +214,8 @@ impl Sub<i32> for &Date{
     }
 }
 
-
-
 // Subtract dates
-impl Sub<Date> for Date{
+impl Sub<Date> for Date {
     type Output = i32;
 
     fn sub(self, rhs: Date) -> i32 {
@@ -234,8 +225,6 @@ impl Sub<Date> for Date{
         serial_i32 - rhs_i32
     }
 }
-
-
 
 // This block will be compiled only when running cargo test
 #[cfg(test)]
@@ -255,7 +244,7 @@ mod tests {
     }
 
     #[test]
-    fn display_date_correctly(){
+    fn display_date_correctly() {
         let d1 = Date::new(14, 5, 1989);
         let result = format!("{}", d1);
 
@@ -263,20 +252,19 @@ mod tests {
     }
 
     #[test]
-    fn equality_works_when_fields_match(){
+    fn equality_works_when_fields_match() {
         let d1 = Date::new(14, 5, 1989);
         let d2 = Date::new(14, 5, 1989);
 
         assert_eq!(d1, d2, "Dates should be equal");
 
         let d3 = Date::new(15, 5, 1989);
-        
+
         assert_ne!(d1, d3, "Dates should not be equal");
-        
     }
-    
+
     #[test]
-    fn date_comparison_works(){
+    fn date_comparison_works() {
         let d1 = Date::new(14, 5, 1989);
         let d2 = Date::new(17, 5, 1989);
 
@@ -297,7 +285,7 @@ mod tests {
     }
 
     #[test]
-    fn add_days_by_value_works_correctly(){
+    fn add_days_by_value_works_correctly() {
         let d1 = Date::new(1, 5, 1989);
         let derived_date = d1 + 40;
 
@@ -305,14 +293,13 @@ mod tests {
         let expected_date = Date::new(11, 6, 1989);
 
         assert_eq!(derived_date, expected_date);
-
     }
 
     #[test]
-    fn add_days_by_reference_works_correctly(){
+    fn add_days_by_reference_works_correctly() {
         // `d1` owns a Date instance
         let d1 = Date::new(1, 5, 1989);
-        // `&d1` borrows d1 immutably 
+        // `&d1` borrows d1 immutably
         // meaning d1 can be borrowed but not changed
         let derived_date = &d1 + 40;
 
@@ -320,11 +307,10 @@ mod tests {
         let expected_date = Date::new(11, 6, 1989);
 
         assert_eq!(derived_date, expected_date);
-
     }
 
     #[test]
-    fn subtract_days_by_value_works_correctly(){
+    fn subtract_days_by_value_works_correctly() {
         let d1 = Date::new(15, 5, 1989);
         // Subtracting 15 days will result in 0 May
         // Subtracitng 16 days will result in 29 May
@@ -335,11 +321,10 @@ mod tests {
         let expected_date = Date::new(29, 4, 1989);
 
         assert_eq!(derived_date, expected_date);
-
     }
 
     #[test]
-    fn subtract_days_by_reference_works_correctly(){
+    fn subtract_days_by_reference_works_correctly() {
         let d1 = Date::new(15, 5, 1989);
         // Subtracting 15 days will result in 0 May
         // Subtracitng 16 days will result in 29 May
@@ -350,11 +335,10 @@ mod tests {
         let expected_date = Date::new(29, 4, 1989);
 
         assert_eq!(derived_date, expected_date);
-
     }
 
     #[test]
-    fn subtract_dates_works_correctly(){
+    fn subtract_dates_works_correctly() {
         let d1 = Date::new(14, 5, 1989);
         let d2 = Date::new(15, 5, 1989);
 
@@ -365,7 +349,7 @@ mod tests {
     }
 
     #[test]
-    fn to_serial_works_correctly(){
+    fn to_serial_works_correctly() {
         let d = Date::new(14, 5, 1989);
 
         let derived_serial = d.to_serial();
@@ -375,11 +359,11 @@ mod tests {
     }
 
     #[test]
-    fn from_serial_works_correctly(){
+    fn from_serial_works_correctly() {
         let serial = 11 + 5 * 30 + 1989 * 360;
         let derived_date = Date::from_serial(serial);
         let expected_date = Date::new(11, 5, 1989);
-        
+
         assert_eq!(derived_date, expected_date);
     }
 }

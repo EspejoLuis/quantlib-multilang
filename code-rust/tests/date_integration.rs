@@ -1,5 +1,5 @@
 /*
-This imports the type Date into your current scope. 
+This imports the type Date into your current scope.
 So now, instead of
     let d = code_rust::date::Date::new(…);
 we can use
@@ -8,21 +8,20 @@ we can use
 use code_rust::date::Date;
 
 #[test]
-fn serial_conversion_works_correctly(){
+fn serial_conversion_works_correctly() {
     let expected_date = Date::new(14, 5, 1989);
     let serial_date = expected_date.to_serial();
     let derived_date = Date::from_serial(serial_date);
 
     assert_eq!(expected_date, derived_date);
-
 }
 
 #[test]
-fn add_then_subtract_returns_original_date_correctly(){
+fn add_then_subtract_returns_original_date_correctly() {
     let expected_date = Date::new(14, 5, 1989);
     /*
     Had to implement by reference add function (&)
-    by value was not enough. 
+    by value was not enough.
 
         let a = Date::new(1, 1, 2020);
         let c = &a + 10;  // borrow `a`
