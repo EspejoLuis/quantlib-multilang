@@ -3,9 +3,9 @@ using System.Runtime;
 using NUnit.Framework;
 using QuantLibCSharp;
 
-namespace QuantLibCSharp.Tests;
+namespace QuantLibCSharp.UnitTests;
 
-public class DataTests
+public class DateUnitTests
 {
     /*
     In C++, you need to create a default constructor otherwise

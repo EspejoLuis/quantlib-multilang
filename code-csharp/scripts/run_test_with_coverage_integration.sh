@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# run_test_with_coverage_unit.sh — run C# unit tests with coverage and open the HTML report.
+# coverage_integration.sh — run only the Integration tests with coverage.
 # Usage:
-#   ./run_test_with_coverage_unit.sh        # run and open report
-#   ./run_test_with_coverage_unit.sh --clean# clean, run, and open report
+#   ./coverage_integration.sh        # run and open report
+#   ./coverage_integration.sh --clean# clean, run, and open report
 
 # --- Resolve paths relative to this script ---
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)"
 CSHARP_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
-TEST_PROJ="$CSHARP_ROOT/tests/QuantLibCSharp.UnitTests"
+TEST_PROJ="$CSHARP_ROOT/tests/QuantLibCSharp.IntegrationTests"
 RESULTS_DIR="$TEST_PROJ/TestResults"
-REPORT_DIR="$CSHARP_ROOT/CoverageReportUnit"
+REPORT_DIR="$CSHARP_ROOT/CoverageReportIntegration"
 REPORT_INDEX="$REPORT_DIR/index.html"
 
 # --- Options: only '--clean' is supported ---
@@ -22,6 +22,7 @@ elif [[ "${1:-}" != "" ]]; then
   echo "Usage: $(basename "$0") [--clean]"
   exit 1
 fi
+
 
 # --- Clean if requested ---
 if $CLEAN; then
@@ -36,8 +37,8 @@ if $CLEAN; then
   # dotnet nuget locals all --clear
 fi
 
-# --- Run tests with Coverlet collector ---
-echo "[coverage] Running unit tests with coverage…"
+# --- Run only the Integration tests with Coverlet collector ---
+echo "[coverage] Running integration tests with coverage…"
 pushd "$TEST_PROJ" >/dev/null
 dotnet test --nologo --collect:"XPlat Code Coverage" --results-directory "$RESULTS_DIR"
 popd >/dev/null
@@ -46,8 +47,8 @@ popd >/dev/null
 echo "[coverage] Generating HTML report…"
 pushd "$CSHARP_ROOT" >/dev/null
 dotnet tool run reportgenerator \
-  -reports:"tests/QuantLibCSharp.UnitTests/TestResults/**/coverage.cobertura.xml" \
-  -targetdir:"CoverageReportUnit" \
+  -reports:"tests/QuantLibCSharp.IntegrationTests/TestResults/**/coverage.cobertura.xml" \
+  -targetdir:"CoverageReportIntegration" \
   -reporttypes:"Html;TextSummary"
 popd >/dev/null
 

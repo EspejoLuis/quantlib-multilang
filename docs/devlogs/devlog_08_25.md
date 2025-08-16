@@ -150,17 +150,21 @@
 ## 15 August 2025: C# Unit Test
 - Completed 100% unit tests.
 
-## 16 August 2025: C++
-- Create new workspace. This contains the multilang and the 4 languages folders. The 4 folders are simply added to the workspace so the `settings.json` are correctly read by vscode from each folder.
-- Settings are in `.vscode/setting.json` for each language and in the root multilang folder.
-- Set tests in Testing window in VSCode for 3 languages:
-    - ✅ C# --> C# Dev Kit with coverage
-    - ✅ C++ --> TestMate C++ with coverage
-    - ✅ Python --> Pytest with coverage
-    - ❌ Rust --> Rust-Analyzer without coverate. Still doesn't support coverage so have to do it manually.
-- Coverage reports and test can be anyway run also manually.
-- Also debugging is working. Nice.
-
+## 16 August 2025: Structure and C# Integration tests
+- Structure:
+    - Create new workspace. This contains the multilang and the 4 languages folders. The 4 folders are simply added to the workspace so the `settings.json` are correctly read by vscode from each folder.
+    - Settings are in `.vscode/setting.json` for each language and in the root multilang folder.
+    - Set tests in Testing window in VSCode for 3 languages:
+        - ✅ C# --> C# Dev Kit with coverage
+        - ✅ C++ --> TestMate C++ with coverage
+        - ✅ Python --> Pytest with coverage
+        - ❌ Rust --> Rust-Analyzer without coverate. Still doesn't support coverage so have to do it manually.
+    - Coverage reports and test can be anyway run also manually.
+    - Also debugging is working. Nice.
+- C#:
+    - Created UniteTests and IntegrationTests projects.
+    - Updated the scripts to manually run coverage reports.
+    
 
 
 # TODO:

@@ -51,6 +51,8 @@ code-cpp/.vscode/
 **/obj/
 **/TestResults/
 **/CoverageReport/
+**/CoverageReportUnit/
+**/CoverageReportIntegration/
 
 # VS/coverlet coverage files
 *.coverage
