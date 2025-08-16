@@ -50,7 +50,7 @@ code-cpp/.vscode/
 **/bin/
 **/obj/
 **/TestResults/
-**/CoverageReport/
+**/CoverageReportAll/
 **/CoverageReportUnit/
 **/CoverageReportIntegration/
 

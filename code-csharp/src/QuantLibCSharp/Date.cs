@@ -102,7 +102,9 @@ public class Date : IEquatable<Date>
     public override bool Equals(object? obj)
     {
         // Can be used in collection for example
-        // Nullable reference ? -> object could be null.
+        // Polymorphic/object APIs call your overridden Equals(object?) like object.ReferenceEquals(left, right)
+
+        // Nullable reference ? -> object could be null
         // The check below defined what to do in case is null
         // If obj is not a Date, return false; otherwise, treat it as a Date and call it other
         if (obj is Date other)
@@ -118,7 +120,10 @@ public class Date : IEquatable<Date>
     {
         // : IEquatable<Date> is needed to declare this.
         // Collections will used this method over Equals(object? obj)
-        // Polymorphic/object APIs call your overridden Equals(object?) like object.ReferenceEquals(left, right)
+        // By implementing IEquatable<Date>, you give generic collections like 
+        // List<Date>, HashSet<Date>, Dictionary<Date, …> a strongly-typed equality method
+        // This will make such generic collections faster because they will not need to cast from
+        // object from Equals(object? obj)
         if (date is null)
             return false;
         return _dateonly.DayNumber == date._dateonly.DayNumber;

@@ -163,8 +163,9 @@
     - Also debugging is working. Nice.
 - C#:
     - Created UniteTests and IntegrationTests projects.
-    - Updated the scripts to manually run coverage reports.
-    
+    - Updated the scripts to manually run coverage reports
+    - Integration Tests:
+        - In Unit Tests there were tests that should have been put in integration.
 
 
 # TODO:
