@@ -123,7 +123,7 @@
 - Instead of using System.DateTime, going to use System.DateOnly. Not aiming at doing intraday valuation so time is not really needed just Date:
     - Modified the code accordingly
 
-## 13 August 2025: C# Unit Test
+## 14 August 2025: C# Unit Test
 
 - Checked test: `dotnet test QuantLibCSharp.sln`.
 - Adding a coverage tool also for C#:
@@ -147,8 +147,21 @@
 - Created a bash file in [scripts](/code-csharp/scripts/)
 - Added units tests! Many. Only `GetHashCode` missing.
 
-## 14 August 2025: C# Unit Test
+## 15 August 2025: C# Unit Test
 - Completed 100% unit tests.
+
+## 16 August 2025: C++
+- Create new workspace. This contains the multilang and the 4 languages folders. The 4 folders are simply added to the workspace so the `settings.json` are correctly read by vscode from each folder.
+- Settings are in `.vscode/setting.json` for each language and in the root multilang folder.
+- Set tests in Testing window in VSCode for 3 languages:
+    - ✅ C# --> C# Dev Kit with coverage
+    - ✅ C++ --> TestMate C++ with coverage
+    - ✅ Python --> Pytest with coverage
+    - ❌ Rust --> Rust-Analyzer without coverate. Still doesn't support coverage so have to do it manually.
+- Coverage reports and test can be anyway run also manually.
+- Also debugging is working. Nice.
+
+
 
 # TODO:
 - Date:

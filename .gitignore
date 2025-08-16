@@ -4,6 +4,7 @@
 
 # macOS stores folder view settings here — useless for your repo
 .DS_Store
+*.code-workspace
 
 # -------------------------------
 # C++ Build Artifacts
