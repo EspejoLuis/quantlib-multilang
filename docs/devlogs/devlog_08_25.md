@@ -185,19 +185,38 @@
 - C++:
     - Installled `clang-format` as extension to have formatting when saving the file.
 
-# 16 August 2025: Rust Review
+## 17 August 2025: Rust Review
 - Review code
-
+- Quantlib uses serial numbers not normalize functions (see beloew). Going to implement option B in Rust, then modify C++ to allign because as of now, approach A is used in C++
+    - Approach A — Normalize loop (what you coded in C++ first)
+        - You add/subtract days directly from (day, month, year).
+        - Then run a normalize() loop to “fix” cases like:
+        - Day = 32 → push into next month
+        - Day = 0 → pull back into previous month
+        - This is very manual, step-by-step adjustment.
+    - Approach B — Serial numbers (what we’re now doing in Rust, and also what QuantLib does internally)
+        - Convert (day, month, year) into a single integer (serial).
+        - Add/subtract days directly on that integer.
+        - Convert back into (day, month, year).
+        - No loop, no manual adjustments — the modular arithmetic handles everything.
+- ✅ `month_offset` created.
+    
+ 
 # TODO:
 - Date:
     - Rust:
-        - ❌  Validation of inputs --> is it in DateOnly
+        - ❌  Validation of inputs , validate day , validate year
+        - ❌  Operators: > < != ==
         - ❌  Leap year awareness
-        - ❌  Overflow when adding days --> DateOnly
+        - ❌  Overflow when adding days, normalize
         - ❌  Add unit tests
         - ❌  Divide unit test when expecation is true or false
         - ❌  Integration tests.
-        - ❌  No utility like daysInMonth(month, year)
+        - ❌  No utility like :
+            - ❌ daysInMonth(month, year)
+            - ❌ to string
+            - ❌ from serial 
+            - ❌ to serial
         - ❌  No conversion logic from overflowing days to next month/year --> DateOnly
         - ❌  Check coverage. Some issue 
         - ❌  Null cases
@@ -206,7 +225,10 @@
         - ❌ opeartor - for two dates
         - ❌ Enf of month/IsEndOfMonth
         - ❌ Different
+        - ❌ Normalize is actually not needed!
     - Python: Review:
         - We are using datetime + day,month,year. Is it correct ? should we store just datime so as to have one soruce of true ?
     - Date Parser:
-        - Given string create Date
+        - Given string create Date for example "Mar" → Month::March
+
+

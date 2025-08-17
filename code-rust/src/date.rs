@@ -1,4 +1,41 @@
 /*
+1. Copy
+Means values of this type can be copied bit-for-bit instead of moved.
+For Month, that’s fine: it’s just a tiny integer under the hood (the discriminant).
+
+Effect: you can do:
+let m1 = Month::March;
+let m2 = m1;      // this makes a *copy*, not a move
+let m3 = m1;      // ❌ still works, m1 is still valid
+If Month were not Copy, the assignment would “move” it, and m1 couldn’t be used anymore.
+
+2. Clone
+Gives you a .clone() method that makes an explicit copy.
+Normally, Clone can mean deep copies (like duplicating a vector).
+For a Copy type like Month, .clone() just does the same as assignment.
+
+Example:
+let m1 = Month::April;
+let m2 = m1.clone();  // same as m1
+
+*/
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+pub enum Month {
+    January = 1,
+    February,
+    March,
+    April,
+    May,
+    June,
+    July,
+    August,
+    September,
+    October,
+    November,
+    December,
+}
+
+/*
 Since the struct contains types that implement equality
 (u32) then Rust automatically generates == logic
 i.e. each field is compared in ORDER (day, month, year)
@@ -18,6 +55,28 @@ if all fiels are equal then true
     value when the test fails but to do that `Debug` is needed
 */
 
+impl Month {
+    // Because not every u32 is valid (e.g., 0 or 13), the function should return an Option:
+    // If n is between 1 and 12 → return Some(Month::X)
+    // Otherwise → return None
+    pub fn from_u32(number: u32) -> Option<Month> {
+        match number {
+            1 => Some(Month::January),
+            2 => Some(Month::February),
+            3 => Some(Month::March),
+            4 => Some(Month::April),
+            5 => Some(Month::May),
+            6 => Some(Month::June),
+            7 => Some(Month::July),
+            8 => Some(Month::August),
+            9 => Some(Month::September),
+            10 => Some(Month::October),
+            11 => Some(Month::November),
+            12 => Some(Month::December),
+            _ => None,
+        }
+    }
+}
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 /*
 This can be done!
@@ -25,20 +84,31 @@ This can be done!
         println!("Dates are equal!");
     }
 */
-pub struct Date {
+struct Date {
     // Defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
     // pub --> public so they can be access by other files like main.rs
     // unsigned 32-bit integer
-
-    // Order below impact for example how operator < works.
-    // First field to be check is the first one below.
-    pub year: u32,
-    pub month: u32,
-    pub day: u32,
+    serial: u32, //private by default
+                 // Order below impact for example how operator < works.
+                 // First field to be check is the first one below.
+                 //pub year: u32,
+                 //pub month: Month,
+                 //pub day: u32,
 }
 
 impl Date {
-    pub fn new(day: u32, month: u32, year: u32) -> Date {
+    // Are this constan just here in for everything ? i.e. pub ?
+    pub const EPOCH_YEAR: u32 = 1901;
+    pub const EPOCH_MONTH: Month = Month::January;
+    pub const EPOCH_DAY: u32 = 1;
+
+    // Days from 1-Jan to start of each month
+    pub const MONTH_OFFSET: [u32; 13] =
+        [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365];
+    pub const MONTH_LEAP_OFFSET: [u32; 13] =
+        [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+
+    pub fn new(_day: u32, _month: Month, _year: u32) -> Date {
         // Implementation block i.e. to have a constructor
 
         /*
@@ -52,8 +122,9 @@ impl Date {
                 month: month,
                 year: year,
             }
+            Date { day, month, year }
         */
-        Date { day, month, year }
+        // compute s from (day, month, year) using a helper we’ll add next, then return  Date { serial: s }
     }
 
     /*
@@ -65,28 +136,107 @@ impl Date {
         - A method from_serial(n: u32) -> Date that builds a date from that count.
     */
 
+    pub fn from_serial(n: u32) -> Date {
+        Date { serial: n }
+    }
+
     pub fn to_serial(&self) -> u32 {
-        // Assum each month has 30 days and each year has 360 days.
-        // This avoids needing leap year or real calendar logic for now.
-        self.year * 360 + self.month * 30 + self.day
-        /* Alternatively:
-        let serial = self.year * 360 + self.month * 30 + self.day
-        serial
+        self.serial
+    }
+
+    fn days_from_year_epoch(year: u32) -> u64 {
+        /*
+        Returns the total number of days from the epoch (1901-01-01)
+        up to, but not including, `year`-01-01.
+
+        Year version
+
+        Example:
+        - days_from_epoch(1901) = 0
+        - days_from_epoch(1902) = 365
+        - days_from_epoch(1904) = 365 + 365 + 366 = 1096
         */
     }
 
-    pub fn from_serial(n: u32) -> Date {
-        // Assum each month has 30 days and each year has 360 days.
-        let year: u32 = n / 360;
-        let month: u32 = (n % 360) / 30;
-        let day: u32 = (n % 360) % 30;
+    fn month_offset(year: u32, month: Month) -> u32 {
+        /*
+        Returns the number of days from the start of `year` (Jan-01)
+        up to, but not including, `year`-`month`-01.
 
-        Date::new(day, month, year)
+        Examples:
+        - days_from_month_epoch(1901, January) = 0
+        - days_from_month_epoch(2017, February) = 31
+        - days_from_month_epoch(1904, March) = 31 + 29 = 60
+        */
+        let days: u32 = if Date::is_leap(year) {
+            Date::MONTH_LEAP_OFFSET[month as usize - 1]
+        } else {
+            Date::MONTH_OFFSET[month as usize - 1]
+        };
+
+        days
+    }
+
+    pub fn is_leap(year: u32) -> bool {
+        (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0)
+    }
+
+    pub fn days_in_month(month: Month, year: u32) -> u32 {
+        // needed if we are using DAYS_FROM_START_MONTH_LEAP ?
+        match month {
+            Month::January => 31,
+            Month::February => {
+                if Date::is_leap(year) {
+                    29
+                } else {
+                    28
+                }
+            }
+            Month::March => 31,
+            Month::April => 30,
+            Month::May => 31,
+            Month::June => 30,
+            Month::July => 31,
+            Month::August => 31,
+            Month::September => 30,
+            Month::October => 31,
+            Month::November => 30,
+            Month::December => 31,
+        }
+    }
+
+    pub fn days_in_year(year: u32) -> u32 {
+        if Date::is_leap(year) { 366 } else { 365 }
+    }
+
+    //Getters
+    pub fn day(&self) -> u32 {
+        //decode day from serial
+    }
+    pub fn month(&self) -> Month {
+        //decode month from serial
+    }
+    pub fn year(&self) -> u32 {
+        //decode year from serial
     }
 }
 
 use std::fmt;
 
+static MONTH_NAMES: [&str; 13] = [
+    "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+impl fmt::Display for Month {
+    // You need to dereference (*self) because self is a reference i.e. pointer i.e. address of a value (&Month).
+    // Only the value (Month) can be cast to its numeric discriminant.
+    // A reference (&Month) can’t be directly cast to a number
+    // — otherwise you’d be casting the pointer address, not the enum value
+    fn fmt(&self, formatter_buffer: &mut fmt::Formatter) -> fmt::Result {
+        let index: usize = *self as usize; // convert enum discriminant to usize
+        write!(formatter_buffer, "{}", MONTH_NAMES[index])
+    }
+}
 /*
 - impl: we are implementing something.
 - fmt::Display: this is a TRAIT:
@@ -117,8 +267,8 @@ impl fmt::Display for Date {
     fn fmt(&self, formatter_buffer: &mut fmt::Formatter) -> fmt::Result {
         write!(
             formatter_buffer,
-            "{}-{}-{}",
-            self.day, self.month, self.year
+            "{:02}-{}-{}",
+            self.day, MONTH_NAMES[self.month as usize], self.year
         )
     }
 }
@@ -155,8 +305,6 @@ impl Add<i32> for &Date {
         // right_hand_side (i32) and serial (u32) cannot be added
         let serial_i32: i32 = self.to_serial() as i32;
         let new_serial: i32 = serial_i32 + right_hand_side;
-        // Put Check
-        assert!(new_serial >= 0, "New date is before base date");
 
         Date::from_serial(new_serial as u32)
     }
@@ -173,8 +321,6 @@ impl Add<i32> for Date {
         // right_hand_side (i32) and serial (u32) cannot be added
         let serial_i32: i32 = self.to_serial() as i32;
         let new_serial: i32 = serial_i32 + right_hand_side;
-        // Put Check
-        assert!(new_serial >= 0, "New date is before base date");
 
         Date::from_serial(new_serial as u32)
     }
@@ -196,46 +342,36 @@ impl Sub<i32> for Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn sub(self, right_hand_side: i32) -> Date {
+        // right_hand_side (i32) and serial (u32) cannot be added
         let serial_i32: i32 = self.to_serial() as i32;
-        // rhs and serial cannot be added
-        // i32 vs u32
         let new_serial: i32 = serial_i32 - right_hand_side;
-        // Put Check
-        assert!(new_serial >= 0, "New date is before base date");
 
         Date::from_serial(new_serial as u32)
     }
 }
 
-/*
-Implementing this without & i.e. by reference:
-
-"borrowing" a value
-*/
 impl Sub<i32> for &Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn sub(self, right_hand_side: i32) -> Date {
+        // right_hand_side (i32) and serial (u32) cannot be added
         let serial_i32: i32 = self.to_serial() as i32;
-        // rhs and serial cannot be added
-        // i32 vs u32
         let new_serial: i32 = serial_i32 - right_hand_side;
-        // Put Check
-        assert!(new_serial >= 0, "New date is before base date");
 
         Date::from_serial(new_serial as u32)
     }
 }
 
-// Subtract dates
 impl Sub<Date> for Date {
     type Output = i32;
 
-    fn sub(self, rhs: Date) -> i32 {
-        let rhs_i32: i32 = rhs.to_serial() as i32;
+    fn sub(self, right_hand_side: Date) -> i32 {
+        // Subtract dates
+        // right_hand_side (i32) and serial (u32) cannot be added
+        let right_hand_side_i32: i32 = right_hand_side.to_serial() as i32;
         let serial_i32: i32 = self.to_serial() as i32;
 
-        serial_i32 - rhs_i32
+        serial_i32 - right_hand_side_i32
     }
 }
 
@@ -243,140 +379,142 @@ impl Sub<Date> for Date {
 #[cfg(test)]
 // Defines a nested test module
 mod tests {
-
     // Bring everything from the outer scope (Date, its methods, etc.)
     use super::*;
-
     #[test]
     fn creates_date_correctly() {
-        let d1 = Date::new(1, 05, 1989);
+        let d1: Date = Date::new(1, Month::April, 1989);
 
         assert_eq!(d1.day, 1);
-        assert_eq!(d1.month, 05);
+        assert_eq!(d1.month, Month::April);
         assert_eq!(d1.year, 1989);
     }
 
     #[test]
     fn display_date_correctly() {
-        let d1 = Date::new(14, 5, 1989);
-        let result = format!("{}", d1);
+        let d1: Date = Date::new(2, Month::May, 1989);
+        let result: String = format!("{}", d1);
 
-        assert_eq!(result, "14-5-1989");
-    }
+        assert_eq!(result, "02-May-1989");
 
-    #[test]
-    fn equality_works_when_fields_match() {
-        let d1 = Date::new(14, 5, 1989);
-        let d2 = Date::new(14, 5, 1989);
+        #[test]
+        fn equality_same_date_true() {
+            let d1: Date = Date::new(14, Month::May, 1989);
+            let d2: Date = Date::new(14, Month::May, 1989);
 
-        assert_eq!(d1, d2, "Dates should be equal");
+            assert_eq!(d1, d2, "Dates should be equal");
+        }
 
-        let d3 = Date::new(15, 5, 1989);
+        #[test]
+        fn equality_same_date_false() {
+            let d1: Date = Date::new(14, Month::May, 1989);
+            let d3: Date = Date::new(15, Month::May, 1989);
 
-        assert_ne!(d1, d3, "Dates should not be equal");
-    }
+            assert_ne!(d1, d3, "Dates should not be equal");
+        }
 
-    #[test]
-    fn date_comparison_works() {
-        let d1 = Date::new(14, 5, 1989);
-        let d2 = Date::new(17, 5, 1989);
+        #[test]
+        fn date_comparison_works() {
+            let d1 = Date::new(14, Month::May, 1989);
+            let d2 = Date::new(17, Month::May, 1989);
 
-        assert!(d1 < d2);
+            assert!(d1 < d2);
 
-        let d3 = Date::new(13, 8, 1989);
+            let d3 = Date::new(13, 8, 1989);
 
-        /*
-        The first time it run, got an error here. Why ?
-        Because the the order of comparison was:
-            day -> month -> year.
-        The order is defined in the constructor.
-        It should be:
-            year -> month -> day
+            /*
+            The first time it run, got an error here. Why ?
+            Because the the order of comparison was:
+                day -> month -> year.
+            The order is defined in the constructor.
+            It should be:
+                year -> month -> day
 
-        */
-        assert!(d3 > d2);
-    }
+            */
+            assert!(d3 > d2);
+        }
 
-    #[test]
-    fn add_days_by_value_works_correctly() {
-        let d1 = Date::new(1, 5, 1989);
-        let derived_date = d1 + 40;
+        #[test]
+        fn add_days_by_value_works_correctly() {
+            let d1 = Date::new(1, 5, 1989);
+            let derived_date = d1 + 40;
 
-        // We made assumption 30 days per month
-        let expected_date = Date::new(11, 6, 1989);
+            // We made assumption 30 days per month
+            let expected_date = Date::new(11, 6, 1989);
 
-        assert_eq!(derived_date, expected_date);
-    }
+            assert_eq!(derived_date, expected_date);
+        }
 
-    #[test]
-    fn add_days_by_reference_works_correctly() {
-        // `d1` owns a Date instance
-        let d1 = Date::new(1, 5, 1989);
-        // `&d1` borrows d1 immutably
-        // meaning d1 can be borrowed but not changed
-        let derived_date = &d1 + 40;
+        #[test]
+        fn add_days_by_reference_works_correctly() {
+            // `d1` owns a Date instance
+            let d1 = Date::new(1, 5, 1989);
+            // `&d1` borrows d1 immutably
+            // meaning d1 can be borrowed but not changed
+            let derived_date = &d1 + 40;
 
-        // We made assumption 30 days per month
-        let expected_date = Date::new(11, 6, 1989);
+            // We made assumption 30 days per month
+            let expected_date = Date::new(11, 6, 1989);
 
-        assert_eq!(derived_date, expected_date);
-    }
+            assert_eq!(derived_date, expected_date);
+        }
 
-    #[test]
-    fn subtract_days_by_value_works_correctly() {
-        let d1 = Date::new(15, 5, 1989);
-        // Subtracting 15 days will result in 0 May
-        // Subtracitng 16 days will result in 29 May
-        // so when is 30 May ?
-        let derived_date = d1 - 16;
+        #[test]
+        fn subtract_days_by_value_works_correctly() {
+            let d1 = Date::new(15, 5, 1989);
+            // Subtracting 15 days will result in 0 May
+            // Subtracitng 16 days will result in 29 May
+            // so when is 30 May ?
+            let derived_date = d1 - 16;
 
-        // We made assumption 30 days per month
-        let expected_date = Date::new(29, 4, 1989);
+            // We made assumption 30 days per month
+            let expected_date = Date::new(29, 4, 1989);
 
-        assert_eq!(derived_date, expected_date);
-    }
+            assert_eq!(derived_date, expected_date);
+        }
 
-    #[test]
-    fn subtract_days_by_reference_works_correctly() {
-        let d1 = Date::new(15, 5, 1989);
-        // Subtracting 15 days will result in 0 May
-        // Subtracitng 16 days will result in 29 May
-        // so when is 30 May ?
-        let derived_date = &d1 - 16;
+        #[test]
+        fn subtract_days_by_reference_works_correctly() {
+            let d1 = Date::new(15, 5, 1989);
+            // Subtracting 15 days will result in 0 May
+            // Subtracitng 16 days will result in 29 May
+            // so when is 30 May ?
+            let derived_date = &d1 - 16;
 
-        // We made assumption 30 days per month
-        let expected_date = Date::new(29, 4, 1989);
+            // We made assumption 30 days per month
+            let expected_date = Date::new(29, 4, 1989);
 
-        assert_eq!(derived_date, expected_date);
-    }
+            assert_eq!(derived_date, expected_date);
+        }
 
-    #[test]
-    fn subtract_dates_works_correctly() {
-        let d1 = Date::new(14, 5, 1989);
-        let d2 = Date::new(15, 5, 1989);
+        #[test]
+        fn subtract_dates_works_correctly() {
+            let d1 = Date::new(14, 5, 1989);
+            let d2 = Date::new(15, 5, 1989);
 
-        let derived_days = d2 - d1;
-        let expected_days = 1;
+            let derived_days = d2 - d1;
+            let expected_days = 1;
 
-        assert_eq!(derived_days, expected_days);
-    }
+            assert_eq!(derived_days, expected_days);
+        }
 
-    #[test]
-    fn to_serial_works_correctly() {
-        let d = Date::new(14, 5, 1989);
+        #[test]
+        fn to_serial_works_correctly() {
+            let d = Date::new(14, 5, 1989);
 
-        let derived_serial = d.to_serial();
-        let expected_serial = 14 + 5 * 30 + 1989 * 360;
+            let derived_serial = d.to_serial();
+            let expected_serial = 14 + 5 * 30 + 1989 * 360;
 
-        assert_eq!(derived_serial, expected_serial);
-    }
+            assert_eq!(derived_serial, expected_serial);
+        }
 
-    #[test]
-    fn from_serial_works_correctly() {
-        let serial = 11 + 5 * 30 + 1989 * 360;
-        let derived_date = Date::from_serial(serial);
-        let expected_date = Date::new(11, 5, 1989);
+        #[test]
+        fn from_serial_works_correctly() {
+            let serial = 11 + 5 * 30 + 1989 * 360;
+            let derived_date = Date::from_serial(serial);
+            let expected_date = Date::new(11, 5, 1989);
 
-        assert_eq!(derived_date, expected_date);
+            assert_eq!(derived_date, expected_date);
+        }
     }
 }
