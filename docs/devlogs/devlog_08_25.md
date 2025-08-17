@@ -185,6 +185,9 @@
 - C++:
     - Installled `clang-format` as extension to have formatting when saving the file.
 
+# 16 August 2025: Rust Review
+- Review code
+
 # TODO:
 - Date:
     - Rust:
@@ -203,10 +206,7 @@
         - ❌ opeartor - for two dates
         - ❌ Enf of month/IsEndOfMonth
         - ❌ Different
-    - Rust: Review
-    
     - Python: Review:
         - We are using datetime + day,month,year. Is it correct ? should we store just datime so as to have one soruce of true ?
-
-- Date Parser:
-    - Given string create Date
+    - Date Parser:
+        - Given string create Date

@@ -3,23 +3,19 @@ Since the struct contains types that implement equality
 (u32) then Rust automatically generates == logic
 i.e. each field is compared in ORDER (day, month, year)
 if all fiels are equal then true
+*/
 
-PartialEq vs Eq:
+/*
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]:
     - PartialEq gives == and != logic
     - Eq: does not give anything more but
         confirms that == logic behaves mathematically sensibly
-        For example a == a can be false if a is Nan. By saying Eq
+        For example a == a can be false if a is Nan. By adding Eq
         that possibility is excluded a priori.
-*/
-
-/*
-With PartialOrd and Ord:
     - PartialOrd --> Enables <, <=, >, >=
     - Ord --> Enables full ordering (like sorting)
-*/
-/*
-Using asser_eq!(d1, d1, "xxx") mean Rust will try to show the
-value when the test fails but to do that `Debug` is needed
+    - Using asser_eq!(d1, d1, "xxx") mean Rust will try to show the
+    value when the test fails but to do that `Debug` is needed
 */
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
@@ -29,8 +25,8 @@ This can be done!
         println!("Dates are equal!");
     }
 */
-// defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
 pub struct Date {
+    // Defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
     // pub --> public so they can be access by other files like main.rs
     // unsigned 32-bit integer
 
@@ -41,9 +37,10 @@ pub struct Date {
     pub day: u32,
 }
 
-// Implementation block i.e. to have a constructor
 impl Date {
     pub fn new(day: u32, month: u32, year: u32) -> Date {
+        // Implementation block i.e. to have a constructor
+
         /*
         This uses Rust's field init shorthand:
         since the parameter names (defined in new)
@@ -80,9 +77,9 @@ impl Date {
 
     pub fn from_serial(n: u32) -> Date {
         // Assum each month has 30 days and each year has 360 days.
-        let year = n / 360;
-        let month = (n % 360) / 30;
-        let day = (n % 360) % 30;
+        let year: u32 = n / 360;
+        let month: u32 = (n % 360) / 30;
+        let day: u32 = (n % 360) % 30;
 
         Date::new(day, month, year)
     }
@@ -92,10 +89,10 @@ use std::fmt;
 
 /*
 - impl: we are implementing something.
-- fmt::Display: this is a trait:
+- fmt::Display: this is a TRAIT:
     - like an interface in C# or abstract base class in C++.
 - for Date:
-    - the Display trait is implemented for Date struct.
+    - the Display TRAIT is implemented for Date struct.
 So basically implementing how Date should be printed using the {} format
 */
 impl fmt::Display for Date {
@@ -117,12 +114,26 @@ impl fmt::Display for Date {
         - &self -> fields of the struct can be looked at, but cannot be changed
         - &mut fmt::Formatter -> allowed to write into this formatter buffer
     */
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}-{}-{}", self.day, self.month, self.year)
+    fn fmt(&self, formatter_buffer: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            formatter_buffer,
+            "{}-{}-{}",
+            self.day, self.month, self.year
+        )
     }
 }
 
 use std::ops::Add;
+
+/*
+This would be the trait:
+
+pub trait Add<Rhs = Self> {
+    type Output;
+    fn add(self, rhs: Rhs) -> Self::Output;
+}
+
+*/
 
 /*
 Implementing the behavior of the + operator where:
@@ -134,15 +145,16 @@ This (impl Add<i32> for Date) is similar to:
     - C#: public static Date operator -(Date d, int n)
 */
 
-// Add days to date (by reference)
 impl Add<i32> for &Date {
+    // Add days to date (by REFERENCE):
+    // creates a new Date too, but can keep the original around
+    // &d1 + 5 → borrows d1, returns a new Date, and still keep d1.
     type Output = Date;
     // i32 means it can be NEGATIVE!
-    fn add(self, rhs: i32) -> Date {
-        let serial_i32 = self.to_serial() as i32;
-        // rhs and serial cannot be added
-        // i32 vs u32
-        let new_serial = serial_i32 + rhs;
+    fn add(self, right_hand_side: i32) -> Date {
+        // right_hand_side (i32) and serial (u32) cannot be added
+        let serial_i32: i32 = self.to_serial() as i32;
+        let new_serial: i32 = serial_i32 + right_hand_side;
         // Put Check
         assert!(new_serial >= 0, "New date is before base date");
 
@@ -150,15 +162,17 @@ impl Add<i32> for &Date {
     }
 }
 
-// Add days to date (by value)
 impl Add<i32> for Date {
+    // Add days to date (by VALUE):
+    // indeed consumes the original Date and creates a new one.
+    // You can do d1 + 5, but after that d1 is moved (not usable anymore).
+    // d1 + 5 → consumes d1, returns a new Date.
     type Output = Date;
     // i32 means it can be NEGATIVE!
-    fn add(self, rhs: i32) -> Date {
-        let serial_i32 = self.to_serial() as i32;
-        // rhs and serial cannot be added
-        // i32 vs u32
-        let new_serial = serial_i32 + rhs;
+    fn add(self, right_hand_side: i32) -> Date {
+        // right_hand_side (i32) and serial (u32) cannot be added
+        let serial_i32: i32 = self.to_serial() as i32;
+        let new_serial: i32 = serial_i32 + right_hand_side;
         // Put Check
         assert!(new_serial >= 0, "New date is before base date");
 
@@ -168,25 +182,24 @@ impl Add<i32> for Date {
 
 use std::ops::Sub;
 
-/*
-Subtract days from date
-This implementations consumes the value
-Rust has strict ownership rules.
-When a function takes an argument by value (not by reference),
-It moves ownership of that argument into the function,
-meaning the caller can no longer use it afterward unless it's Copy.
-
-This is what's meant by "consuming" a value:
-    it's no longer usable after that operation.
-*/
 impl Sub<i32> for Date {
+    /*
+    by VALUE
+    This implementations consumes the value:
+    When a function takes an argument by value (not by reference),
+    it moves ownership of that argument into the function,
+    meaning the caller can no longer use it afterward unless it's Copy.
+
+    This is what's meant by "consuming" a value:
+        it's no longer usable after that operation.
+    */
     type Output = Date;
     // i32 means it can be NEGATIVE!
-    fn sub(self, rhs: i32) -> Date {
-        let serial_i32 = self.to_serial() as i32;
+    fn sub(self, right_hand_side: i32) -> Date {
+        let serial_i32: i32 = self.to_serial() as i32;
         // rhs and serial cannot be added
         // i32 vs u32
-        let new_serial = serial_i32 - rhs;
+        let new_serial: i32 = serial_i32 - right_hand_side;
         // Put Check
         assert!(new_serial >= 0, "New date is before base date");
 
@@ -202,11 +215,11 @@ Implementing this without & i.e. by reference:
 impl Sub<i32> for &Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
-    fn sub(self, rhs: i32) -> Date {
-        let serial_i32 = self.to_serial() as i32;
+    fn sub(self, right_hand_side: i32) -> Date {
+        let serial_i32: i32 = self.to_serial() as i32;
         // rhs and serial cannot be added
         // i32 vs u32
-        let new_serial = serial_i32 - rhs;
+        let new_serial: i32 = serial_i32 - right_hand_side;
         // Put Check
         assert!(new_serial >= 0, "New date is before base date");
 
@@ -219,8 +232,8 @@ impl Sub<Date> for Date {
     type Output = i32;
 
     fn sub(self, rhs: Date) -> i32 {
-        let rhs_i32 = rhs.to_serial() as i32;
-        let serial_i32 = self.to_serial() as i32;
+        let rhs_i32: i32 = rhs.to_serial() as i32;
+        let serial_i32: i32 = self.to_serial() as i32;
 
         serial_i32 - rhs_i32
     }
