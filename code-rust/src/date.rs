@@ -88,7 +88,7 @@ struct Date {
     // Defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
     // pub --> public so they can be access by other files like main.rs
     // unsigned 32-bit integer
-    serial: u32, //private by default
+    serial: i64, //private by default i64
                  // Order below impact for example how operator < works.
                  // First field to be check is the first one below.
                  //pub year: u32,
@@ -97,18 +97,13 @@ struct Date {
 }
 
 impl Date {
-    // Are this constan just here in for everything ? i.e. pub ?
-    pub const EPOCH_YEAR: u32 = 1901;
-    pub const EPOCH_MONTH: Month = Month::January;
-    pub const EPOCH_DAY: u32 = 1;
-
     // Days from 1-Jan to start of each month
     pub const MONTH_OFFSET: [u32; 13] =
         [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365];
     pub const MONTH_LEAP_OFFSET: [u32; 13] =
         [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
 
-    pub fn new(_day: u32, _month: Month, _year: u32) -> Date {
+    pub fn new(day: u32, month: Month, year: u32) -> Date {
         // Implementation block i.e. to have a constructor
 
         /*
@@ -124,7 +119,9 @@ impl Date {
             }
             Date { day, month, year }
         */
-        // compute s from (day, month, year) using a helper we’ll add next, then return  Date { serial: s }
+        let serial: i64 =
+            (day as i64) + (Date::month_offset(year, month) as i64) + Date::year_offset(year);
+        Date { serial }
     }
 
     /*
@@ -136,37 +133,42 @@ impl Date {
         - A method from_serial(n: u32) -> Date that builds a date from that count.
     */
 
-    pub fn from_serial(n: u32) -> Date {
+    pub fn from_serial(n: i64) -> Date {
         Date { serial: n }
     }
 
-    pub fn to_serial(&self) -> u32 {
+    pub fn to_serial(&self) -> i64 {
         self.serial
     }
 
-    fn days_from_year_epoch(year: u32) -> u64 {
+    fn year_offset(year: u32) -> i64 {
         /*
-        Returns the total number of days from the epoch (1901-01-01)
-        up to, but not including, `year`-01-01.
-
-        Year version
+        Returns the offset in days from 1900-01-01 up
+        to year-01-01 using the closed-form formula.
 
         Example:
-        - days_from_epoch(1901) = 0
-        - days_from_epoch(1902) = 365
-        - days_from_epoch(1904) = 365 + 365 + 366 = 1096
+        - year_offset(1900) = 0
+        - year_offset(1901) = 365
+        - year_offset(1903) = 365 + 365 + 366 = 1096
         */
+        let y: i64 = (year as i64) - 1900;
+        // JUST INTEGERS!
+        //y * 365 base days assuming all years normal.
+        //+ (y+3)/4 add leap days (every 4 years).
+        //- (y+99)/100 remove century years that aren not leap (every century)
+        //+ (y+399)/400 add back 400-multiples (leap again) (every 400 years)
+        y * 365 + (y + 3) / 4 - (y + 99) / 100 + (y + 399) / 400
     }
 
     fn month_offset(year: u32, month: Month) -> u32 {
         /*
-        Returns the number of days from the start of `year` (Jan-01)
-        up to, but not including, `year`-`month`-01.
+        Returns the offset in days from the start of `year` (i.e. Jan-01)
+        up to, but not including, `year`-`month`-01
 
         Examples:
-        - days_from_month_epoch(1901, January) = 0
-        - days_from_month_epoch(2017, February) = 31
-        - days_from_month_epoch(1904, March) = 31 + 29 = 60
+        - month_offset(1901, January) = 0
+        - month_offset(2017, February) = 31
+        - month_offset(1904, March) = 31 + 29 = 60
         */
         let days: u32 = if Date::is_leap(year) {
             Date::MONTH_LEAP_OFFSET[month as usize - 1]
@@ -205,6 +207,7 @@ impl Date {
         }
     }
 
+    // needed ?
     pub fn days_in_year(year: u32) -> u32 {
         if Date::is_leap(year) { 366 } else { 365 }
     }
@@ -214,10 +217,49 @@ impl Date {
         //decode day from serial
     }
     pub fn month(&self) -> Month {
-        //decode month from serial
+        /*
+        1. Find the year with Date::year().
+        2. Compute day_of_year = serial - year_offset(year).
+           Example: if serial = 36 in 1900 → day_of_year = 36 - 0 = 36.
+        3. Select the correct offset table:
+           - MONTH_OFFSET for normal years
+           - MONTH_LEAP_OFFSET for leap years
+        4. Iterate over the table:
+           - Find largest month m where offset[m] <= day_of_year
+           - That m is the month
+           Example: day_of_year = 36, not leap → February (since offset[2]=31 ≤ 36 < 59).
+
+        Compute on Demand !
+        */
     }
     pub fn year(&self) -> u32 {
-        //decode year from serial
+        /*
+        Decode `year` from `serial` using QuantLib-style year_offset formula.
+        Algorithm:
+        1. Make a first guess: 1900 + serial/365.
+        2. Adjust upward if year_offset(candidate+1) <= serial.
+        3. Adjust downward if year_offset(candidate) > serial.
+
+        Example:
+        - serial = 73049
+            → initial guess = 1900 + 73049/365 = 2100
+            → year_offset(2101) = 73400 > 73049 -> No `while`
+            → year_offset(2100) = 73035 ≤ 73049 -> No `while`
+        → result = 2100.
+
+        Computed on Demand!
+        */
+        let mut candidate_year: i64 = 1900 + self.serial / 365;
+
+        // If Guess correct both 'while' will not be entered
+        while Date::year_offset((candidate_year as u32) + 1) <= self.serial {
+            candidate_year += 1;
+        }
+
+        while Date::year_offset(candidate_year as u32) > self.serial {
+            candidate_year -= 1;
+        }
+        candidate_year as u32
     }
 }
 

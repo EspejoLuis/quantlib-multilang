@@ -200,6 +200,7 @@
         - Convert back into (day, month, year).
         - No loop, no manual adjustments — the modular arithmetic handles everything.
 - ✅ `month_offset` created.
+- ✅ `year` from serial number.
     
  
 # TODO:
