@@ -206,6 +206,9 @@
 - `imp Date` ok: 
     - ✅ `month` from serial number.
     - ✅ `year` from serial number.
+    - ✅  Operators: +/- - dates
+    - ✅  Leap year awareness
+- Used ChatGPT to create .sh scripts to run automatically coverage and tests. 
 
 
 
@@ -214,7 +217,6 @@
     - Rust:
         - ❌  Validation of inputs , validate day , validate year
         - ❌  Operators: > < != ==
-        - ✅  Leap year awareness
         - ❌  Overflow when adding days, normalize
         - ❌  Add unit tests
         - ❌  Divide unit test when expecation is true or false

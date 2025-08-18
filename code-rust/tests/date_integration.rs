@@ -6,19 +6,20 @@ we can use
     let d = Date::new(…);
 */
 use code_rust::date::Date;
+use code_rust::date::Month;
 
 #[test]
 fn serial_conversion_works_correctly() {
-    let expected_date = Date::new(14, 5, 1989);
-    let serial_date = expected_date.to_serial();
-    let derived_date = Date::from_serial(serial_date);
+    let expected_date: Date = Date::new(14, Month::July, 1989);
+    let serial_date: i32 = expected_date.to_serial_number();
+    let derived_date: Date = Date::from_serial_number(serial_date);
 
     assert_eq!(expected_date, derived_date);
 }
 
 #[test]
 fn add_then_subtract_returns_original_date_correctly() {
-    let expected_date = Date::new(14, 5, 1989);
+    let expected_date: Date = Date::new(12, Month::November, 1989);
     /*
     Had to implement by reference add function (&)
     by value was not enough.
@@ -29,8 +30,8 @@ fn add_then_subtract_returns_original_date_correctly() {
         let b = Date::new(1, 1, 2020);
         let a = b;  // ownership of `b` moved into `a`
     */
-    let date_add_days = &expected_date + 40;
-    let date_subtract_days = date_add_days - 40;
+    let date_add_days: Date = expected_date + 40;
+    let date_subtract_days: Date = date_add_days - 40;
 
     assert_eq!(expected_date, date_subtract_days);
 }
