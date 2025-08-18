@@ -201,23 +201,29 @@
         - No loop, no manual adjustments — the modular arithmetic handles everything.
 - ✅ `month_offset` created.
 - ✅ `year` from serial number.
-    
- 
+
+## 18 August 2025: Rust Review
+- `imp Date` ok: 
+    - ✅ `month` from serial number.
+    - ✅ `year` from serial number.
+
+
+
 # TODO:
 - Date:
     - Rust:
         - ❌  Validation of inputs , validate day , validate year
         - ❌  Operators: > < != ==
-        - ❌  Leap year awareness
+        - ✅  Leap year awareness
         - ❌  Overflow when adding days, normalize
         - ❌  Add unit tests
         - ❌  Divide unit test when expecation is true or false
         - ❌  Integration tests.
         - ❌  No utility like :
-            - ❌ daysInMonth(month, year)
-            - ❌ to string
-            - ❌ from serial 
-            - ❌ to serial
+            - ✅ daysInMonth(month, year)
+            - ✅ to string
+            - ✅ from serial 
+            - ✅ to serial
         - ❌  No conversion logic from overflowing days to next month/year --> DateOnly
         - ❌  Check coverage. Some issue 
         - ❌  Null cases

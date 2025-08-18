@@ -59,7 +59,7 @@ impl Month {
     // Because not every u32 is valid (e.g., 0 or 13), the function should return an Option:
     // If n is between 1 and 12 → return Some(Month::X)
     // Otherwise → return None
-    pub fn from_u32(number: u32) -> Option<Month> {
+    pub fn from_i32(number: i32) -> Option<Month> {
         match number {
             1 => Some(Month::January),
             2 => Some(Month::February),
@@ -88,22 +88,22 @@ struct Date {
     // Defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
     // pub --> public so they can be access by other files like main.rs
     // unsigned 32-bit integer
-    serial: i64, //private by default i64
-                 // Order below impact for example how operator < works.
-                 // First field to be check is the first one below.
-                 //pub year: u32,
-                 //pub month: Month,
-                 //pub day: u32,
+    serial_number: i32, //private by default
+                        // Order below impact for example how operator < works.
+                        // First field to be check is the first one below.
+                        //pub year: u32,
+                        //pub month: Month,
+                        //pub day: u32,
 }
 
 impl Date {
     // Days from 1-Jan to start of each month
-    pub const MONTH_OFFSET: [u32; 13] =
+    pub const MONTH_OFFSET: [i32; 13] =
         [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365];
-    pub const MONTH_LEAP_OFFSET: [u32; 13] =
+    pub const MONTH_LEAP_OFFSET: [i32; 13] =
         [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
 
-    pub fn new(day: u32, month: Month, year: u32) -> Date {
+    pub fn new(day: i32, month: Month, year: i32) -> Date {
         // Implementation block i.e. to have a constructor
 
         /*
@@ -119,9 +119,8 @@ impl Date {
             }
             Date { day, month, year }
         */
-        let serial: i64 =
-            (day as i64) + (Date::month_offset(year, month) as i64) + Date::year_offset(year);
-        Date { serial }
+        let serial_number: i32 = day + Date::month_offset(year, month) + Date::year_offset(year);
+        Date { serial_number }
     }
 
     /*
@@ -129,19 +128,19 @@ impl Date {
         - like Python’s datetime
         - or C#’s DateTime.
     To make operator + work, two methods need to be implemented:
-        - A method to_serial() that gives an integer day count.
-        - A method from_serial(n: u32) -> Date that builds a date from that count.
+        - A method to_serial_number() that gives an integer day count.
+        - A method from_serial_number(n: u32) -> Date that builds a date from that count.
     */
 
-    pub fn from_serial(n: i64) -> Date {
-        Date { serial: n }
+    pub fn from_serial_number(n: i32) -> Date {
+        Date { serial_number: n }
     }
 
-    pub fn to_serial(&self) -> i64 {
-        self.serial
+    pub fn to_serial_number(&self) -> i32 {
+        self.serial_number
     }
 
-    fn year_offset(year: u32) -> i64 {
+    fn year_offset(year: i32) -> i32 {
         /*
         Returns the offset in days from 1900-01-01 up
         to year-01-01 using the closed-form formula.
@@ -151,7 +150,7 @@ impl Date {
         - year_offset(1901) = 365
         - year_offset(1903) = 365 + 365 + 366 = 1096
         */
-        let y: i64 = (year as i64) - 1900;
+        let y: i32 = (year as i32) - 1900;
         // JUST INTEGERS!
         //y * 365 base days assuming all years normal.
         //+ (y+3)/4 add leap days (every 4 years).
@@ -160,7 +159,7 @@ impl Date {
         y * 365 + (y + 3) / 4 - (y + 99) / 100 + (y + 399) / 400
     }
 
-    fn month_offset(year: u32, month: Month) -> u32 {
+    fn month_offset(year: i32, month: Month) -> i32 {
         /*
         Returns the offset in days from the start of `year` (i.e. Jan-01)
         up to, but not including, `year`-`month`-01
@@ -170,7 +169,7 @@ impl Date {
         - month_offset(2017, February) = 31
         - month_offset(1904, March) = 31 + 29 = 60
         */
-        let days: u32 = if Date::is_leap(year) {
+        let days: i32 = if Date::is_leap(year) {
             Date::MONTH_LEAP_OFFSET[month as usize - 1]
         } else {
             Date::MONTH_OFFSET[month as usize - 1]
@@ -179,11 +178,11 @@ impl Date {
         days
     }
 
-    pub fn is_leap(year: u32) -> bool {
+    pub fn is_leap(year: i32) -> bool {
         (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0)
     }
 
-    pub fn days_in_month(month: Month, year: u32) -> u32 {
+    pub fn days_in_month(month: Month, year: i32) -> i32 {
         // needed if we are using DAYS_FROM_START_MONTH_LEAP ?
         match month {
             Month::January => 31,
@@ -207,20 +206,39 @@ impl Date {
         }
     }
 
-    // needed ?
-    pub fn days_in_year(year: u32) -> u32 {
+    pub fn days_in_year(year: i32) -> i32 {
         if Date::is_leap(year) { 366 } else { 365 }
     }
 
     //Getters
-    pub fn day(&self) -> u32 {
-        //decode day from serial
+    pub fn day(&self) -> i32 {
+        /*
+        Decode `day` from `serial_number` using QuantLib-style year_offset formula.
+        1. Decode the year from serial_number using Date::year().
+        2. Decode the month from serial_number using Date::month().
+        3. Compute day_of_year = serial_number - year_offset(year).
+        4. Compute day_of_month = day_of_year - month_offset(year, month).
+
+        Example:
+        - serial_number = 36 (1900-02-05)
+            → year = 1900
+            → month = February
+            → day_of_year = 36 - 0 = 36
+            → month_offset(1900, Feb) = 31
+            → day = 36 - 31 = 5 ✅
+        */
+        let year: i32 = Date::year(&self);
+        let month: Month = Date::month(&self);
+        let days_of_month: i32 =
+            self.serial_number - Date::month_offset(year, month) - Date::year_offset(year);
+        days_of_month
     }
     pub fn month(&self) -> Month {
         /*
+        Decode `month` from `serial_number` using QuantLib-style year_offset formula.
         1. Find the year with Date::year().
-        2. Compute day_of_year = serial - year_offset(year).
-           Example: if serial = 36 in 1900 → day_of_year = 36 - 0 = 36.
+        2. Compute day_of_year = serial_number - year_offset(year).
+           Example: if serial_number = 36 in 1900 → day_of_year = 36 - 0 = 36.
         3. Select the correct offset table:
            - MONTH_OFFSET for normal years
            - MONTH_LEAP_OFFSET for leap years
@@ -229,19 +247,37 @@ impl Date {
            - That m is the month
            Example: day_of_year = 36, not leap → February (since offset[2]=31 ≤ 36 < 59).
 
+        If serial_number = 36 (i.e. 1900-02-05):
+        year = 1900
+        day_of_year = 36
+        offsets = [0,31,59,…] (non-leap)
+        loop runs until candidate_month = 3 (March overshoot), then -1 gives February ✅
         Compute on Demand !
         */
+        let year: i32 = Date::year(&self);
+        let days_from_start: i32 = self.serial_number as i32 - Date::year_offset(year); //Number of days from start year
+        let mut candidate_month: u32 = 1;
+        while (Date::month_offset(
+            year,
+            Month::from_u32(candidate_month).expect("Internal logic error: invalid month index"),
+        ) as i32)
+            <= days_from_start
+        {
+            candidate_month += 1;
+        }
+
+        Month::from_u32(candidate_month - 1).unwrap()
     }
-    pub fn year(&self) -> u32 {
+    pub fn year(&self) -> i32 {
         /*
-        Decode `year` from `serial` using QuantLib-style year_offset formula.
+        Decode `year` from `serial_number` using QuantLib-style year_offset formula.
         Algorithm:
-        1. Make a first guess: 1900 + serial/365.
-        2. Adjust upward if year_offset(candidate+1) <= serial.
-        3. Adjust downward if year_offset(candidate) > serial.
+        1. Make a first guess: 1900 + serial_number/365.
+        2. Adjust upward if year_offset(candidate+1) <= serial_number.
+        3. Adjust downward if year_offset(candidate) > serial_number.
 
         Example:
-        - serial = 73049
+        - serial_number = 73049
             → initial guess = 1900 + 73049/365 = 2100
             → year_offset(2101) = 73400 > 73049 -> No `while`
             → year_offset(2100) = 73035 ≤ 73049 -> No `while`
@@ -249,17 +285,17 @@ impl Date {
 
         Computed on Demand!
         */
-        let mut candidate_year: i64 = 1900 + self.serial / 365;
+        let mut candidate_year: i32 = 1900 + self.serial_number / 365;
 
         // If Guess correct both 'while' will not be entered
-        while Date::year_offset((candidate_year as u32) + 1) <= self.serial {
+        while Date::year_offset(candidate_year + 1) <= self.serial_number {
             candidate_year += 1;
         }
 
-        while Date::year_offset(candidate_year as u32) > self.serial {
+        while Date::year_offset(candidate_year) > self.serial_number {
             candidate_year -= 1;
         }
-        candidate_year as u32
+        candidate_year as i32
     }
 }
 
@@ -344,11 +380,11 @@ impl Add<i32> for &Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn add(self, right_hand_side: i32) -> Date {
-        // right_hand_side (i32) and serial (u32) cannot be added
-        let serial_i32: i32 = self.to_serial() as i32;
-        let new_serial: i32 = serial_i32 + right_hand_side;
+        // right_hand_side (i32) and serial_number (u32) cannot be added
+        let serial_number_i32: i32 = self.to_serial_number() as i32;
+        let new_serial_number: i32 = serial_number_i32 + right_hand_side;
 
-        Date::from_serial(new_serial as u32)
+        Date::from_serial_number(new_serial_number as u32)
     }
 }
 
@@ -360,11 +396,11 @@ impl Add<i32> for Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn add(self, right_hand_side: i32) -> Date {
-        // right_hand_side (i32) and serial (u32) cannot be added
-        let serial_i32: i32 = self.to_serial() as i32;
-        let new_serial: i32 = serial_i32 + right_hand_side;
+        // right_hand_side (i32) and serial_number (u32) cannot be added
+        let serial_number_i32: i32 = self.to_serial_number() as i32;
+        let new_serial_number: i32 = serial_number_i32 + right_hand_side;
 
-        Date::from_serial(new_serial as u32)
+        Date::from_serial_number(new_serial_number as u32)
     }
 }
 
@@ -384,11 +420,11 @@ impl Sub<i32> for Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn sub(self, right_hand_side: i32) -> Date {
-        // right_hand_side (i32) and serial (u32) cannot be added
-        let serial_i32: i32 = self.to_serial() as i32;
-        let new_serial: i32 = serial_i32 - right_hand_side;
+        // right_hand_side (i32) and serial_number (u32) cannot be added
+        let serial_number_i32: i32 = self.to_serial_number() as i32;
+        let new_serial_number: i32 = serial_number_i32 - right_hand_side;
 
-        Date::from_serial(new_serial as u32)
+        Date::from_serial_number(new_serial_number as u32)
     }
 }
 
@@ -396,11 +432,11 @@ impl Sub<i32> for &Date {
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn sub(self, right_hand_side: i32) -> Date {
-        // right_hand_side (i32) and serial (u32) cannot be added
-        let serial_i32: i32 = self.to_serial() as i32;
-        let new_serial: i32 = serial_i32 - right_hand_side;
+        // right_hand_side (i32) and serial_number (u32) cannot be added
+        let serial_number_i32: i32 = self.to_serial_number() as i32;
+        let new_serial_number: i32 = serial_number_i32 - right_hand_side;
 
-        Date::from_serial(new_serial as u32)
+        Date::from_serial_number(new_serial_number as u32)
     }
 }
 
@@ -409,11 +445,11 @@ impl Sub<Date> for Date {
 
     fn sub(self, right_hand_side: Date) -> i32 {
         // Subtract dates
-        // right_hand_side (i32) and serial (u32) cannot be added
-        let right_hand_side_i32: i32 = right_hand_side.to_serial() as i32;
-        let serial_i32: i32 = self.to_serial() as i32;
+        // right_hand_side (i32) and serial_number (u32) cannot be added
+        let right_hand_side_i32: i32 = right_hand_side.to_serial_number() as i32;
+        let serial_number_i32: i32 = self.to_serial_number() as i32;
 
-        serial_i32 - right_hand_side_i32
+        serial_number_i32 - right_hand_side_i32
     }
 }
 
@@ -541,19 +577,19 @@ mod tests {
         }
 
         #[test]
-        fn to_serial_works_correctly() {
+        fn to_serial_number_works_correctly() {
             let d = Date::new(14, 5, 1989);
 
-            let derived_serial = d.to_serial();
-            let expected_serial = 14 + 5 * 30 + 1989 * 360;
+            let derived_serial_number = d.to_serial_number();
+            let expected_serial_number = 14 + 5 * 30 + 1989 * 360;
 
-            assert_eq!(derived_serial, expected_serial);
+            assert_eq!(derived_serial_number, expected_serial_number);
         }
 
         #[test]
-        fn from_serial_works_correctly() {
-            let serial = 11 + 5 * 30 + 1989 * 360;
-            let derived_date = Date::from_serial(serial);
+        fn from_serial_number_works_correctly() {
+            let serial_number = 11 + 5 * 30 + 1989 * 360;
+            let derived_date = Date::from_serial_number(serial_number);
             let expected_date = Date::new(11, 5, 1989);
 
             assert_eq!(derived_date, expected_date);
