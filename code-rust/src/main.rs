@@ -8,4 +8,6 @@ use date::Date;
 fn main() {
     let d = Date::new(35, date::Month::August, 2025);
     println!("Date: {}-{}-{}", d.day(), d.month(), d.year());
+    let d = Date::new(0, date::Month::March, 2025);
+    println!("Date: {}-{}-{}", d.day(), d.month(), d.year());
 }

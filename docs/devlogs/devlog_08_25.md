@@ -202,7 +202,7 @@
 - ✅ `month_offset` created.
 - ✅ `year` from serial number.
 
-## 18 August 2025: Rust Review
+## 18 August 2025: Rust Date
 - `imp Date` ok: 
     - ✅ `month` from serial number.
     - ✅ `year` from serial number.
@@ -210,22 +210,24 @@
     - ✅  Leap year awareness
 - Used ChatGPT to create .sh scripts to run automatically coverage and tests. 
 
+## 19 August 2025: Rust Date:
+- ✅  Add normalize()
+- ✅  Overflow when adding days, normalize
+- ✅  No utility like :
+    - ✅ daysInMonth(month, year)
+    - ✅ to string
+    - ✅ from serial 
+    - ✅ to serial
 
-
+    
 # TODO:
 - Date:
     - Rust:
         - ❌  Validation of inputs , validate day , validate year
         - ❌  Operators: > < != ==
-        - ❌  Overflow when adding days, normalize
         - ❌  Add unit tests
         - ❌  Divide unit test when expecation is true or false
         - ❌  Integration tests.
-        - ❌  No utility like :
-            - ✅ daysInMonth(month, year)
-            - ✅ to string
-            - ✅ from serial 
-            - ✅ to serial
         - ❌  No conversion logic from overflowing days to next month/year --> DateOnly
         - ❌  Check coverage. Some issue 
         - ❌  Null cases

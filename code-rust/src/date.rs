@@ -119,7 +119,40 @@ impl Date {
             }
             Date { day, month, year }
         */
-        Date::from_serial_number(day + Date::month_offset(year, month) + Date::year_offset(year))
+        let (days_normalized, month_normalized, year_normalized) =
+            Date::normalize(day, month, year);
+
+        Date::from_serial_number(
+            days_normalized
+                + Date::month_offset(year_normalized, month_normalized)
+                + Date::year_offset(year_normalized),
+        )
+    }
+
+    fn normalize(mut day: i32, mut month: Month, mut year: i32) -> (i32, Month, i32) {
+        // while day > days_in_month(year, month) → roll forward
+        while day > Date::days_in_month(month, year) {
+            day -= Date::days_in_month(month, year);
+            month = Month::from_i32(month as i32 + 1)
+                .expect("Internal logic error: invalid month index");
+            if month > Month::December {
+                month = Month::January;
+                year += 1;
+            }
+        }
+        // while day <= 0 → roll backward
+        while day <= 0 {
+            let mut month_num: i32 = month as i32 - 1;
+
+            if month_num < Month::January as i32 {
+                month_num = Month::December as i32;
+                year -= 1;
+            }
+            month = Month::from_i32(month_num).expect("Internal logic error: invalid month index");
+            day += Date::days_in_month(month, year);
+        }
+
+        (day, month, year)
     }
 
     /*
@@ -204,10 +237,6 @@ impl Date {
         }
     }
 
-    pub fn days_in_year(year: i32) -> i32 {
-        if Date::is_leap(year) { 366 } else { 365 }
-    }
-
     //Getters
     pub fn day(&self) -> i32 {
         /*
@@ -253,19 +282,19 @@ impl Date {
         loop runs until candidate_month = 3 (March overshoot), then -1 gives February ✅
         Compute on Demand !
         */
-        let year: i32 = Date::year(&self);
-        let days_from_start: i32 = self.serial_number as i32 - Date::year_offset(year); //Number of days from start year
         let mut candidate_month: i32 = 1;
+
         while (Date::month_offset(
-            year,
+            Date::year(&self),
             Month::from_i32(candidate_month).expect("Internal logic error: invalid month index"),
         ) as i32)
-            <= days_from_start
+            < self.serial_number as i32 - Date::year_offset(Date::year(&self))
+        // self.serial_number as i32 - Date::year_offset(year) is Number of days from start year
         {
             candidate_month += 1;
         }
 
-        Month::from_i32(candidate_month - 1).unwrap()
+        Month::from_i32(candidate_month - 1).expect("Internal logic error: invalid month index")
     }
 
     pub fn year(&self) -> i32 {
