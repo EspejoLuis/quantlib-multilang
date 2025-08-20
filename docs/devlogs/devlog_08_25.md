@@ -219,7 +219,11 @@
     - ✅ from serial 
     - ✅ to serial
 
-    
+## 20 August 2025: Rust Date:
+- Normalize is actually not implemented in Quantlibe. Deleted.
+- Implemented `days_in_month()` and `Month::fromi32()`
+
+
 # TODO:
 - Date:
     - Rust:

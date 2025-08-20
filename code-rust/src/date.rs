@@ -20,6 +20,8 @@ let m2 = m1.clone();  // same as m1
 
 */
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[repr(u8)] // Ensures the compiler really lays it out as 1–12. 
+// Without it, Rust doesn’t guarantee contiguous values.
 pub enum Month {
     January = 1,
     February,
@@ -56,24 +58,29 @@ if all fiels are equal then true
 */
 
 impl Month {
-    // Because not every u32 is valid (e.g., 0 or 13), the function should return an Option:
-    // If n is between 1 and 12 → return Some(Month::X)
-    // Otherwise → return None
-    pub fn from_i32(number: i32) -> Option<Month> {
-        match number {
-            1 => Some(Month::January),
-            2 => Some(Month::February),
-            3 => Some(Month::March),
-            4 => Some(Month::April),
-            5 => Some(Month::May),
-            6 => Some(Month::June),
-            7 => Some(Month::July),
-            8 => Some(Month::August),
-            9 => Some(Month::September),
-            10 => Some(Month::October),
-            11 => Some(Month::November),
-            12 => Some(Month::December),
-            _ => None,
+    /*
+    Because not every u32 is valid, the function should return an Option:
+    If n is between 1 and 12 → return Some(Month::X)
+    Otherwise → return None
+
+    Option<T> in Rust is an enum with two variants:
+    enum Option<T> {
+    None,
+    Some(T),
+    }
+    */
+    pub fn from_i32(number: i32) -> Option<Self> {
+        if (1..=12).contains(&number) {
+            /*
+            transmute --> low-level cast that tells the compiler.
+            transmute is unsafe because if you give it a value outside 1..=12,
+            it would create an invalid enum value, which leads to UB (undefined behavior).
+            unsafe --> "the contract necessary to call the operations inside the block has been
+            checked by the programmer and is guaranteed to be respected"
+            */
+            Some(unsafe { std::mem::transmute(number as u8) })
+        } else {
+            None
         }
     }
 }
@@ -103,6 +110,9 @@ impl Date {
     pub const MONTH_LEAP_OFFSET: [i32; 13] =
         [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
 
+    pub const MONTH_LENGTH: [i32; 12] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    pub const MONTH_LEAP_LENGTH: [i32; 12] = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
     pub fn new(day: i32, month: Month, year: i32) -> Date {
         // Implementation block i.e. to have a constructor
 
@@ -119,40 +129,7 @@ impl Date {
             }
             Date { day, month, year }
         */
-        let (days_normalized, month_normalized, year_normalized) =
-            Date::normalize(day, month, year);
-
-        Date::from_serial_number(
-            days_normalized
-                + Date::month_offset(year_normalized, month_normalized)
-                + Date::year_offset(year_normalized),
-        )
-    }
-
-    fn normalize(mut day: i32, mut month: Month, mut year: i32) -> (i32, Month, i32) {
-        // while day > days_in_month(year, month) → roll forward
-        while day > Date::days_in_month(month, year) {
-            day -= Date::days_in_month(month, year);
-            month = Month::from_i32(month as i32 + 1)
-                .expect("Internal logic error: invalid month index");
-            if month > Month::December {
-                month = Month::January;
-                year += 1;
-            }
-        }
-        // while day <= 0 → roll backward
-        while day <= 0 {
-            let mut month_num: i32 = month as i32 - 1;
-
-            if month_num < Month::January as i32 {
-                month_num = Month::December as i32;
-                year -= 1;
-            }
-            month = Month::from_i32(month_num).expect("Internal logic error: invalid month index");
-            day += Date::days_in_month(month, year);
-        }
-
-        (day, month, year)
+        Date::from_serial_number(day + Date::month_offset(year, month) + Date::year_offset(year))
     }
 
     /*
@@ -215,25 +192,10 @@ impl Date {
     }
 
     pub fn days_in_month(month: Month, year: i32) -> i32 {
-        match month {
-            Month::January => 31,
-            Month::February => {
-                if Date::is_leap(year) {
-                    29
-                } else {
-                    28
-                }
-            }
-            Month::March => 31,
-            Month::April => 30,
-            Month::May => 31,
-            Month::June => 30,
-            Month::July => 31,
-            Month::August => 31,
-            Month::September => 30,
-            Month::October => 31,
-            Month::November => 30,
-            Month::December => 31,
+        if Date::is_leap(year) {
+            Date::MONTH_LEAP_LENGTH[month as usize - 1]
+        } else {
+            Date::MONTH_LENGTH[month as usize - 1]
         }
     }
 
