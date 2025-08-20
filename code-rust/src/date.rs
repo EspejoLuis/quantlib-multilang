@@ -19,7 +19,7 @@ let m1 = Month::April;
 let m2 = m1.clone();  // same as m1
 
 */
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 #[repr(u8)] // Ensures the compiler really lays it out as 1–12. 
 // Without it, Rust doesn’t guarantee contiguous values.
 pub enum Month {
@@ -105,13 +105,11 @@ pub struct Date {
 
 impl Date {
     // Days from 1-Jan to start of each month
-    pub const MONTH_OFFSET: [i32; 13] =
-        [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365];
-    pub const MONTH_LEAP_OFFSET: [i32; 13] =
+    const MONTH_OFFSET: [i32; 13] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365];
+    const MONTH_LEAP_OFFSET: [i32; 13] =
         [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
-
-    pub const MONTH_LENGTH: [i32; 12] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    pub const MONTH_LEAP_LENGTH: [i32; 12] = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const MONTH_LENGTH: [i32; 12] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const MONTH_LEAP_LENGTH: [i32; 12] = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
     pub fn new(day: i32, month: Month, year: i32) -> Date {
         // Implementation block i.e. to have a constructor
@@ -178,13 +176,11 @@ impl Date {
         - month_offset(2017, February) = 31
         - month_offset(1904, March) = 31 + 29 = 60
         */
-        let days: i32 = if Date::is_leap(year) {
+        if Date::is_leap(year) {
             Date::MONTH_LEAP_OFFSET[month as usize - 1]
         } else {
             Date::MONTH_OFFSET[month as usize - 1]
-        };
-
-        days
+        }
     }
 
     pub fn is_leap(year: i32) -> bool {
@@ -218,9 +214,8 @@ impl Date {
         */
         let year: i32 = Date::year(&self);
         let month: Month = Date::month(&self);
-        let days_of_month: i32 =
-            self.serial_number - Date::month_offset(year, month) - Date::year_offset(year);
-        days_of_month
+
+        self.serial_number - Date::month_offset(year, month) - Date::year_offset(year)
     }
 
     pub fn month(&self) -> Month {
@@ -292,18 +287,26 @@ impl Date {
 
 use std::fmt;
 
-static MONTH_NAMES: [&str; 13] = [
-    "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-
 impl fmt::Display for Month {
-    // You need to dereference (*self) because self is a reference i.e. pointer i.e. address of a value (&Month).
-    // Only the value (Month) can be cast to its numeric discriminant.
-    // A reference (&Month) can’t be directly cast to a number
-    // — otherwise you’d be casting the pointer address, not the enum value
-    fn fmt(&self, formatter_buffer: &mut fmt::Formatter) -> fmt::Result {
-        let index: usize = *self as usize; // convert enum discriminant to usize
-        write!(formatter_buffer, "{}", MONTH_NAMES[index])
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // `&'static str` means a reference to a string literal that
+        // lives for the entire program (string literals never expire).
+        // Example: "Jan" is compiled into the binary and always safe.
+        let name: &'static str = match self {
+            Month::January => "Jan",
+            Month::February => "Feb",
+            Month::March => "Mar",
+            Month::April => "Apr",
+            Month::May => "May",
+            Month::June => "Jun",
+            Month::July => "Jul",
+            Month::August => "Aug",
+            Month::September => "Sep",
+            Month::October => "Oct",
+            Month::November => "Nov",
+            Month::December => "Dec",
+        };
+        write!(f, "{}", name)
     }
 }
 /*
@@ -338,7 +341,7 @@ impl fmt::Display for Date {
             formatter_buffer,
             "{:02}-{}-{}",
             self.day(),
-            MONTH_NAMES[self.month() as usize],
+            self.month(),
             self.year()
         )
     }
@@ -437,10 +440,10 @@ mod tests {
 
     #[test]
     fn display_date_iso_format() {
-        let d1: Date = Date::new(2, Month::May, 1989);
+        let d1: Date = Date::new(2, Month::January, 1989);
         let result: String = format!("{}", d1);
 
-        assert_eq!(result, "02-May-1989");
+        assert_eq!(result, "02-Jan-1989");
     }
 
     #[test]
@@ -497,7 +500,7 @@ mod tests {
     #[test]
      fn add_days_by_reference_works_correctly() {
          // `d1` owns a Date instance
-         let d1 = Date::new(1, Month::August, 1989);
+         let d1 = Date::new(1, Month::January, 1989);
          // `&d1` borrows d1 immutably
          // meaning d1 can be borrowed but not changed
          let derived_date = &d1 + 40;
@@ -531,11 +534,11 @@ mod tests {
 
     #[test]
     fn to_serial_number_works_correctly() {
-        let d: Date = Date::new(14, Month::October, 1989);
+        let d: Date = Date::new(14, Month::June, 1989);
 
         let derived_serial_number: i32 = d.to_serial_number();
         let expected_serial_number: i32 =
-            14 + Date::month_offset(1989, Month::October) + Date::year_offset(1989);
+            14 + Date::month_offset(1989, Month::June) + Date::year_offset(1989);
 
         assert_eq!(derived_serial_number, expected_serial_number);
     }
@@ -548,5 +551,125 @@ mod tests {
         let derived_date: Date = Date::from_serial_number(serial_number);
 
         assert_eq!(derived_date, expected_date);
+    }
+
+    #[test]
+    fn from_month_i32_gives_correct_month() {
+        let cases: &[(i32, Month)] = &[
+            (1, Month::January),
+            (2, Month::February),
+            (3, Month::March),
+            (4, Month::April),
+            (5, Month::May),
+            (6, Month::June),
+            (7, Month::July),
+            (8, Month::August),
+            (9, Month::September),
+            (10, Month::October),
+            (11, Month::November),
+            (12, Month::December),
+        ];
+
+        for (num, expected) in cases {
+            let derived: Option<Month> = Month::from_i32(*num);
+            assert_eq!(derived.unwrap(), *expected, "Failed for number {}", num);
+        }
+    }
+    #[test]
+    fn from_month_i32_invalid_gives_none() {
+        let invalid_cases: [i32; 4] = [0, 13, 99, -5];
+
+        for num in invalid_cases {
+            let derived: Option<Month> = Month::from_i32(num);
+            assert!(
+                derived.is_none(),
+                // It comes from the Debug trait (automatically derived in Month enum
+                // since #[derive(Debug)] was declared.
+                // It prints a developer-friendly representation of a value
+                "Expected None for invalid month {}, but got {:?}",
+                num,
+                derived
+            );
+        }
+    }
+
+    #[test]
+    fn is_leap_true() {
+        let leap_years: [i32; 3] = [2000, 1928, 1956];
+        for year in leap_years {
+            assert_eq!(
+                Date::is_leap(year),
+                true,
+                "Year {} was incorrectly detected as leap",
+                year
+            );
+        }
+    }
+
+    #[test]
+    fn is_leap_false() {
+        let not_leap_years: [i32; 3] = [1945, 1999, 1900];
+        for year in not_leap_years {
+            assert_eq!(
+                Date::is_leap(year),
+                false,
+                "Year {} was incorrectly detected as not leap",
+                year
+            );
+        }
+    }
+
+    #[test]
+    fn days_in_month_not_leap_year() {
+        let cases: &[(i32, Month)] = &[
+            (31, Month::January),
+            (28, Month::February),
+            (31, Month::March),
+            (30, Month::April),
+            (31, Month::May),
+            (30, Month::June),
+            (31, Month::July),
+            (31, Month::August),
+            (30, Month::September),
+            (31, Month::October),
+            (30, Month::November),
+            (31, Month::December),
+        ];
+        for (days, month) in cases {
+            assert_eq!(
+                Date::days_in_month(month, 2001),
+                *days,
+                "Month {} for year {} does not have right number of days {}",
+                month,
+                2001,
+                days
+            );
+        }
+    }
+    fn days_in_month_leap_year() {
+        let cases: &[(i32, Month)] = &[
+            (31, Month::January),
+            (29, Month::February),
+            (31, Month::March),
+            (30, Month::April),
+            (31, Month::May),
+            (30, Month::June),
+            (31, Month::July),
+            (31, Month::August),
+            (30, Month::September),
+            (31, Month::October),
+            (30, Month::November),
+            (31, Month::December),
+        ];
+        for (days, month) in cases {
+            assert_eq!(
+                Date::days_in_month(*month, 2000),
+                *days,
+                "Month {} for year {} does not have right number of days {}",
+                month,
+                2000,
+                days
+            );
+        }
     }
 }

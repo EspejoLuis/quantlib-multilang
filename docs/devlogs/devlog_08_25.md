@@ -222,7 +222,9 @@
 ## 20 August 2025: Rust Date:
 - Normalize is actually not implemented in Quantlibe. Deleted.
 - Implemented `days_in_month()` and `Month::fromi32()`
-
+- Using [run_test_with_coverage.sh](/code-rust/scripts/run_test_with_coverage.sh) to check unit tests and add new unit tests accordingly.
+- ✅  No conversion logic from overflowing days to next month/year.
+- Thinking of borrowing vs ownership.
 
 # TODO:
 - Date:
@@ -232,7 +234,7 @@
         - ❌  Add unit tests
         - ❌  Divide unit test when expecation is true or false
         - ❌  Integration tests.
-        - ❌  No conversion logic from overflowing days to next month/year --> DateOnly
+        
         - ❌  Check coverage. Some issue 
         - ❌  Null cases
     - C++:
