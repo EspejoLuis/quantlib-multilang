@@ -248,17 +248,25 @@
 - Adding better loggin when panicking.
 - Shuuld be serial number alligned with Excel ???
 
+## 23 August 2025: Rust Date
+
+- Relying on ChatGPT not always good. Date was an issue. Sometimes it was saying that Quantlib does implement a formula to define leap years, the classic (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0). Sometimes it says it uses arrays. Everytime it was switching from one to the other way. From now on is better to always ask for the direct reference in the github repo and check myself what is the implementation. And upload the corrispodning file in the folder.
+- Refactor entire date class and unit tests
+- ✅ Divide unit test when expecation is true or false
+- ✅ Validation of inputs , validate day , validate year
+
 # TODO:
 
 - Date:
+
   - Rust:
+
     - ❌ Better panicking handling
-    - ❌ Validation of inputs , validate day , validate year
     - ❌ Operators: > < != ==
-    - ❌ Divide unit test when expecation is true or false
     - ❌ Integration tests.
     - ❌ Check coverage. Some issue
     - ❌ Null cases
+
   - C++:
     - ❌ operator >
     - ❌ opeartor - for two dates
