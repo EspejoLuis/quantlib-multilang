@@ -552,14 +552,14 @@ impl Sub<Date> for Date {
 }
 
 // This block will be compiled only when running cargo test
+
 #[cfg(test)]
 // Defines a nested test module
 
 mod tests {
     // Bring everything from the outer scope (Date, its methods, etc.)
     use super::*;
-
-    // ADD PANIC CASES
+    use std::panic;
 
     #[test]
     fn creates_date_correctly() {
@@ -635,13 +635,12 @@ mod tests {
 
     #[test]
     fn invalid_dates_panic() {
-        use std::panic;
-
-        let cases: [(i32, Month, i32, &str); 4] = [
+        let cases: [(i32, Month, i32, &str); 5] = [
             (29, Month::February, 1901, "Feb 29 non-leap year"),
             (1, Month::January, 1800, "year before min"),
             (1, Month::January, 2200, "year after max"),
             (400, Month::October, 1989, "day overflow"),
+            (-1, Month::October, 1989, "day underflow"),
         ];
 
         for (day, month, year, label) in cases {
@@ -656,6 +655,40 @@ mod tests {
                 day,
                 month as i32,
                 year
+            );
+        }
+    }
+
+    #[test]
+    fn year_offset_invalid_panics() {
+        let invalid_years: [i32; 2] = [1899, 2201];
+
+        for year in invalid_years {
+            let result = panic::catch_unwind(|| {
+                Date::year_offset(year);
+            });
+
+            assert!(
+                result.is_err(),
+                "Expected panic for invalid year {} but got Ok",
+                year
+            );
+        }
+    }
+
+    #[test]
+    fn month_offset_invalid_panics() {
+        let invalid_month_indices: [i32; 3] = [15, 0, 17];
+
+        for month_index in invalid_month_indices {
+            let result = std::panic::catch_unwind(|| {
+                Date::month_offset(month_index, true);
+            });
+
+            assert!(
+                result.is_err(),
+                "Expected panic for invalid month {} but got Ok",
+                month_index
             );
         }
     }
@@ -1025,6 +1058,22 @@ mod tests {
     }
 
     #[test]
+    fn is_leap_invalid_panics() {
+        let invalid_years: [i32; 2] = [1700, 2500];
+
+        for year in invalid_years {
+            let result = panic::catch_unwind(|| {
+                Date::is_leap(year);
+            });
+
+            assert!(
+                result.is_err(),
+                "Expected panic for invalid year {} but got Ok",
+                year
+            );
+        }
+    }
+    #[test]
     fn month_length_not_leap_year() {
         let cases: [(i32, Month); 12] = [
             (31, Month::January),
@@ -1077,6 +1126,73 @@ mod tests {
                 2000,
                 days
             );
+        }
+    }
+
+    #[test]
+    fn from_serial_number_invalid_panics() {
+        let invalid_serials: [i32; 3] = [Date::MIN_SERIAL - 1, 0, Date::MAX_SERIAL + 1];
+
+        for n in invalid_serials {
+            let result = panic::catch_unwind(|| {
+                Date::from_serial_number(n);
+            });
+
+            assert!(
+                result.is_err(),
+                "Expected panic for invalid serial {} but got Ok",
+                n
+            );
+        }
+    }
+
+    #[test]
+    fn min_date_returns_expected() {
+        let d: Date = Date::min_date();
+        assert_eq!(d.to_serial_number(), Date::MIN_SERIAL);
+        assert_eq!(d, Date::new(1, Month::January, 1901));
+    }
+
+    #[test]
+    fn max_date_returns_expected() {
+        let d: Date = Date::max_date();
+        assert_eq!(d.to_serial_number(), Date::MAX_SERIAL);
+        assert_eq!(d, Date::new(31, Month::December, 2199));
+    }
+
+    #[test]
+    fn display_month_outputs_correct_abbreviation() {
+        let cases: [(Month, &str); 12] = [
+            (Month::January, "Jan"),
+            (Month::February, "Feb"),
+            (Month::March, "Mar"),
+            (Month::April, "Apr"),
+            (Month::May, "May"),
+            (Month::June, "Jun"),
+            (Month::July, "Jul"),
+            (Month::August, "Aug"),
+            (Month::September, "Sep"),
+            (Month::October, "Oct"),
+            (Month::November, "Nov"),
+            (Month::December, "Dec"),
+        ];
+
+        for (month, expected) in cases {
+            assert_eq!(format!("{}", month), expected, "Failed for {:?}", month);
+        }
+    }
+
+    #[test]
+    fn display_date_outputs_correct_format() {
+        let cases: [(Date, &str); 4] = [
+            (Date::new(1, Month::January, 1901), "01-Jan-1901"), // epoch
+            (Date::new(15, Month::May, 1989), "15-May-1989"),    // mid example
+            (Date::new(29, Month::February, 2000), "29-Feb-2000"), // leap year
+            (Date::new(31, Month::December, 2199), "31-Dec-2199"), // max supported
+        ];
+
+        for (date, expected) in cases {
+            assert_eq!(format!("{}", date), expected, "Failed for {:?}", date);
         }
     }
 }

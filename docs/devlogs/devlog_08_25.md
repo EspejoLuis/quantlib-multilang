@@ -246,7 +246,7 @@
 - ✅ Add unit tests --> Used ChatGPT after a certain point.
 - General refactoring
 - Adding better loggin when panicking.
-- Shuuld be serial number alligned with Excel ???
+- Shuuld be serial number alligned with Excel ??? yes. At least this is what Quantlib does.
 
 ## 23 August 2025: Rust Date
 
@@ -254,6 +254,7 @@
 - Refactor entire date class and unit tests
 - ✅ Divide unit test when expecation is true or false
 - ✅ Validation of inputs , validate day , validate year
+- LCOV coverage doesn't allow to exclude inline tests (the ones in the function). For now it's ok. But maybe in the future is worth separating the unit test in another file.
 
 # TODO:
 

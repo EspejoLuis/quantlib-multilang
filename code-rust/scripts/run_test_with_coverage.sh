@@ -22,7 +22,13 @@ fi
 mkdir -p "$REPORT_DIR"
 
 echo "Running ALL tests with coverage..."
-cargo +nightly llvm-cov --all-features --tests --branch --lcov --output-path "$REPORT_FILE"
+cargo +nightly llvm-cov \
+  --all-features \
+  --tests \
+  --branch \
+  --lcov \
+  --output-path "$REPORT_FILE" \
+  --ignore-filename-regex '(^|/)tests/|src/.*/date.rs'
 
 echo "Generating HTML from LCOV..."
 genhtml "$REPORT_FILE" --output-directory "$HTML_DIR" --legend --branch-coverage
