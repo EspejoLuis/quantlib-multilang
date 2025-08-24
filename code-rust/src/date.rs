@@ -20,7 +20,8 @@ let m2 = m1.clone();  // same as m1
 
 */
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
-#[repr(u8)] // Ensures the compiler really lays it out as 1–12.
+#[repr(u8)]
+// Ensures the compiler really lays it out as 1–12.
 // Without it, Rust doesn’t guarantee contiguous values.
 pub enum Month {
     January = 1,
@@ -36,26 +37,6 @@ pub enum Month {
     November,
     December,
 }
-
-/*
-Since the struct contains types that implement equality
-(u32) then Rust automatically generates == logic
-i.e. each field is compared in ORDER (day, month, year)
-if all fiels are equal then true
-*/
-
-/*
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]:
-    - PartialEq gives == and != logic
-    - Eq: does not give anything more but
-        confirms that == logic behaves mathematically sensibly
-        For example a == a can be false if a is Nan. By adding Eq
-        that possibility is excluded a priori.
-    - PartialOrd --> Enables <, <=, >, >=
-    - Ord --> Enables full ordering (like sorting)
-    - Using asser_eq!(d1, d1, "xxx") mean Rust will try to show the
-    value when the test fails but to do that `Debug` is needed
-*/
 
 impl Month {
     /*
@@ -95,6 +76,14 @@ This can be done!
         println!("Dates are equal!");
     }
 */
+
+/*
+Since the struct contains types that implement equality
+(u32) then Rust automatically generates == logic
+i.e. each field is compared in ORDER (day, month, year)
+if all fiels are equal then true
+*/
+
 pub struct Date {
     // Defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
     // pub --> public so they can be access by other files like main.rs
@@ -111,6 +100,7 @@ impl Date {
     pub const MIN_SERIAL: i32 = 367; // 1901-01-01
     pub const MAX_SERIAL: i32 = 109574; // 2199-12-31
 
+    // Constructor
     pub fn new(day: i32, month: Month, year: i32) -> Date {
         // TODO: ADD how to handle wrong dates
 
@@ -143,6 +133,18 @@ impl Date {
         Date { serial_number }
     }
 
+    pub fn from_serial_number(n: i32) -> Date {
+        assert!(
+            (Date::MIN_SERIAL..=Date::MAX_SERIAL).contains(&n),
+            "Serial number {} out of bounds, must be [{}..={}]",
+            n,
+            Date::MIN_SERIAL,
+            Date::MAX_SERIAL
+        );
+        Date { serial_number: n }
+    }
+
+    // Helpers
     fn year_offset(year: i32) -> i32 {
         /*
         Returns the offset in days from 31 Dec 1900 (serial 0)
@@ -227,6 +229,10 @@ impl Date {
         YEAR_OFFSET[(year - 1900) as usize]
     }
 
+    fn year_lenght(year: i32) -> i32 {
+        if Date::is_leap(year) { 366 } else { 365 }
+    }
+
     fn month_offset(month_index: i32, is_leap: bool) -> i32 {
         /*
         Returns the offset in days from 1-Jan of `year`
@@ -254,16 +260,15 @@ impl Date {
         }
     }
 
-    fn day_of_year(&self) -> i32 {
-        self.serial_number - Date::year_offset(self.year())
-    }
+    fn month_length(month_index: i32, is_leap: bool) -> i32 {
+        // Days from 1-Jan to start of each month
+        const MONTH_LENGTH: [i32; 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const MONTH_LEAP_LENGTH: [i32; 13] = [0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-    fn day_of_month(&self) -> i32 {
-        let year: i32 = self.year();
-        let leap: bool = Date::is_leap(year);
-        let month_index: i32 = self.month() as i32;
-
-        self.serial_number - Date::year_offset(year) - Date::month_offset(month_index, leap)
+        match is_leap {
+            true => MONTH_LEAP_LENGTH[month_index as usize],
+            false => MONTH_LENGTH[month_index as usize],
+        }
     }
 
     fn is_leap(year: i32) -> bool {
@@ -341,17 +346,20 @@ impl Date {
         YEAR_IS_LEAP[(year - 1900) as usize]
     }
 
-    fn month_length(month_index: i32, is_leap: bool) -> i32 {
-        // Days from 1-Jan to start of each month
-        const MONTH_LENGTH: [i32; 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-        const MONTH_LEAP_LENGTH: [i32; 13] = [0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-        match is_leap {
-            true => MONTH_LEAP_LENGTH[month_index as usize],
-            false => MONTH_LENGTH[month_index as usize],
-        }
+    // Inspectors private
+    fn day_of_year(&self) -> i32 {
+        self.serial_number - Date::year_offset(self.year())
     }
 
+    fn day_of_month(&self) -> i32 {
+        let year: i32 = self.year();
+        let leap: bool = Date::is_leap(year);
+        let month_index: i32 = self.month() as i32;
+
+        self.serial_number - Date::year_offset(year) - Date::month_offset(month_index, leap)
+    }
+
+    // Inspectors public
     pub fn year(&self) -> i32 {
         // Initial guess
         let mut y: i32 = (self.serial_number / 365) + 1900;
@@ -388,16 +396,6 @@ impl Date {
 
     pub fn day(&self) -> i32 {
         self.day_of_month()
-    }
-    pub fn from_serial_number(n: i32) -> Date {
-        assert!(
-            (Date::MIN_SERIAL..=Date::MAX_SERIAL).contains(&n),
-            "Serial number {} out of bounds, must be [{}..={}]",
-            n,
-            Date::MIN_SERIAL,
-            Date::MAX_SERIAL
-        );
-        Date { serial_number: n }
     }
 
     pub fn to_serial_number(&self) -> i32 {
@@ -487,20 +485,20 @@ pub trait Add<Rhs = Self> {
 
 */
 
-/*
-Implementing the behavior of the + operator where:
-  - the left-hand side is Date
-  - the right-hand side is i32
-
-This (impl Add<i32> for Date) is similar to:
-    - C++: Date operator-(int n) const;
-    - C#: public static Date operator -(Date d, int n)
-*/
-
 impl Add<i32> for Date {
-    // Add days to date (by REFERENCE):
-    // creates a new Date too, but can keep the original around
-    // &d1 + 5 → borrows d1, returns a new Date, and still keep d1.
+    /*
+    Implementing the behavior of the + operator where:
+      - the left-hand side is Date
+      - the right-hand side is i32
+
+    This (impl Add<i32> for Date) is similar to:
+        - C++: Date operator-(int n) const;
+        - C#: public static Date operator -(Date d, int n)
+
+    Add days to date (by REFERENCE):
+    creates a new Date too, but can keep the original around
+    &d1 + 5 → borrows d1, returns a new Date, and still keep d1.
+    */
     type Output = Date;
     // i32 means it can be NEGATIVE!
     fn add(self, right_hand_side: i32) -> Date {
@@ -551,11 +549,7 @@ impl Sub<Date> for Date {
     }
 }
 
-// This block will be compiled only when running cargo test
-
 #[cfg(test)]
-// Defines a nested test module
-
 mod tests {
     // Bring everything from the outer scope (Date, its methods, etc.)
     use super::*;
@@ -1178,7 +1172,12 @@ mod tests {
         ];
 
         for (month, expected) in cases {
-            assert_eq!(format!("{}", month), expected, "Failed for {:?}", month);
+            assert_eq!(
+                format!("{}", month),
+                expected,
+                "Failed for month {:?}",
+                month
+            );
         }
     }
 
@@ -1192,7 +1191,26 @@ mod tests {
         ];
 
         for (date, expected) in cases {
-            assert_eq!(format!("{}", date), expected, "Failed for {:?}", date);
+            assert_eq!(format!("{}", date), expected, "Failed for date {:?}", date);
+        }
+    }
+
+    #[test]
+    fn year_length_works_correctly() {
+        let cases: [(i32, i32); 4] = [
+            (1900, 366), // Fake leap year
+            (1901, 365), // No leap
+            (2000, 366), // Leap year
+            (2100, 365), // No Leap
+        ];
+
+        for (year, expected) in cases {
+            assert_eq!(
+                Date::year_lenght(year),
+                expected,
+                "Failed for year {:?}",
+                year
+            );
         }
     }
 }

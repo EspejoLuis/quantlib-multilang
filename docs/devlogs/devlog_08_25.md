@@ -256,25 +256,36 @@
 - ✅ Validation of inputs , validate day , validate year
 - LCOV coverage doesn't allow to exclude inline tests (the ones in the function). For now it's ok. But maybe in the future is worth separating the unit test in another file.
 
-# TODO:
+## 24 August 2025: Rust Date
+
+- ✅ Better panicking handling --> Asssert!
+- ✅ Operators: > < != == . These are already implemented because of #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]: #[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]:
+  - PartialEq gives == and != logic
+  - Eq: does not give anything more but confirms that == logic behaves mathematically sensibly. For example a == a can be false if a is Nan. By adding Eq that possibility is excluded a priori --> Rules out NaN cases!
+  - PartialOrd --> Enables <, <=, >, >=.
+  - Ord --> Enables full ordering (like sorting) --> Rules out NaN cases!
+  - Using asser_eq!(d1, d1, "xxx") mean Rust will try to show the value when the test fails but to do that `Debug` is needed
+
+### TODO:
 
 - Date:
 
   - Rust:
 
-    - ❌ Better panicking handling
-    - ❌ Operators: > < != ==
     - ❌ Integration tests.
     - ❌ Check coverage. Some issue
     - ❌ Null cases
 
   - C++:
+
     - ❌ operator >
     - ❌ opeartor - for two dates
     - ❌ Enf of month/IsEndOfMonth
     - ❌ Different
     - ❌ Normalize is actually not needed!
+
   - Python: Review:
     - We are using datetime + day,month,year. Is it correct ? should we store just datime so as to have one soruce of true ?
-  - Date Parser:
-    - Given string create Date for example "Mar" → Month::March
+
+- Date Parser:
+  - Given string create Date for example "Mar" → Month::March
