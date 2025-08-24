@@ -1,28 +1,5 @@
-/*
-1. Copy
-Means values of this type can be copied bit-for-bit instead of moved.
-For Month, that’s fine: it’s just a tiny integer under the hood (the discriminant).
-
-Effect: you can do:
-let m1 = Month::March;
-let m2 = m1;      // this makes a *copy*, not a move
-let m3 = m1;      // ❌ still works, m1 is still valid
-If Month were not Copy, the assignment would “move” it, and m1 couldn’t be used anymore.
-
-2. Clone
-Gives you a .clone() method that makes an explicit copy.
-Normally, Clone can mean deep copies (like duplicating a vector).
-For a Copy type like Month, .clone() just does the same as assignment.
-
-Example:
-let m1 = Month::April;
-let m2 = m1.clone();  // same as m1
-
-*/
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
-#[repr(u8)]
-// Ensures the compiler really lays it out as 1–12.
-// Without it, Rust doesn’t guarantee contiguous values.
+#[repr(u8)] // Ensures the compiler really lays it out as 1–12.Without it, Rust doesn’t guarantee contiguous values.
 pub enum Month {
     January = 1,
     February,
@@ -67,16 +44,6 @@ impl Month {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
-/*
-Because of #[derive(..)] dont need to create specific functions for
-date. ><==!
-
-This can be done!
-    if date1 == date2 {
-        println!("Dates are equal!");
-    }
-*/
-
 /*
 Since the struct contains types that implement equality
 (u32) then Rust automatically generates == logic
@@ -347,11 +314,9 @@ impl Date {
     }
 
     // Inspectors private
-    fn day_of_year(&self) -> i32 {
-        self.serial_number - Date::year_offset(self.year())
-    }
 
-    fn day_of_month(&self) -> i32 {
+    // Inspectors public
+    pub fn day_of_month(&self) -> i32 {
         let year: i32 = self.year();
         let leap: bool = Date::is_leap(year);
         let month_index: i32 = self.month() as i32;
@@ -359,7 +324,10 @@ impl Date {
         self.serial_number - Date::year_offset(year) - Date::month_offset(month_index, leap)
     }
 
-    // Inspectors public
+    pub fn day_of_year(&self) -> i32 {
+        self.serial_number - Date::year_offset(self.year())
+    }
+
     pub fn year(&self) -> i32 {
         // Initial guess
         let mut y: i32 = (self.serial_number / 365) + 1900;
@@ -409,42 +377,57 @@ impl Date {
     pub fn max_date() -> Date {
         Date::from_serial_number(Date::MAX_SERIAL)
     }
+
+    pub fn is_end_of_month(&self) -> bool {
+        self.day() == Date::month_length(self.month() as i32, Date::is_leap(self.year()))
+    }
+
+    pub fn end_of_month(&self) -> Date {
+        let month: Month = self.month();
+        let year: i32 = self.year();
+        Date::new(
+            Date::month_length(month as i32, Date::is_leap(year)),
+            month,
+            year,
+        )
+    }
 }
 
+// Traits: Display
 use std::fmt;
 
 impl fmt::Display for Month {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // `&'static str` means a reference to a string literal that
         // lives for the entire program (string literals never expire).
-        // Example: "Jan" is compiled into the binary and always safe.
+        // Example: "January" is compiled into the binary and always safe.
         let name: &'static str = match self {
-            Month::January => "Jan",
-            Month::February => "Feb",
-            Month::March => "Mar",
-            Month::April => "Apr",
+            Month::January => "January",
+            Month::February => "February",
+            Month::March => "March",
+            Month::April => "April",
             Month::May => "May",
-            Month::June => "Jun",
-            Month::July => "Jul",
-            Month::August => "Aug",
-            Month::September => "Sep",
-            Month::October => "Oct",
-            Month::November => "Nov",
-            Month::December => "Dec",
+            Month::June => "June",
+            Month::July => "July",
+            Month::August => "August",
+            Month::September => "September",
+            Month::October => "October",
+            Month::November => "November",
+            Month::December => "December",
         };
         write!(f, "{}", name)
     }
 }
-/*
-- impl: we are implementing something.
-- fmt::Display: this is a TRAIT:
-    - like an interface in C# or abstract base class in C++.
-- for Date:
-    - the Display TRAIT is implemented for Date struct.
-So basically implementing how Date should be printed using the {} format
-*/
+
 impl fmt::Display for Date {
     /*
+    - impl: we are implementing something.
+    - fmt::Display: this is a TRAIT:
+        - like an interface in C# or abstract base class in C++.
+    - for Date:
+        - the Display TRAIT is implemented for Date struct.
+    So basically implementing how Date should be printed using the {} format
+
     - fn fmt(..):
         - The fmt method is called automatically when {} is used with Date.
     - &self:
@@ -461,35 +444,40 @@ impl fmt::Display for Date {
     So basically:
         - &self -> fields of the struct can be looked at, but cannot be changed
         - &mut fmt::Formatter -> allowed to write into this formatter buffer
-    */
+        */
     fn fmt(&self, formatter_buffer: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            formatter_buffer,
-            "{:02}-{}-{}",
-            self.day(),
-            self.month(),
-            self.year()
-        )
+        write!(formatter_buffer, "{}", io::long_date(self))
     }
 }
 
+// Traits: Add
 use std::ops::Add;
-
-/*
-This would be the trait:
-
-pub trait Add<Rhs = Self> {
-    type Output;
-    fn add(self, rhs: Rhs) -> Self::Output;
-}
-
-*/
 
 impl Add<i32> for Date {
     /*
+    This would be the trait:
+
+    pub trait Add<Rhs = Self> {
+        type Output;
+        fn add(self, rhs: Rhs) -> Self::Output;
+    }
+
+    It will be implemented automatically by adding #derive(clone,copy)
+    impl Add<i32> for Date {
+        // Add days to date (by VALUE):
+        // indeed consumes the original Date and creates a new one.
+        // You can do d1 + 5, but after that d1 is moved (not usable anymore).
+        // d1 + 5 → consumes d1, returns a new Date.
+        type Output = Date;
+        // i32 means it can be NEGATIVE!
+        fn add(self, right_hand_side: i32) -> Date {
+            Date::from_serial_number(self.serial_number + right_hand_side)
+        }
+    }
+
     Implementing the behavior of the + operator where:
-      - the left-hand side is Date
-      - the right-hand side is i32
+        - the left-hand side is Date
+        - the right-hand side is i32
 
     This (impl Add<i32> for Date) is similar to:
         - C++: Date operator-(int n) const;
@@ -506,20 +494,7 @@ impl Add<i32> for Date {
     }
 }
 
-/*
-It will be implemented automatically by adding #derive(clone,copy)
-impl Add<i32> for Date {
-    // Add days to date (by VALUE):
-    // indeed consumes the original Date and creates a new one.
-    // You can do d1 + 5, but after that d1 is moved (not usable anymore).
-    // d1 + 5 → consumes d1, returns a new Date.
-    type Output = Date;
-    // i32 means it can be NEGATIVE!
-    fn add(self, right_hand_side: i32) -> Date {
-        Date::from_serial_number(self.serial_number + right_hand_side)
-    }
-}
-*/
+// Traits: Sub
 use std::ops::Sub;
 
 impl Sub<i32> for Date {
@@ -549,8 +524,60 @@ impl Sub<Date> for Date {
     }
 }
 
+pub mod io {
+
+    use super::Date;
+
+    pub fn short_date(date: &Date) -> String {
+        // 12-31-1989 (US)
+        format!(
+            "{:02}/{:02}/{}",
+            date.month() as u8,
+            date.day(),
+            date.year()
+        )
+    }
+
+    pub fn long_date(date: &Date) -> String {
+        // January 21st, 1989
+        format!(
+            "{} {}, {}",
+            date.month(),
+            ordinal(date.day()), // e.g. 23 -> "23rd"
+            date.year()
+        )
+    }
+
+    pub fn iso_date(date: &Date) -> String {
+        // 1989-12-31
+        format!(
+            "{:04}-{:02}-{:02}",
+            date.year(),
+            date.month() as u8,
+            date.day()
+        )
+    }
+
+    fn ordinal(n: i32) -> String {
+        // Mod is the remainder
+        // n%100 tells exactly the last two digits of any number
+        let suffix: &'static str = if (11..=13).contains(&(n % 100)) {
+            "th"
+        } else {
+            match n % 10 {
+                1 => "st",
+                2 => "nd",
+                3 => "rd",
+                _ => "th",
+            }
+        };
+        format!("{}{}", n, suffix)
+    }
+}
+
 #[cfg(test)]
 mod tests {
+
     // Bring everything from the outer scope (Date, its methods, etc.)
     use super::*;
     use std::panic;
@@ -1157,18 +1184,18 @@ mod tests {
     #[test]
     fn display_month_outputs_correct_abbreviation() {
         let cases: [(Month, &str); 12] = [
-            (Month::January, "Jan"),
-            (Month::February, "Feb"),
-            (Month::March, "Mar"),
-            (Month::April, "Apr"),
+            (Month::January, "January"),
+            (Month::February, "February"),
+            (Month::March, "March"),
+            (Month::April, "April"),
             (Month::May, "May"),
-            (Month::June, "Jun"),
-            (Month::July, "Jul"),
-            (Month::August, "Aug"),
-            (Month::September, "Sep"),
-            (Month::October, "Oct"),
-            (Month::November, "Nov"),
-            (Month::December, "Dec"),
+            (Month::June, "June"),
+            (Month::July, "July"),
+            (Month::August, "August"),
+            (Month::September, "September"),
+            (Month::October, "October"),
+            (Month::November, "November"),
+            (Month::December, "December"),
         ];
 
         for (month, expected) in cases {
@@ -1184,14 +1211,47 @@ mod tests {
     #[test]
     fn display_date_outputs_correct_format() {
         let cases: [(Date, &str); 4] = [
-            (Date::new(1, Month::January, 1901), "01-Jan-1901"), // epoch
-            (Date::new(15, Month::May, 1989), "15-May-1989"),    // mid example
-            (Date::new(29, Month::February, 2000), "29-Feb-2000"), // leap year
-            (Date::new(31, Month::December, 2199), "31-Dec-2199"), // max supported
+            (Date::new(1, Month::January, 1901), "January 1st, 1901"), // epoch
+            (Date::new(15, Month::May, 1989), "May 15th, 1989"),       // mid example
+            (Date::new(29, Month::February, 2000), "February 29th, 2000"), // leap year
+            (Date::new(31, Month::December, 2199), "December 31st, 2199"), // max supported
         ];
 
         for (date, expected) in cases {
             assert_eq!(format!("{}", date), expected, "Failed for date {:?}", date);
+        }
+    }
+
+    #[test]
+    fn short_date_outputs_correct_format() {
+        let cases: [(Date, &str); 4] = [
+            (Date::new(1, Month::January, 1901), "01/01/1901"), // epoch
+            (Date::new(15, Month::May, 1989), "05/15/1989"),    // mid example
+            (Date::new(29, Month::February, 2000), "02/29/2000"), // leap year
+            (Date::new(31, Month::December, 2199), "12/31/2199"), // max supported
+        ];
+
+        for (date, expected) in cases {
+            assert_eq!(
+                io::short_date(&date),
+                expected,
+                "Failed for date {:?}",
+                date
+            );
+        }
+    }
+
+    #[test]
+    fn iso_date_outputs_correct_format() {
+        let cases: [(Date, &str); 4] = [
+            (Date::new(1, Month::January, 1901), "1901-01-01"), // epoch
+            (Date::new(15, Month::May, 1989), "1989-05-15"),    // mid example
+            (Date::new(29, Month::February, 2000), "2000-02-29"), // leap year
+            (Date::new(31, Month::December, 2199), "2199-12-31"), // max supported
+        ];
+
+        for (date, expected) in cases {
+            assert_eq!(io::iso_date(&date), expected, "Failed for date {:?}", date);
         }
     }
 
@@ -1211,6 +1271,51 @@ mod tests {
                 "Failed for year {:?}",
                 year
             );
+        }
+    }
+    #[test]
+    fn is_end_of_month_works_correctly() {
+        let cases: [(Date, bool); 6] = [
+            // True cases
+            (Date::new(31, Month::January, 2024), true), // 31-day month
+            (Date::new(30, Month::April, 2024), true),   // 30-day month
+            (Date::new(29, Month::February, 2020), true), // leap-year Feb
+            // False cases
+            (Date::new(30, Month::January, 2024), false), // not last day
+            (Date::new(28, Month::February, 2020), false), // leap year, not last day
+            (Date::new(27, Month::February, 2021), false), // non-leap year
+        ];
+
+        for (date, expected) in cases {
+            assert_eq!(
+                date.is_end_of_month(),
+                expected,
+                "Failed for date {:?}",
+                date
+            );
+        }
+    }
+
+    #[test]
+    fn end_of_month_returns_correct_date() {
+        let cases: [(Date, Date); 3] = [
+            (
+                Date::new(15, Month::January, 2024),
+                Date::new(31, Month::January, 2024),
+            ),
+            (
+                Date::new(10, Month::February, 2020), // leap year
+                Date::new(29, Month::February, 2020),
+            ),
+            (
+                Date::new(10, Month::February, 2021), // non-leap year
+                Date::new(28, Month::February, 2021),
+            ),
+        ];
+
+        for (input, expected) in cases {
+            let result = input.end_of_month();
+            assert_eq!(result, expected, "Failed for date {:?}", input);
         }
     }
 }

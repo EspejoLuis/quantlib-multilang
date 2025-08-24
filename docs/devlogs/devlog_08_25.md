@@ -265,6 +265,23 @@
   - PartialOrd --> Enables <, <=, >, >=.
   - Ord --> Enables full ordering (like sorting) --> Rules out NaN cases!
   - Using asser_eq!(d1, d1, "xxx") mean Rust will try to show the value when the test fails but to do that `Debug` is needed
+  - Copy: Means values of this type can be copied bit-for-bit instead of moved. For Month, that’s fine: it’s just a tiny integer under the hood (the discriminant).
+  ```
+  Effect: you can do:
+  let m1 = Month::March;
+  let m2 = m1;      // this makes a *copy*, not a move
+  let m3 = m1;      // ❌ still works, m1 is still valid
+  If Month were not Copy, the assignment would “move” it, and m1 couldn’t be used anymore.
+  ```
+  - Clone: Gives you a .clone() method that makes an explicit copy. Normally, Clone can mean deep copies (like duplicating a vector). For a Copy type like Month, .clone() just does the same as assignment.
+  ```
+  Example:
+  let m1 = Month::April;
+  let m2 = m1.clone();  // same as m1
+  ```
+  - Started `weekdays.rs` file and updating `date.rs` with:
+    - `iso_date`, `short_date`, `long_date`.
+    - `is_end_of_month`,`end_of_month`.
 
 ### TODO:
 
@@ -272,9 +289,17 @@
 
   - Rust:
 
-    - ❌ Integration tests.
-    - ❌ Check coverage. Some issue
-    - ❌ Null cases
+        - ❌ Integration tests.
+        - ❌ Check coverage. Some issue
+        - ❌ Null cases
+        - ❌ Weekday-related:
+          - ❌ weekday()
+          - ❌ dayOfWeek() (alias for weekday())
+        - ❌ Weekday utilities
+          - ❌ nextWeekday(const Date&, Weekday)
+          - ❌ nthWeekday(Size n, Weekday, Month, Year)
+        - ❌ Parsing
+          - ❌ parseISO(const std::string&) (takes "2024-07-23" and turns it into a Date)
 
   - C++:
 
@@ -286,6 +311,3 @@
 
   - Python: Review:
     - We are using datetime + day,month,year. Is it correct ? should we store just datime so as to have one soruce of true ?
-
-- Date Parser:
-  - Given string create Date for example "Mar" → Month::March
