@@ -1,5 +1,12 @@
+use chrono::prelude::*;
+use std::ffi::c_void;
+// Todays' date
+use std::fmt; // Display
+use std::ops::{Add, Sub}; // Addition, Subtraction
+use std::ops::{AddAssign, SubAssign}; // += and -=
+
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
-#[repr(u8)] // Ensures the compiler really lays it out as 1–12.Without it, Rust doesn’t guarantee contiguous values.
+#[repr(u8)] // Ensures the compiler lays it out as 1–12. Without it, Rust doesn’t guarantee contiguous values.
 pub enum Month {
     January = 1,
     February,
@@ -14,7 +21,6 @@ pub enum Month {
     November,
     December,
 }
-
 impl Month {
     /*
     Because not every u32 is valid, the function should return an Option:
@@ -27,7 +33,7 @@ impl Month {
     Some(T),
     }
     */
-    pub fn from_i32(number: i32) -> Option<Self> {
+    pub fn from_i32(number: MonthIndex) -> Option<Self> {
         if (1..=12).contains(&number) {
             /*
             transmute --> low-level cast that tells the compiler.
@@ -43,32 +49,30 @@ impl Month {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
-/*
-Since the struct contains types that implement equality
-(u32) then Rust automatically generates == logic
-i.e. each field is compared in ORDER (day, month, year)
-if all fiels are equal then true
-*/
+// Types
+type Day = i32;
+type Year = i32;
+type MonthIndex = i32;
+type SerialType = i32;
 
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Date {
     // Defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
     // pub --> public so they can be access by other files like main.rs
     // unsigned 32-bit integer
-    serial_number: i32, //private by default
-                        // Order below impact for example how operator < works.
-                        // First field to be check is the first one below.
-                        //pub year: u32,
-                        //pub month: Month,
-                        //pub day: u32,
+    serial_number: SerialType, //private by default
+                               // Order below impact for example how operator < works.
+                               // First field to be check is the first one below.
+                               //pub year: u32,
+                               //pub month: Month,
+                               //pub day: u32,
 }
-
 impl Date {
-    pub const MIN_SERIAL: i32 = 367; // 1901-01-01
-    pub const MAX_SERIAL: i32 = 109574; // 2199-12-31
+    const MIN_SERIAL: i32 = 367; // 1901-01-01
+    const MAX_SERIAL: i32 = 109574; // 2199-12-31
 
     // Constructor
-    pub fn new(day: i32, month: Month, year: i32) -> Date {
+    pub fn new(day: Day, month: Month, year: Year) -> Date {
         // TODO: ADD how to handle wrong dates
 
         // 1. Year check
@@ -95,24 +99,26 @@ impl Date {
         );
 
         // 5. Serial number
-        let serial_number: i32 = day + offset + Date::year_offset(year);
+        let serial_number: SerialType = day + offset + Date::year_offset(year);
 
         Date { serial_number }
     }
 
-    pub fn from_serial_number(n: i32) -> Date {
+    pub fn from_serial_number(serial_number: SerialType) -> Date {
         assert!(
-            (Date::MIN_SERIAL..=Date::MAX_SERIAL).contains(&n),
+            (Date::MIN_SERIAL..=Date::MAX_SERIAL).contains(&serial_number),
             "Serial number {} out of bounds, must be [{}..={}]",
-            n,
+            serial_number,
             Date::MIN_SERIAL,
             Date::MAX_SERIAL
         );
-        Date { serial_number: n }
+        Date {
+            serial_number: serial_number,
+        }
     }
 
     // Helpers
-    fn year_offset(year: i32) -> i32 {
+    fn year_offset(year: Year) -> i32 {
         /*
         Returns the offset in days from 31 Dec 1900 (serial 0)
         up to 1 Jan `year` using the closed-form formula.
@@ -124,6 +130,11 @@ impl Date {
         - year_offset(1902) = 365
         - year_offset(1903) = 731
          */
+        assert!(
+            (1900..=2200).contains(&year),
+            "year {} outside valid range [1900,2200]",
+            year
+        );
 
         const YEAR_OFFSET: [i32; 301] = [
             // 1900–1909
@@ -187,20 +198,14 @@ impl Date {
             109574,
         ];
 
-        assert!(
-            (1900..=2200).contains(&year),
-            "year {} outside valid range [1900,2200]",
-            year
-        );
-
         YEAR_OFFSET[(year - 1900) as usize]
     }
 
-    fn year_lenght(year: i32) -> i32 {
+    fn year_lenght(year: Year) -> i32 {
         if Date::is_leap(year) { 366 } else { 365 }
     }
 
-    fn month_offset(month_index: i32, is_leap: bool) -> i32 {
+    fn month_offset(month_index: MonthIndex, is_leap: bool) -> i32 {
         /*
         Returns the offset in days from 1-Jan of `year`
         up to (but not including) the 1st day of the given `month`.
@@ -227,7 +232,7 @@ impl Date {
         }
     }
 
-    fn month_length(month_index: i32, is_leap: bool) -> i32 {
+    fn month_length(month_index: MonthIndex, is_leap: bool) -> i32 {
         // Days from 1-Jan to start of each month
         const MONTH_LENGTH: [i32; 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         const MONTH_LEAP_LENGTH: [i32; 13] = [0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -238,7 +243,13 @@ impl Date {
         }
     }
 
-    fn is_leap(year: i32) -> bool {
+    fn is_leap(year: Year) -> bool {
+        assert!(
+            (1900..=2200).contains(&year),
+            "year {} outside valid range [1900, 2200]",
+            year
+        );
+
         const YEAR_IS_LEAP: [bool; 301] = [
             // 1900 is leap in agreement with Excel's bug
             // 1900–1909
@@ -304,49 +315,43 @@ impl Date {
             false,
         ];
 
-        assert!(
-            (1900..=2200).contains(&year),
-            "year {} outside valid range [1900, 2200]",
-            year
-        );
-
         YEAR_IS_LEAP[(year - 1900) as usize]
     }
 
     // Inspectors private
 
     // Inspectors public
-    pub fn day_of_month(&self) -> i32 {
-        let year: i32 = self.year();
+    pub fn day_of_month(&self) -> Day {
+        let year: Year = self.year();
         let leap: bool = Date::is_leap(year);
-        let month_index: i32 = self.month() as i32;
+        let month_index: MonthIndex = self.month() as i32;
 
         self.serial_number - Date::year_offset(year) - Date::month_offset(month_index, leap)
     }
 
-    pub fn day_of_year(&self) -> i32 {
+    pub fn day_of_year(&self) -> Day {
         self.serial_number - Date::year_offset(self.year())
     }
 
-    pub fn year(&self) -> i32 {
+    pub fn year(&self) -> Year {
         // Initial guess
-        let mut y: i32 = (self.serial_number / 365) + 1900;
+        let mut year: Year = (self.serial_number / 365) + 1900;
 
         // Correction step
-        if self.serial_number <= Date::year_offset(y) {
-            y -= 1;
+        if self.serial_number <= Date::year_offset(year) {
+            year -= 1;
         }
 
-        y
+        year
     }
 
     pub fn month(&self) -> Month {
-        let day_of_year: i32 = self.day_of_year();
-        let year: i32 = self.year();
+        let day_of_year: Day = self.day_of_year();
+        let year: Year = self.year();
         let leap: bool = Date::is_leap(year);
 
         // Rough guess
-        let mut month_index: i32 = day_of_year / 30 + 1;
+        let mut month_index: MonthIndex = day_of_year / 30 + 1;
 
         // Adjust down if too far
         while day_of_year <= Date::month_offset(month_index, leap) {
@@ -362,11 +367,11 @@ impl Date {
         Month::from_i32(month_index).unwrap()
     }
 
-    pub fn day(&self) -> i32 {
+    pub fn day(&self) -> Day {
         self.day_of_month()
     }
 
-    pub fn to_serial_number(&self) -> i32 {
+    pub fn to_serial_number(&self) -> SerialType {
         self.serial_number
     }
 
@@ -384,18 +389,24 @@ impl Date {
 
     pub fn end_of_month(&self) -> Date {
         let month: Month = self.month();
-        let year: i32 = self.year();
+        let year: Year = self.year();
         Date::new(
             Date::month_length(month as i32, Date::is_leap(year)),
             month,
             year,
         )
     }
+
+    pub fn todays_date() -> Date {
+        let today: NaiveDate = Local::now().date_naive();
+        let year: Year = today.year();
+        let month = Month::from_i32(today.month() as i32).unwrap();
+        let day: Day = today.day() as i32;
+        Date::new(day, month, year)
+    }
 }
 
-// Traits: Display
-use std::fmt;
-
+// Traits:
 impl fmt::Display for Month {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // `&'static str` means a reference to a string literal that
@@ -418,7 +429,6 @@ impl fmt::Display for Month {
         write!(f, "{}", name)
     }
 }
-
 impl fmt::Display for Date {
     /*
     - impl: we are implementing something.
@@ -449,11 +459,7 @@ impl fmt::Display for Date {
         write!(formatter_buffer, "{}", io::long_date(self))
     }
 }
-
-// Traits: Add
-use std::ops::Add;
-
-impl Add<i32> for Date {
+impl Add<Day> for Date {
     /*
     This would be the trait:
 
@@ -489,15 +495,18 @@ impl Add<i32> for Date {
     */
     type Output = Date;
     // i32 means it can be NEGATIVE!
-    fn add(self, right_hand_side: i32) -> Date {
+    // New Date as Output
+    fn add(self, right_hand_side: Day) -> Date {
         Date::from_serial_number(self.serial_number + right_hand_side)
     }
 }
-
-// Traits: Sub
-use std::ops::Sub;
-
-impl Sub<i32> for Date {
+impl AddAssign<Day> for Date {
+    // No Output, no new Date returned. SAME DATE modified!
+    fn add_assign(&mut self, right_hand_side: Day) -> () {
+        self.serial_number += right_hand_side
+    }
+}
+impl Sub<Day> for Date {
     /*
     by VALUE
     This implementations consumes the value:
@@ -510,23 +519,31 @@ impl Sub<i32> for Date {
     */
     type Output = Date;
     // i32 means it can be NEGATIVE!
-    fn sub(self, right_hand_side: i32) -> Date {
+    // New Date as Output
+    fn sub(self, right_hand_side: Day) -> Date {
         Date::from_serial_number(self.serial_number - right_hand_side)
     }
 }
-
+impl SubAssign<Day> for Date {
+    // No Output, no new Date returned. SAME DATE modified!
+    fn sub_assign(&mut self, right_hand_side: Day) -> () {
+        self.serial_number -= right_hand_side
+    }
+}
 impl Sub<Date> for Date {
-    type Output = i32;
+    type Output = SerialType;
 
-    fn sub(self, right_hand_side: Date) -> i32 {
+    fn sub(self, right_hand_side: Date) -> SerialType {
         // Subtract dates
         self.to_serial_number() - right_hand_side.to_serial_number()
     }
 }
 
+// Dates strings outputs
 pub mod io {
 
     use super::Date;
+    use crate::date::Day;
 
     pub fn short_date(date: &Date) -> String {
         // 12-31-1989 (US)
@@ -558,7 +575,7 @@ pub mod io {
         )
     }
 
-    fn ordinal(n: i32) -> String {
+    fn ordinal(n: Day) -> String {
         // Mod is the remainder
         // n%100 tells exactly the last two digits of any number
         let suffix: &'static str = if (11..=13).contains(&(n % 100)) {
@@ -575,16 +592,16 @@ pub mod io {
     }
 }
 
+// Tests
 #[cfg(test)]
 mod tests {
 
-    // Bring everything from the outer scope (Date, its methods, etc.)
-    use super::*;
+    use super::*; // Bring everything from the outer scope (Date, its methods, etc.)
     use std::panic;
 
     #[test]
     fn creates_date_correctly() {
-        let cases: [(Date, i32, Month, i32, &str); 6] = [
+        let cases: [(Date, Day, Month, Year, &str); 6] = [
             (
                 Date::new(1, Month::October, 1989),
                 1,
@@ -656,7 +673,7 @@ mod tests {
 
     #[test]
     fn invalid_dates_panic() {
-        let cases: [(i32, Month, i32, &str); 5] = [
+        let cases: [(Day, Month, Year, &str); 5] = [
             (29, Month::February, 1901, "Feb 29 non-leap year"),
             (1, Month::January, 1800, "year before min"),
             (1, Month::January, 2200, "year after max"),
@@ -682,7 +699,7 @@ mod tests {
 
     #[test]
     fn year_offset_invalid_panics() {
-        let invalid_years: [i32; 2] = [1899, 2201];
+        let invalid_years: [Year; 2] = [1899, 2201];
 
         for year in invalid_years {
             let result = panic::catch_unwind(|| {
@@ -699,7 +716,7 @@ mod tests {
 
     #[test]
     fn month_offset_invalid_panics() {
-        let invalid_month_indices: [i32; 3] = [15, 0, 17];
+        let invalid_month_indices: [MonthIndex; 3] = [15, 0, 17];
 
         for month_index in invalid_month_indices {
             let result = std::panic::catch_unwind(|| {
@@ -829,7 +846,7 @@ mod tests {
         ];
 
         for (d1, d2, expected, label) in cases {
-            let result = d1.cmp(&d2);
+            let result: std::cmp::Ordering = d1.cmp(&d2);
             assert_eq!(result, expected, "Failed cmp for {}", label);
 
             match expected {
@@ -851,7 +868,7 @@ mod tests {
 
     #[test]
     fn add_days_works_correctly() {
-        let cases: [(Date, i32, Date, &str); 6] = [
+        let cases: [(Date, Day, Date, &str); 6] = [
             // --- Within same month ---
             (
                 Date::new(1, Month::May, 1989),
@@ -897,7 +914,7 @@ mod tests {
         ];
 
         for (start, delta, expected, label) in cases {
-            let result = start + delta;
+            let result: Date = start + delta;
             assert_eq!(
                 result, expected,
                 "Failed {}: {} + {} days",
@@ -908,7 +925,7 @@ mod tests {
 
     #[test]
     fn subtract_days_works_correctly() {
-        let cases: [(i32, Month, i32, i32, i32, Month, i32); 5] = [
+        let cases: [(Day, Month, Year, Day, Day, Month, Year); 5] = [
             (20, Month::May, 1989, 5, 15, Month::May, 1989), // within same month
             (15, Month::May, 1989, 15, 30, Month::April, 1989), // cross month
             (1, Month::January, 1990, 1, 31, Month::December, 1989), // cross year
@@ -926,9 +943,9 @@ mod tests {
             expected_year,
         ) in cases
         {
-            let start = Date::new(start_day, start_month, start_year);
-            let derived = start - delta;
-            let expected = Date::new(expected_day, expected_month, expected_year);
+            let start: Date = Date::new(start_day, start_month, start_year);
+            let derived: Date = start - delta;
+            let expected: Date = Date::new(expected_day, expected_month, expected_year);
 
             assert_eq!(derived, expected, "Failed case: {start:?} - {delta}");
         }
@@ -936,7 +953,7 @@ mod tests {
 
     #[test]
     fn subtract_dates_works_correctly() {
-        let cases: [(i32, Month, i32, i32, Month, i32, i32); 5] = [
+        let cases: [(Day, Month, Year, Day, Month, Year, Day); 5] = [
             (14, Month::February, 1989, 15, Month::February, 1989, 1),
             (28, Month::February, 1989, 1, Month::March, 1989, 1),
             (31, Month::December, 1989, 1, Month::January, 1990, 1),
@@ -945,17 +962,17 @@ mod tests {
         ];
 
         for (d1_day, d1_month, d1_year, d2_day, d2_month, d2_year, expected_days) in cases {
-            let d1 = Date::new(d1_day, d1_month, d1_year);
-            let d2 = Date::new(d2_day, d2_month, d2_year);
+            let d1: Date = Date::new(d1_day, d1_month, d1_year);
+            let d2: Date = Date::new(d2_day, d2_month, d2_year);
 
-            let derived_days: i32 = d2 - d1;
+            let derived_days: Day = d2 - d1;
             assert_eq!(derived_days, expected_days, "Failed case: {d2:?} - {d1:?}");
         }
     }
 
     #[test]
     fn to_serial_number_works_correctly() {
-        let cases: [(i32, Month, i32); 6] = [
+        let cases: [(Day, Month, Year); 6] = [
             (1, Month::January, 1901),   // epoch start (first usable date)
             (29, Month::February, 1904), // leap day
             (31, Month::December, 1989), // year end
@@ -965,11 +982,11 @@ mod tests {
         ];
 
         for (day, month, year) in cases {
-            let date = Date::new(day, month, year);
+            let date: Date = Date::new(day, month, year);
 
-            let is_leap = Date::is_leap(year);
-            let derived = date.to_serial_number();
-            let expected =
+            let is_leap: bool = Date::is_leap(year);
+            let derived: SerialType = date.to_serial_number();
+            let expected: SerialType =
                 day + Date::month_offset(month as i32, is_leap) + Date::year_offset(year);
 
             assert_eq!(derived, expected, "Failed case: {date:?}");
@@ -995,7 +1012,7 @@ mod tests {
 
     #[test]
     fn to_serial_number_vs_quantlib() {
-        let cases: [(i32, Month, i32, i32); 7] = [
+        let cases: [(Day, Month, Year, SerialType); 7] = [
             // serial 0
             (1, Month::January, 1901, 367),     //
             (31, Month::December, 1901, 731),   // non-leap year end
@@ -1016,7 +1033,7 @@ mod tests {
 
     #[test]
     fn from_month_i32_gives_correct_month() {
-        let cases: [(i32, Month); 12] = [
+        let cases: [(MonthIndex, Month); 12] = [
             (1, Month::January),
             (2, Month::February),
             (3, Month::March),
@@ -1039,7 +1056,7 @@ mod tests {
 
     #[test]
     fn from_month_i32_invalid_gives_none() {
-        let invalid_cases: [i32; 4] = [0, 13, 99, -5];
+        let invalid_cases: [MonthIndex; 4] = [0, 13, 99, -5];
 
         for num in invalid_cases {
             let derived: Option<Month> = Month::from_i32(num);
@@ -1054,7 +1071,7 @@ mod tests {
 
     #[test]
     fn is_leap_true() {
-        let leap_years: [i32; 4] = [2000, 1928, 1956, 1900]; //1900
+        let leap_years: [Year; 4] = [2000, 1928, 1956, 1900]; //1900
         for year in leap_years {
             assert_eq!(
                 Date::is_leap(year),
@@ -1067,7 +1084,7 @@ mod tests {
 
     #[test]
     fn is_leap_false() {
-        let not_leap_years: [i32; 3] = [1945, 1999, 1901]; //1900 
+        let not_leap_years: [Year; 3] = [1945, 1999, 1901]; //1900 
         for year in not_leap_years {
             assert_eq!(
                 Date::is_leap(year),
@@ -1080,7 +1097,7 @@ mod tests {
 
     #[test]
     fn is_leap_invalid_panics() {
-        let invalid_years: [i32; 2] = [1700, 2500];
+        let invalid_years: [Year; 2] = [1700, 2500];
 
         for year in invalid_years {
             let result = panic::catch_unwind(|| {
@@ -1094,6 +1111,7 @@ mod tests {
             );
         }
     }
+
     #[test]
     fn month_length_not_leap_year() {
         let cases: [(i32, Month); 12] = [
@@ -1152,7 +1170,7 @@ mod tests {
 
     #[test]
     fn from_serial_number_invalid_panics() {
-        let invalid_serials: [i32; 3] = [Date::MIN_SERIAL - 1, 0, Date::MAX_SERIAL + 1];
+        let invalid_serials: [SerialType; 3] = [Date::MIN_SERIAL - 1, 0, Date::MAX_SERIAL + 1];
 
         for n in invalid_serials {
             let result = panic::catch_unwind(|| {
@@ -1210,11 +1228,18 @@ mod tests {
 
     #[test]
     fn display_date_outputs_correct_format() {
-        let cases: [(Date, &str); 4] = [
+        let cases: [(Date, &str); 11] = [
             (Date::new(1, Month::January, 1901), "January 1st, 1901"), // epoch
             (Date::new(15, Month::May, 1989), "May 15th, 1989"),       // mid example
             (Date::new(29, Month::February, 2000), "February 29th, 2000"), // leap year
             (Date::new(31, Month::December, 2199), "December 31st, 2199"), // max supported
+            (Date::new(1, Month::January, 2024), "January 1st, 2024"),
+            (Date::new(2, Month::January, 2024), "January 2nd, 2024"),
+            (Date::new(3, Month::January, 2024), "January 3rd, 2024"),
+            (Date::new(4, Month::January, 2024), "January 4th, 2024"),
+            (Date::new(11, Month::January, 2024), "January 11th, 2024"),
+            (Date::new(12, Month::January, 2024), "January 12th, 2024"),
+            (Date::new(13, Month::January, 2024), "January 13th, 2024"),
         ];
 
         for (date, expected) in cases {
@@ -1257,7 +1282,7 @@ mod tests {
 
     #[test]
     fn year_length_works_correctly() {
-        let cases: [(i32, i32); 4] = [
+        let cases: [(Year, i32); 4] = [
             (1900, 366), // Fake leap year
             (1901, 365), // No leap
             (2000, 366), // Leap year
@@ -1316,6 +1341,106 @@ mod tests {
         for (input, expected) in cases {
             let result = input.end_of_month();
             assert_eq!(result, expected, "Failed for date {:?}", input);
+        }
+    }
+
+    #[test]
+    fn todays_date_matches_system_time() {
+        // Get today using chrono
+        let chrono_today: NaiveDate = Local::now().date_naive();
+
+        let expected = Date::new(
+            chrono_today.day() as i32,
+            Month::from_i32(chrono_today.month() as i32).unwrap(),
+            chrono_today.year(),
+        );
+
+        let derived = Date::todays_date();
+
+        // 1. Check equality with chrono-based date
+        assert_eq!(
+            derived, expected,
+            "todays_date() mismatch: expected {:?}, got {:?}",
+            expected, derived
+        );
+
+        // 2. Check range boundaries
+        assert!(
+            derived >= Date::min_date() && derived <= Date::max_date(),
+            "todays_date() out of valid QuantLib range: {:?}",
+            derived
+        );
+
+        // 3. Check round-trip serial number consistency
+        let round_trip = Date::from_serial_number(derived.to_serial_number());
+        assert_eq!(
+            round_trip, derived,
+            "Round-trip serial_number failed for todays_date()"
+        );
+    }
+
+    #[test]
+    fn add_assign_days_works_correctly() {
+        let cases: [(Date, Day, Date); 3] = [
+            // Within same month
+            (
+                Date::new(1, Month::January, 2024),
+                10,
+                Date::new(11, Month::January, 2024),
+            ),
+            // Across month boundary
+            (
+                Date::new(25, Month::January, 2024),
+                10,
+                Date::new(4, Month::February, 2024),
+            ),
+            // Across year boundary
+            (
+                Date::new(31, Month::December, 2023),
+                1,
+                Date::new(1, Month::January, 2024),
+            ),
+        ];
+
+        for (mut start, delta, expected) in cases {
+            start += delta;
+            assert_eq!(
+                start, expected,
+                "Failed case: start +={} {:?}",
+                delta, start
+            );
+        }
+    }
+    #[test]
+    fn sub_assign_days_works_correctly() {
+        let cases: [(Date, Day, Date); 3] = [
+            // Within same month
+            (
+                Date::new(15, Month::January, 2024),
+                5,
+                Date::new(10, Month::January, 2024),
+            ),
+            // Across month boundary
+            (
+                Date::new(5, Month::February, 2024),
+                10,
+                Date::new(26, Month::January, 2024),
+            ),
+            // Across year boundary
+            (
+                Date::new(1, Month::January, 2024),
+                1,
+                Date::new(31, Month::December, 2023),
+            ),
+        ];
+
+        for (mut start, delta, expected) in cases {
+            start -= delta;
+            assert_eq!(
+                start, expected,
+                "Failed case: start -={} {:?}",
+                delta, start
+            );
         }
     }
 }
