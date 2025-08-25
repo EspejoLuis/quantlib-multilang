@@ -289,6 +289,13 @@
 - Start from CPP version and cascade to the other ones
 - Added `todays_date()` to date
 - Modified `Cargo.toml` to get chronos lib (for `todays_date()`)
+- ✅ `weekday.rs`, `weekday()` in `date.rs`
+- ❓ Thinking about having `enum month` in a proper `month.rs`
+- ✅ Weekday-related:
+  - ✅ `weekday()`
+- ✅ Weekday utilities
+  - ✅ `next_weekday()`
+  - ✅ `nth_weekday()`
 
 ### TODO:
 
@@ -299,32 +306,26 @@
         - ❌ Integration tests.
         - ❌ Check coverage. Some issue
         - ❌ Null cases
-        - ❌ Weekday-related:
-          - ❌ weekday()
-          - ❌ dayOfWeek() (alias for weekday())
-        - ❌ Weekday utilities
-          - ❌ nextWeekday(const Date&, Weekday)
-          - ❌ nthWeekday(Size n, Weekday, Month, Year)
         - ❌ Parsing
           - ❌ parseISO(const std::string&) (takes "2024-07-23" and turns it into a Date)
         - ❌ Operators:
           - Date& operator+=(const Period&);
           - Date& operator-=(const Period&);
-          - Date& operator++();    // pre-increment
-          - Date operator++(int);  // post-increment
-          - Date& operator--();    // pre-decrement
-          - Date operator--(int);  // post-decrement
-          - Date operator+(Date::serial_type days) const;
-          - Date operator-(Date::serial_type days) const;
           - Date operator+(const Period&) const;
           - Date operator-(const Period&) const;
+        - ❌ Period
 
   - C++:
 
     - ❌ EVERYTHING!!!
 
-  - C#: review everything according to new strategy
-  - Python: review everything according to new strategy
+  - C#: review everything according to new strategy:
+
+    - ❌ EVERYTHING!!!
+
+  - Python: review everything according to new strategy:
+
+    - ❌ EVERYTHING!!!
 
   - Python: Review:
     - We are using datetime + day,month,year. Is it correct ? should we store just datime so as to have one soruce of true ?

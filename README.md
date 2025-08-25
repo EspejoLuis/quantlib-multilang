@@ -21,13 +21,14 @@ quantlib-multilang/
 ## Goals
 
 - Learn modern C++ by rebuilding QuantLib functionality
-- Practice clean design in Pythonm, C#, Rust and C++ 
+- Practice clean design in Pythonm, C#, Rust and C++
 - Compare idiomatic patterns across three languages
 - Understand financial instruments and pricing engines deeply
 
 ## Getting Started
 
 Each subfolder contains its own instructions:
+
 - [`code-cpp/`](code-cpp/) – build with CMake
 - [`code-csharp/`](code-csharp/) – .NET 9 class library
 - [`code-python/`](code-python/) – uses `uv` and `ruff` and `polars`

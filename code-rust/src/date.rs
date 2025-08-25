@@ -1,9 +1,13 @@
-use chrono::prelude::*;
-use std::ffi::c_void;
-// Todays' date
+use super::weekday::{WeekDayIndex, Weekday};
+use chrono::{Datelike, Local, NaiveDate}; // Todays' date
 use std::fmt; // Display
 use std::ops::{Add, Sub}; // Addition, Subtraction
-use std::ops::{AddAssign, SubAssign}; // += and -=
+use std::ops::{AddAssign, SubAssign};
+
+type Day = i32;
+type Year = i32;
+type MonthIndex = i32;
+type SerialType = i32;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
 #[repr(u8)] // Ensures the compiler lays it out as 1–12. Without it, Rust doesn’t guarantee contiguous values.
@@ -49,12 +53,29 @@ impl Month {
     }
 }
 
-// Types
-type Day = i32;
-type Year = i32;
-type MonthIndex = i32;
-type SerialType = i32;
-
+// Traits:
+impl fmt::Display for Month {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // `&'static str` means a reference to a string literal that
+        // lives for the entire program (string literals never expire).
+        // Example: "January" is compiled into the binary and always safe.
+        let name: &'static str = match self {
+            Month::January => "January",
+            Month::February => "February",
+            Month::March => "March",
+            Month::April => "April",
+            Month::May => "May",
+            Month::June => "June",
+            Month::July => "July",
+            Month::August => "August",
+            Month::September => "September",
+            Month::October => "October",
+            Month::November => "November",
+            Month::December => "December",
+        };
+        write!(f, "{}", name)
+    }
+}
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Date {
     // Defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
@@ -86,15 +107,15 @@ impl Date {
         let is_leap: bool = Date::is_leap(year);
 
         // 3. Month length & offset
-        let month_length: i32 = Date::month_length(month as i32, is_leap);
-        let offset: i32 = Date::month_offset(month as i32, is_leap);
+        let month_length: i32 = Date::month_length(month as MonthIndex, is_leap);
+        let offset: i32 = Date::month_offset(month as MonthIndex, is_leap);
 
         // 4. Day check
         assert!(
             day > 0 && day <= month_length,
             "day {} outside month ({}) day-range [1,{}]",
             day,
-            month as i32,
+            month as MonthIndex,
             month_length
         );
 
@@ -103,7 +124,6 @@ impl Date {
 
         Date { serial_number }
     }
-
     pub fn from_serial_number(serial_number: SerialType) -> Date {
         assert!(
             (Date::MIN_SERIAL..=Date::MAX_SERIAL).contains(&serial_number),
@@ -200,11 +220,9 @@ impl Date {
 
         YEAR_OFFSET[(year - 1900) as usize]
     }
-
     fn year_lenght(year: Year) -> i32 {
         if Date::is_leap(year) { 366 } else { 365 }
     }
-
     fn month_offset(month_index: MonthIndex, is_leap: bool) -> i32 {
         /*
         Returns the offset in days from 1-Jan of `year`
@@ -231,7 +249,6 @@ impl Date {
             MONTH_OFFSET[month_index as usize]
         }
     }
-
     fn month_length(month_index: MonthIndex, is_leap: bool) -> i32 {
         // Days from 1-Jan to start of each month
         const MONTH_LENGTH: [i32; 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -242,7 +259,6 @@ impl Date {
             false => MONTH_LENGTH[month_index as usize],
         }
     }
-
     fn is_leap(year: Year) -> bool {
         assert!(
             (1900..=2200).contains(&year),
@@ -324,15 +340,13 @@ impl Date {
     pub fn day_of_month(&self) -> Day {
         let year: Year = self.year();
         let leap: bool = Date::is_leap(year);
-        let month_index: MonthIndex = self.month() as i32;
+        let month_index: MonthIndex = self.month() as MonthIndex;
 
         self.serial_number - Date::year_offset(year) - Date::month_offset(month_index, leap)
     }
-
     pub fn day_of_year(&self) -> Day {
         self.serial_number - Date::year_offset(self.year())
     }
-
     pub fn year(&self) -> Year {
         // Initial guess
         let mut year: Year = (self.serial_number / 365) + 1900;
@@ -344,7 +358,6 @@ impl Date {
 
         year
     }
-
     pub fn month(&self) -> Month {
         let day_of_year: Day = self.day_of_year();
         let year: Year = self.year();
@@ -366,69 +379,120 @@ impl Date {
         // month_index cannot be 13
         Month::from_i32(month_index).unwrap()
     }
-
     pub fn day(&self) -> Day {
         self.day_of_month()
     }
-
     pub fn to_serial_number(&self) -> SerialType {
         self.serial_number
     }
-
     pub fn min_date() -> Date {
         Date::from_serial_number(Date::MIN_SERIAL)
     }
-
     pub fn max_date() -> Date {
         Date::from_serial_number(Date::MAX_SERIAL)
     }
-
     pub fn is_end_of_month(&self) -> bool {
-        self.day() == Date::month_length(self.month() as i32, Date::is_leap(self.year()))
+        self.day() == Date::month_length(self.month() as MonthIndex, Date::is_leap(self.year()))
     }
-
     pub fn end_of_month(&self) -> Date {
         let month: Month = self.month();
         let year: Year = self.year();
         Date::new(
-            Date::month_length(month as i32, Date::is_leap(year)),
+            Date::month_length(month as MonthIndex, Date::is_leap(year)),
             month,
             year,
         )
     }
-
     pub fn todays_date() -> Date {
         let today: NaiveDate = Local::now().date_naive();
         let year: Year = today.year();
-        let month = Month::from_i32(today.month() as i32).unwrap();
-        let day: Day = today.day() as i32;
+        let month: Month = Month::from_i32(today.month() as MonthIndex).unwrap();
+        let day: Day = today.day() as Day;
         Date::new(day, month, year)
+    }
+    pub fn weekday(&self) -> Weekday {
+        /*
+        If remainder is zero then it's a Saturday
+
+        When you divide by 7, the remainder cycles every 7 days:
+        … remainder 1 → Sunday
+        … remainder 2 → Monday
+        … remainder 3 → Tuesday
+        … remainder 4 → Wednesday
+        … remainder 5 → Thursday
+        … remainder 6 → Friday
+        … remainder 0 → Saturday
+        */
+        let day_mask: SerialType = self.serial_number % 7;
+        let day_of_week: WeekDayIndex = if day_mask == 0 { 7 } else { day_mask };
+        Weekday::from_i32(day_of_week).unwrap()
+    }
+    pub fn next_weekday(&self, target_day_of_week: Weekday) -> Date {
+        /*
+        // starting from a given date, move forward until you hit the requested Weekday.
+        // New Date
+
+        Suppose today is Wednesday 21-Aug-2024 (weekday = 3).
+            - You ask for the next Friday (weekday = 5).
+            - current = 3, target = 5
+            - current > target? → No → so diff = 0 - 3 + 5 = 2
+            - Return = Wednesday + 2 days = Friday 23-Aug-2024
+
+        Suppose today is Friday 23-Aug-2024 (weekday = 5).
+            - You ask for the next Wednesday (weekday = 3).
+            - current = 5, target = 3
+            - current > target? → Yes → so diff = 7 - 5 + 3 = 5
+            - Return = Friday + 5 days = Wednesday 28-Aug-2024
+
+        If next is the same of the starting date then it should not give a new date i.e.
+        if next Friday is asked and the current date is already a Friday, then the result
+        will be the same date.
+        */
+        let current_day_of_week: WeekDayIndex = self.weekday() as WeekDayIndex;
+        let target_day_of_week: WeekDayIndex = target_day_of_week as WeekDayIndex;
+        let diff: WeekDayIndex = if current_day_of_week > target_day_of_week {
+            7
+        } else {
+            0
+        } - current_day_of_week
+            + target_day_of_week;
+
+        *self + diff
+    }
+    pub fn nth_weekday(nth: usize, day_of_week: Weekday, month: Month, year: Year) -> Date {
+        /*
+        Find the nth occurrence of a specific weekday in a month/year.
+
+        Example 1:
+            - Find the 3rd Friday of September 2024.
+            - First day of September 2024 is Sunday.
+            - target weekday = Friday.
+            - Formula finds: 20-Sep-2024.
+
+        Example 2:
+            - Find the 1st Monday of May 2025.
+            - First day of May 2025 is Thursday.
+            - First Monday = 5-May-2025.
+
+        */
+        assert!(nth > 0, "The zeroth day of the week is not defined");
+        assert!(nth < 6, "No more the 5 weekday in a given month");
+
+        let day_of_week: WeekDayIndex = day_of_week as WeekDayIndex;
+        let first_day_of_week: WeekDayIndex = Date::new(1, month, year).weekday() as WeekDayIndex;
+
+        let skip: i32 = nth as i32
+            - if day_of_week >= first_day_of_week {
+                1
+            } else {
+                0
+            };
+
+        Date::new(1 + day_of_week + skip * 7 - first_day_of_week, month, year)
     }
 }
 
 // Traits:
-impl fmt::Display for Month {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // `&'static str` means a reference to a string literal that
-        // lives for the entire program (string literals never expire).
-        // Example: "January" is compiled into the binary and always safe.
-        let name: &'static str = match self {
-            Month::January => "January",
-            Month::February => "February",
-            Month::March => "March",
-            Month::April => "April",
-            Month::May => "May",
-            Month::June => "June",
-            Month::July => "July",
-            Month::August => "August",
-            Month::September => "September",
-            Month::October => "October",
-            Month::November => "November",
-            Month::December => "December",
-        };
-        write!(f, "{}", name)
-    }
-}
 impl fmt::Display for Date {
     /*
     - impl: we are implementing something.
@@ -691,7 +755,7 @@ mod tests {
                 "Expected panic but got Ok for case: {} ({}-{}-{})",
                 label,
                 day,
-                month as i32,
+                month as MonthIndex,
                 year
             );
         }
@@ -987,7 +1051,7 @@ mod tests {
             let is_leap: bool = Date::is_leap(year);
             let derived: SerialType = date.to_serial_number();
             let expected: SerialType =
-                day + Date::month_offset(month as i32, is_leap) + Date::year_offset(year);
+                day + Date::month_offset(month as MonthIndex, is_leap) + Date::year_offset(year);
 
             assert_eq!(derived, expected, "Failed case: {date:?}");
         }
@@ -1003,7 +1067,7 @@ mod tests {
         ];
 
         for date in cases {
-            let serial_number: i32 = date.to_serial_number();
+            let serial_number: SerialType = date.to_serial_number();
             let derived_date: Date = Date::from_serial_number(serial_number);
 
             assert_eq!(derived_date, date);
@@ -1025,7 +1089,7 @@ mod tests {
 
         for (day, month, year, expected_serial) in cases {
             let date: Date = Date::new(day, month, year);
-            let derived: i32 = date.to_serial_number();
+            let derived: SerialType = date.to_serial_number();
 
             assert_eq!(derived, expected_serial, "Failed case: {date:?}");
         }
@@ -1114,7 +1178,7 @@ mod tests {
 
     #[test]
     fn month_length_not_leap_year() {
-        let cases: [(i32, Month); 12] = [
+        let cases: [(Day, Month); 12] = [
             (31, Month::January),
             (28, Month::February),
             (31, Month::March),
@@ -1130,7 +1194,7 @@ mod tests {
         ];
         for (days, month) in cases {
             assert_eq!(
-                Date::month_length(month as i32, false),
+                Date::month_length(month as MonthIndex, false),
                 days,
                 "Month {} for year {} does not have right number of days {}",
                 month,
@@ -1142,7 +1206,7 @@ mod tests {
 
     #[test]
     fn month_length_leap_year() {
-        let cases: [(i32, Month); 12] = [
+        let cases: [(Day, Month); 12] = [
             (31, Month::January),
             (29, Month::February),
             (31, Month::March),
@@ -1158,7 +1222,7 @@ mod tests {
         ];
         for (days, month) in cases {
             assert_eq!(
-                Date::month_length(month as i32, true),
+                Date::month_length(month as MonthIndex, true),
                 days,
                 "Month {} for year {} does not have right number of days {}",
                 month,
@@ -1247,6 +1311,26 @@ mod tests {
         }
     }
 
+    #[test]
+    fn long_date_outputs_correct_format() {
+        let cases: [(Date, &str); 11] = [
+            (Date::new(1, Month::January, 1901), "January 1st, 1901"), // epoch
+            (Date::new(15, Month::May, 1989), "May 15th, 1989"),       // mid example
+            (Date::new(29, Month::February, 2000), "February 29th, 2000"), // leap year
+            (Date::new(31, Month::December, 2199), "December 31st, 2199"), // max supported
+            (Date::new(1, Month::January, 2024), "January 1st, 2024"),
+            (Date::new(2, Month::January, 2024), "January 2nd, 2024"),
+            (Date::new(3, Month::January, 2024), "January 3rd, 2024"),
+            (Date::new(4, Month::January, 2024), "January 4th, 2024"),
+            (Date::new(11, Month::January, 2024), "January 11th, 2024"),
+            (Date::new(12, Month::January, 2024), "January 12th, 2024"),
+            (Date::new(13, Month::January, 2024), "January 13th, 2024"),
+        ];
+
+        for (date, expected) in cases {
+            assert_eq!(io::long_date(&date), expected, "Failed for date {:?}", date);
+        }
+    }
     #[test]
     fn short_date_outputs_correct_format() {
         let cases: [(Date, &str); 4] = [
@@ -1350,8 +1434,8 @@ mod tests {
         let chrono_today: NaiveDate = Local::now().date_naive();
 
         let expected = Date::new(
-            chrono_today.day() as i32,
-            Month::from_i32(chrono_today.month() as i32).unwrap(),
+            chrono_today.day() as Day,
+            Month::from_i32(chrono_today.month() as MonthIndex).unwrap(),
             chrono_today.year(),
         );
 
@@ -1411,6 +1495,7 @@ mod tests {
             );
         }
     }
+
     #[test]
     fn sub_assign_days_works_correctly() {
         let cases: [(Date, Day, Date); 3] = [
@@ -1440,6 +1525,86 @@ mod tests {
                 start, expected,
                 "Failed case: start -={} {:?}",
                 delta, start
+            );
+        }
+    }
+
+    #[test]
+    fn test_next_weekday_edge_cases() {
+        let cases: [(Date, Weekday, Date); 3] = [
+            // (start_date, target_weekday, expected_date)
+            (
+                Date::new(21, Month::August, 2024),
+                Weekday::Friday,
+                Date::new(23, Month::August, 2024),
+            ), // Wed → Fri
+            (
+                Date::new(23, Month::August, 2024),
+                Weekday::Wednesday,
+                Date::new(28, Month::August, 2024),
+            ), // Fri → Wed next week
+            (
+                Date::new(23, Month::August, 2024),
+                Weekday::Friday,
+                Date::new(23, Month::August, 2024),
+            ), // Fri → Fri (same date)
+        ];
+
+        for (start, target, expected) in cases {
+            let result: Date = start.next_weekday(target);
+            assert_eq!(result, expected);
+        }
+    }
+
+    #[test]
+    fn test_nth_weekday_edge_cases() {
+        let cases: [(usize, Weekday, Month, Year, Date); 3] = [
+            // (nth, weekday, month, year, expected_date)
+            (
+                1,
+                Weekday::Monday,
+                Month::May,
+                2025,
+                Date::new(5, Month::May, 2025),
+            ), // 1st Monday of May 2025
+            (
+                3,
+                Weekday::Friday,
+                Month::September,
+                2024,
+                Date::new(20, Month::September, 2024),
+            ), // 3rd Friday of Sep 2024
+            (
+                5,
+                Weekday::Friday,
+                Month::March,
+                2024,
+                Date::new(29, Month::March, 2024),
+            ), // 5th Friday in March 2024 (leap year)
+        ];
+
+        for (nth, wd, month, year, expected) in cases {
+            let result: Date = Date::nth_weekday(nth, wd, month, year);
+            assert_eq!(result, expected);
+        }
+    }
+
+    #[test]
+    fn nth_weekday_invalid_panics() {
+        let cases: [(usize, Weekday, Month, i32); 3] = [
+            (0, Weekday::Monday, Month::January, 2025), // nth = 0 → invalid
+            (6, Weekday::Monday, Month::January, 2025), // nth = 6 → invalid
+            (5, Weekday::Monday, Month::February, 2025), // Feb 2025 has only 4 Mondays
+        ];
+
+        for (nth, wd, month, year) in cases {
+            let result = panic::catch_unwind(|| {
+                Date::nth_weekday(nth, wd, month, year);
+            });
+
+            assert!(
+                result.is_err(),
+                "Expected panic for nth={nth}, wd={wd:?}, month={month:?}, year={year} but got Ok"
             );
         }
     }
