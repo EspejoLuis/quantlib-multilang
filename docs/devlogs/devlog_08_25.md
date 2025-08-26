@@ -297,6 +297,12 @@
   - ✅ `next_weekday()`
   - ✅ `nth_weekday()`
 
+## 26 August 2025: Rust time unit, frequency:
+
+- ✅ `time_unit.rs`
+- ✅ `frequency.rs`
+- Working on improving the detail,io structure for `date.rs`
+
 ### TODO:
 
 - Date:
@@ -314,6 +320,7 @@
           - Date operator+(const Period&) const;
           - Date operator-(const Period&) const;
         - ❌ Period
+        - ❌ d.toFormattedString("%d-%b-%Y");
 
   - C++:
 

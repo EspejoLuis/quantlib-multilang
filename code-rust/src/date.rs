@@ -618,7 +618,6 @@ pub mod io {
             date.year()
         )
     }
-
     pub fn long_date(date: &Date) -> String {
         // January 21st, 1989
         format!(
@@ -628,7 +627,6 @@ pub mod io {
             date.year()
         )
     }
-
     pub fn iso_date(date: &Date) -> String {
         // 1989-12-31
         format!(
@@ -638,7 +636,6 @@ pub mod io {
             date.day()
         )
     }
-
     fn ordinal(n: Day) -> String {
         // Mod is the remainder
         // n%100 tells exactly the last two digits of any number

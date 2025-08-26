@@ -1,5 +1,8 @@
 // i.e. include date.rs file
 mod date;
+mod frequency;
+mod period;
+mod time_unit;
 mod weekday;
 
 // So Date can be used directly
