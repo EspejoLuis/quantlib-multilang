@@ -6,7 +6,7 @@ use std::ops::{AddAssign, SubAssign};
 
 type Day = i32;
 type Year = i32;
-type MonthIndex = i32;
+type MonthIndex = usize;
 type SerialType = i32;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
@@ -76,6 +76,7 @@ impl fmt::Display for Month {
         write!(f, "{}", name)
     }
 }
+
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Date {
     // Defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
@@ -88,6 +89,7 @@ pub struct Date {
                                //pub month: Month,
                                //pub day: u32,
 }
+
 impl Date {
     const MIN_SERIAL: i32 = 367; // 1901-01-01
     const MAX_SERIAL: i32 = 109574; // 2199-12-31
@@ -108,8 +110,8 @@ impl Date {
 
         // 3. Month length & offset
         let month_length: i32 = Date::month_length(month as MonthIndex, is_leap);
-        let offset: i32 = Date::month_offset(month as MonthIndex, is_leap);
-
+        let month_offset: i32 = Date::month_offset(month as MonthIndex, is_leap);
+        let year_offset: i32 = Date::year_offset(year);
         // 4. Day check
         assert!(
             day > 0 && day <= month_length,
@@ -120,7 +122,7 @@ impl Date {
         );
 
         // 5. Serial number
-        let serial_number: SerialType = day + offset + Date::year_offset(year);
+        let serial_number: SerialType = day + month_offset + year_offset;
 
         Date { serial_number }
     }
@@ -364,7 +366,7 @@ impl Date {
         let leap: bool = Date::is_leap(year);
 
         // Rough guess
-        let mut month_index: MonthIndex = day_of_year / 30 + 1;
+        let mut month_index: MonthIndex = (day_of_year / 30 + 1) as MonthIndex;
 
         // Adjust down if too far
         while day_of_year <= Date::month_offset(month_index, leap) {
@@ -424,7 +426,7 @@ impl Date {
         … remainder 0 → Saturday
         */
         let day_mask: SerialType = self.serial_number % 7;
-        let day_of_week: WeekDayIndex = if day_mask == 0 { 7 } else { day_mask };
+        let day_of_week: WeekDayIndex = if day_mask == 0 { 7 } else { day_mask as usize };
         Weekday::from_i32(day_of_week).unwrap()
     }
     pub fn next_weekday(&self, target_day_of_week: Weekday) -> Date {
@@ -448,9 +450,9 @@ impl Date {
         if next Friday is asked and the current date is already a Friday, then the result
         will be the same date.
         */
-        let current_day_of_week: WeekDayIndex = self.weekday() as WeekDayIndex;
-        let target_day_of_week: WeekDayIndex = target_day_of_week as WeekDayIndex;
-        let diff: WeekDayIndex = if current_day_of_week > target_day_of_week {
+        let current_day_of_week: Day = self.weekday() as Day;
+        let target_day_of_week: Day = target_day_of_week as Day;
+        let diff: Day = if current_day_of_week > target_day_of_week {
             7
         } else {
             0
@@ -478,10 +480,10 @@ impl Date {
         assert!(nth > 0, "The zeroth day of the week is not defined");
         assert!(nth < 6, "No more the 5 weekday in a given month");
 
-        let day_of_week: WeekDayIndex = day_of_week as WeekDayIndex;
-        let first_day_of_week: WeekDayIndex = Date::new(1, month, year).weekday() as WeekDayIndex;
+        let day_of_week: Day = day_of_week as Day;
+        let first_day_of_week: Day = Date::new(1, month, year).weekday() as Day;
 
-        let skip: i32 = nth as i32
+        let skip: Day = nth as Day
             - if day_of_week >= first_day_of_week {
                 1
             } else {
@@ -520,7 +522,7 @@ impl fmt::Display for Date {
         - &mut fmt::Formatter -> allowed to write into this formatter buffer
         */
     fn fmt(&self, formatter_buffer: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter_buffer, "{}", io::long_date(self))
+        write!(formatter_buffer, "{}", io::long_date(*self))
     }
 }
 impl Add<Day> for Date {
@@ -603,53 +605,78 @@ impl Sub<Date> for Date {
     }
 }
 
-// Dates strings outputs
-pub mod io {
-
+// Private
+mod detail {
     use super::Date;
-    use crate::date::Day;
+    use crate::{time::date::MonthIndex, utilities::dateformatter::io};
+    use std::fmt;
 
-    pub fn short_date(date: &Date) -> String {
-        // 12-31-1989 (US)
-        format!(
-            "{:02}/{:02}/{}",
-            date.month() as u8,
-            date.day(),
-            date.year()
-        )
+    pub(crate) struct LongDate {
+        pub(crate) date: Date,
     }
-    pub fn long_date(date: &Date) -> String {
-        // January 21st, 1989
-        format!(
-            "{} {}, {}",
-            date.month(),
-            ordinal(date.day()), // e.g. 23 -> "23rd"
-            date.year()
-        )
+    pub(crate) struct ShortDate {
+        pub(crate) date: Date,
     }
-    pub fn iso_date(date: &Date) -> String {
-        // 1989-12-31
-        format!(
-            "{:04}-{:02}-{:02}",
-            date.year(),
-            date.month() as u8,
-            date.day()
-        )
+    pub(crate) struct IsoDate {
+        pub(crate) date: Date,
     }
-    fn ordinal(n: Day) -> String {
-        // Mod is the remainder
-        // n%100 tells exactly the last two digits of any number
-        let suffix: &'static str = if (11..=13).contains(&(n % 100)) {
-            "th"
-        } else {
-            match n % 10 {
-                1 => "st",
-                2 => "nd",
-                3 => "rd",
-                _ => "th",
-            }
-        };
-        format!("{}{}", n, suffix)
+
+    impl fmt::Display for LongDate {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            let d: &Date = &self.date;
+            // Example: "July 23, 2024"
+            write!(
+                f,
+                "{} {}, {}",
+                d.month(),
+                io::ordinal(d.day() as usize),
+                d.year()
+            )
+        }
+    }
+    impl fmt::Display for ShortDate {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            let d: &Date = &self.date;
+            write!(
+                f,
+                "{:02}/{:02}/{}",
+                d.month() as MonthIndex,
+                d.day(),
+                d.year()
+            )
+        }
+    }
+    impl fmt::Display for IsoDate {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            let d: &Date = &self.date;
+            write!(
+                f,
+                "{:04}-{:02}-{:02}",
+                d.year(),
+                d.month() as MonthIndex,
+                d.day()
+            )
+        }
+    }
+}
+
+// Public String API
+pub(crate) mod io {
+    /*
+    println!("{}", io::long_date(d));   // default-style
+    println!("{}", io::short_date(d));  // 07/23/2024
+    println!("{}", io::iso_date(d));    // 2024-07-23
+    */
+    use super::{Date, detail};
+
+    pub fn long_date(d: Date) -> impl std::fmt::Display {
+        detail::LongDate { date: d }
+    }
+    pub fn short_date(d: Date) -> impl std::fmt::Display {
+        detail::ShortDate { date: d }
+    }
+    pub fn iso_date(d: Date) -> impl std::fmt::Display {
+        detail::IsoDate { date: d }
     }
 }
 
@@ -1117,7 +1144,7 @@ mod tests {
 
     #[test]
     fn from_month_i32_invalid_gives_none() {
-        let invalid_cases: [MonthIndex; 4] = [0, 13, 99, -5];
+        let invalid_cases: [MonthIndex; 3] = [0, 13, 99];
 
         for num in invalid_cases {
             let derived: Option<Month> = Month::from_i32(num);
@@ -1325,7 +1352,12 @@ mod tests {
         ];
 
         for (date, expected) in cases {
-            assert_eq!(io::long_date(&date), expected, "Failed for date {:?}", date);
+            assert_eq!(
+                format!("{}", io::long_date(date)),
+                expected,
+                "Failed for date {:?}",
+                date
+            );
         }
     }
     #[test]
@@ -1339,7 +1371,7 @@ mod tests {
 
         for (date, expected) in cases {
             assert_eq!(
-                io::short_date(&date),
+                format!("{}", io::short_date(date)),
                 expected,
                 "Failed for date {:?}",
                 date
@@ -1357,7 +1389,12 @@ mod tests {
         ];
 
         for (date, expected) in cases {
-            assert_eq!(io::iso_date(&date), expected, "Failed for date {:?}", date);
+            assert_eq!(
+                format!("{}", io::iso_date(date)),
+                expected,
+                "Failed for date {:?}",
+                date
+            );
         }
     }
 

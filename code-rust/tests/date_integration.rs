@@ -5,8 +5,8 @@ So now, instead of
 we can use
     let d = Date::new(…);
 */
-use code_rust::date::Date;
-use code_rust::date::Month;
+use code_rust::time::date::Date;
+use code_rust::time::date::Month;
 
 #[test]
 fn serial_conversion_works_correctly() {

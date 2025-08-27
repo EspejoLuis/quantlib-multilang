@@ -299,12 +299,19 @@
 
 ## 26 August 2025: Rust time unit, frequency:
 
-- ✅ `time_unit.rs`
-- ✅ `frequency.rs`
-- Working on improving the detail,io structure for `date.rs`
+- ✅ `time_unit.rs`.
+- ✅ `frequency.rs`.
+- Working on improving the detail,io structure for `date.rs`.
+
+## 27 August 2025: Rust time unit, frequency:
+
+- Changed structure to allign with Quantlib.
+- Add unit tests for `time_unit.rs`,`frequency.rs`,`dateformatter.rs`,`weekdays.rs`.
 
 ### TODO:
 
+- ❓ Thinking about having `enum month` in a proper `month.rs`
+- What about using Size (usize) instead of MonthIndex or WeekDayIndex
 - Date:
 
   - Rust:

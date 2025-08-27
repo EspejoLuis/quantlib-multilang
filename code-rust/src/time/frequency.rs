@@ -37,3 +37,36 @@ impl fmt::Display for Frequency {
         write!(f, "{}", frequency)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn display_frequency_outputs_correct_format() {
+        let cases: [(Frequency, &str); 13] = [
+            (Frequency::NoFrequency, "No-Frequency"),
+            (Frequency::Once, "Once"),
+            (Frequency::Annual, "Annual"),
+            (Frequency::Semiannual, "Semiannual"),
+            (Frequency::EveryFourthMonth, "Every-Fourth-Month"),
+            (Frequency::Quarterly, "Quarterly"),
+            (Frequency::Bimonthly, "Bimonthly"),
+            (Frequency::Monthly, "Monthly"),
+            (Frequency::EveryFourthWeek, "Every-fourth-week"),
+            (Frequency::Biweekly, "Biweekly"),
+            (Frequency::Weekly, "Weekly"),
+            (Frequency::Daily, "Daily"),
+            (Frequency::OtherFrequency, "Unknown frequency"),
+        ];
+
+        for (frequency, expected) in cases {
+            assert_eq!(
+                format!("{}", frequency),
+                expected,
+                "Failed for frequency {:?}",
+                frequency
+            );
+        }
+    }
+}
