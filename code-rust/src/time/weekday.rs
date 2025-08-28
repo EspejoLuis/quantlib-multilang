@@ -15,7 +15,7 @@ pub enum Weekday {
 }
 
 impl Weekday {
-    pub fn from_i32(number: WeekDayIndex) -> Option<Self> {
+    pub fn from_index(number: WeekDayIndex) -> Self {
         if (1..=7).contains(&number) {
             /*
             transmute --> low-level cast that tells the compiler.
@@ -24,9 +24,9 @@ impl Weekday {
             unsafe --> "the contract necessary to call the operations inside the block has been
             checked by the programmer and is guaranteed to be respected"
             */
-            Some(unsafe { std::mem::transmute(number as u8) })
+            unsafe { std::mem::transmute(number as u8) }
         } else {
-            None
+            panic!("Weekday index {} out of range [1,7]", number);
         }
     }
 }
@@ -40,14 +40,14 @@ impl fmt::Display for Weekday {
 impl Add<WeekDayIndex> for Weekday {
     type Output = Weekday;
     fn add(self, right_hand_side: WeekDayIndex) -> Weekday {
-        Weekday::from_i32(self as WeekDayIndex + right_hand_side).unwrap()
+        Weekday::from_index(self as WeekDayIndex + right_hand_side)
     }
 }
 impl Sub<WeekDayIndex> for Weekday {
     type Output = Weekday;
 
     fn sub(self, right_hand_side: WeekDayIndex) -> Weekday {
-        Weekday::from_i32(self as WeekDayIndex - right_hand_side).unwrap()
+        Weekday::from_index(self as WeekDayIndex - right_hand_side)
     }
 }
 
@@ -220,7 +220,7 @@ mod tests {
     }
 
     #[test]
-    fn from_i32_valid_inputs() {
+    fn from_index_valid_inputs() {
         let cases: [(WeekDayIndex, Weekday); 7] = [
             (1, Weekday::Sunday),
             (2, Weekday::Monday),
@@ -232,15 +232,23 @@ mod tests {
         ];
 
         for (num, expected) in cases {
-            assert_eq!(Weekday::from_i32(num), Some(expected));
+            assert_eq!(Weekday::from_index(num), expected);
         }
     }
 
     #[test]
-    fn from_i32_invalid_inputs() {
+    fn from_index_invalid_inputs_panic() {
         let invalid_cases: [WeekDayIndex; 3] = [0, 8, 100];
         for num in invalid_cases {
-            assert_eq!(Weekday::from_i32(num), None, "Failed for {}", num);
+            let result = panic::catch_unwind(|| {
+                Weekday::from_index(num);
+            });
+
+            assert!(
+                result.is_err(),
+                "Expected panic for input {} but got Ok",
+                num
+            );
         }
     }
 

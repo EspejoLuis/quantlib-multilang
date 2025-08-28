@@ -310,7 +310,9 @@
 
 ## 28 August 2025: Rust period:
 
-- Adding `period.rs`
+- Added `period.rs`.
+- Added unite tests.
+- ❌ Period --> Checking coverage. One branch missing.
 
 ### TODO:
 
@@ -330,7 +332,6 @@
           - Date& operator-=(const Period&);
           - Date operator+(const Period&) const;
           - Date operator-(const Period&) const;
-        - ❌ Period
         - ❌ d.toFormattedString("%d-%b-%Y");
 
   - C++:

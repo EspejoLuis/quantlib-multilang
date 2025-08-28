@@ -38,6 +38,20 @@ impl fmt::Display for Frequency {
     }
 }
 
+impl Frequency {
+    pub fn from_nth_times_per_year(nth_times: u32) -> Frequency {
+        match nth_times {
+            12 => Frequency::Monthly,
+            6 => Frequency::Bimonthly,
+            4 => Frequency::Quarterly,
+            3 => Frequency::EveryFourthMonth,
+            2 => Frequency::Semiannual,
+            1 => Frequency::Annual,
+            _ => Frequency::OtherFrequency,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -66,6 +80,40 @@ mod tests {
                 expected,
                 "Failed for frequency {:?}",
                 frequency
+            );
+        }
+    }
+
+    #[test]
+    fn from_nth_times_per_year_valid_inputs() {
+        let cases: [(u32, Frequency); 6] = [
+            (12, Frequency::Monthly),
+            (6, Frequency::Bimonthly),
+            (4, Frequency::Quarterly),
+            (3, Frequency::EveryFourthMonth),
+            (2, Frequency::Semiannual),
+            (1, Frequency::Annual),
+        ];
+
+        for (input, expected) in cases {
+            assert_eq!(
+                Frequency::from_nth_times_per_year(input),
+                expected,
+                "Failed for input {}",
+                input
+            );
+        }
+    }
+
+    #[test]
+    fn from_nth_times_per_year_invalid_inputs() {
+        let invalid_cases: [u32; 7] = [0, 5, 7, 8, 10, 13, 100];
+        for input in invalid_cases {
+            assert_eq!(
+                Frequency::from_nth_times_per_year(input),
+                Frequency::OtherFrequency,
+                "Expected OtherFrequency for input {}",
+                input
             );
         }
     }

@@ -37,7 +37,7 @@ impl Month {
     Some(T),
     }
     */
-    pub fn from_i32(number: MonthIndex) -> Option<Self> {
+    pub fn from_index(number: MonthIndex) -> Self {
         if (1..=12).contains(&number) {
             /*
             transmute --> low-level cast that tells the compiler.
@@ -46,9 +46,9 @@ impl Month {
             unsafe --> "the contract necessary to call the operations inside the block has been
             checked by the programmer and is guaranteed to be respected"
             */
-            Some(unsafe { std::mem::transmute(number as u8) })
+            unsafe { std::mem::transmute(number as u8) }
         } else {
-            None
+            panic!("Month index {} out of range [1,12]", number);
         }
     }
 }
@@ -379,7 +379,7 @@ impl Date {
         }
 
         // month_index cannot be 13
-        Month::from_i32(month_index).unwrap()
+        Month::from_index(month_index)
     }
     pub fn day(&self) -> Day {
         self.day_of_month()
@@ -408,7 +408,7 @@ impl Date {
     pub fn todays_date() -> Date {
         let today: NaiveDate = Local::now().date_naive();
         let year: Year = today.year();
-        let month: Month = Month::from_i32(today.month() as MonthIndex).unwrap();
+        let month: Month = Month::from_index(today.month() as MonthIndex);
         let day: Day = today.day() as Day;
         Date::new(day, month, year)
     }
@@ -427,7 +427,7 @@ impl Date {
         */
         let day_mask: SerialType = self.serial_number % 7;
         let day_of_week: WeekDayIndex = if day_mask == 0 { 7 } else { day_mask as usize };
-        Weekday::from_i32(day_of_week).unwrap()
+        Weekday::from_index(day_of_week)
     }
     pub fn next_weekday(&self, target_day_of_week: Weekday) -> Date {
         /*
@@ -1121,7 +1121,7 @@ mod tests {
     }
 
     #[test]
-    fn from_month_i32_gives_correct_month() {
+    fn from_index_gives_correct_month() {
         let cases: [(MonthIndex, Month); 12] = [
             (1, Month::January),
             (2, Month::February),
@@ -1138,22 +1138,22 @@ mod tests {
         ];
 
         for (num, expected) in cases {
-            let derived: Option<Month> = Month::from_i32(num);
-            assert_eq!(derived.unwrap(), expected, "Failed for number {}", num);
+            let derived: Month = Month::from_index(num);
+            assert_eq!(derived, expected, "Failed for number {}", num);
         }
     }
 
     #[test]
-    fn from_month_i32_invalid_gives_none() {
+    fn from_index_invalid_panics() {
         let invalid_cases: [MonthIndex; 3] = [0, 13, 99];
-
         for num in invalid_cases {
-            let derived: Option<Month> = Month::from_i32(num);
+            let result = panic::catch_unwind(|| {
+                Month::from_index(num);
+            });
             assert!(
-                derived.is_none(),
-                "Expected None for invalid month {}, but got {:?}",
-                num,
-                derived
+                result.is_err(),
+                "Expected panic for invalid month {} but got Ok",
+                num
             );
         }
     }
@@ -1470,11 +1470,11 @@ mod tests {
 
         let expected = Date::new(
             chrono_today.day() as Day,
-            Month::from_i32(chrono_today.month() as MonthIndex).unwrap(),
+            Month::from_index(chrono_today.month() as MonthIndex),
             chrono_today.year(),
         );
 
-        let derived = Date::todays_date();
+        let derived: Date = Date::todays_date();
 
         // 1. Check equality with chrono-based date
         assert_eq!(
