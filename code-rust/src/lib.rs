@@ -8,7 +8,7 @@ pub mod time {
     pub mod time_unit;
     pub mod weekday;
 }
-pub mod utilities {
+mod utilities {
     pub mod dateformatter;
 }
 

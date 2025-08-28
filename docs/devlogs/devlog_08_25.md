@@ -308,6 +308,10 @@
 - Changed structure to allign with Quantlib.
 - Add unit tests for `time_unit.rs`,`frequency.rs`,`dateformatter.rs`,`weekdays.rs`.
 
+## 28 August 2025: Rust period:
+
+- Adding `period.rs`
+
 ### TODO:
 
 - ❓ Thinking about having `enum month` in a proper `month.rs`

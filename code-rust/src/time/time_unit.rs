@@ -1,7 +1,7 @@
 use std::fmt;
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
-enum TimeUnit {
+pub enum TimeUnit {
     Days,
     Weeks,
     Months,

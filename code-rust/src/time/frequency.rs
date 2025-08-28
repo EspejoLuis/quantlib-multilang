@@ -1,7 +1,7 @@
 use std::fmt;
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
-enum Frequency {
+pub enum Frequency {
     NoFrequency = -1,     // null frequency
     Once = 0,             // only once, e.g., a zero-coupon
     Annual = 1,           // once a year

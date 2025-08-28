@@ -608,7 +608,8 @@ impl Sub<Date> for Date {
 // Private
 mod detail {
     use super::Date;
-    use crate::{time::date::MonthIndex, utilities::dateformatter::io};
+    use super::MonthIndex;
+    use crate::io;
     use std::fmt;
 
     pub(crate) struct LongDate {
