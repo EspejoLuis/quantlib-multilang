@@ -56,7 +56,7 @@ impl Period {
                 }
             }
             TimeUnit::Months => {
-                if 12 % abs_length == 0 && abs_length <= 12 {
+                if abs_length <= 12 && 12 % abs_length == 0 {
                     Frequency::from_nth_times_per_year(12 / abs_length)
                 } else {
                     Frequency::OtherFrequency
@@ -85,6 +85,37 @@ impl Period {
     }
     pub fn units(&self) -> TimeUnit {
         self.units
+    }
+    pub fn normalize(&mut self) {
+        // If object is owned and want to mutate
+        let units: TimeUnit = self.units;
+
+        if self.length == 0 {
+            self.units = TimeUnit::Days;
+        } else {
+            match units {
+                TimeUnit::Months => {
+                    if (self.length % 12) == 0 {
+                        self.length /= 12;
+                        self.units = TimeUnit::Years;
+                    }
+                }
+                TimeUnit::Days => {
+                    if (self.length % 7) == 0 {
+                        self.length /= 7;
+                        self.units = TimeUnit::Weeks;
+                    }
+                }
+                TimeUnit::Weeks | TimeUnit::Years => {}
+                _ => panic!("unknown time unit {:?}", units),
+            }
+        }
+    }
+    pub fn normalized(&self) -> Period {
+        //If want a normalized copy without touching the original
+        let mut period: Period = *self; // Create copy of the object
+        period.normalize();
+        period
     }
 }
 
@@ -137,6 +168,17 @@ mod tests {
     }
 
     #[test]
+    fn from_frequency_panics_on_otherfrequency() {
+        let result = panic::catch_unwind(|| {
+            let _ = Period::from_frequency(Frequency::OtherFrequency);
+        });
+        assert!(
+            result.is_err(),
+            "Expected panic on OtherFrequency but got Ok"
+        );
+    }
+
+    #[test]
     fn frequency_returns_expected_values() {
         let cases: [(Period, Frequency); 10] = [
             (Period::new(1, TimeUnit::Years), Frequency::Annual),
@@ -181,6 +223,7 @@ mod tests {
             assert_eq!(p.frequency(), expected_freq, "Mismatch for {:?}", p);
         }
     }
+
     #[test]
     fn frequency_zero_length_special_cases() {
         let cases: [(Period, Frequency); 4] = [
@@ -221,17 +264,6 @@ mod tests {
     }
 
     #[test]
-    fn from_frequency_panics_on_otherfrequency() {
-        let result = panic::catch_unwind(|| {
-            let _ = Period::from_frequency(Frequency::OtherFrequency);
-        });
-        assert!(
-            result.is_err(),
-            "Expected panic on OtherFrequency but got Ok"
-        );
-    }
-
-    #[test]
     fn frequency_panics_on_not_implemented_timeunits() {
         let cases: [Period; 5] = [
             Period::new(1, TimeUnit::Milliseconds),
@@ -244,6 +276,234 @@ mod tests {
         for p in cases {
             let result = panic::catch_unwind(|| {
                 let _ = p.frequency();
+            });
+            assert!(
+                result.is_err(),
+                "Expected panic for not implemented time units but got Ok"
+            );
+        }
+    }
+
+    #[test]
+    fn normalized_zero_length_becomes_days() {
+        let cases: [(Period, Period); 2] = [
+            (
+                Period {
+                    length: 0,
+                    units: TimeUnit::Months,
+                },
+                Period {
+                    length: 0,
+                    units: TimeUnit::Days,
+                },
+            ),
+            (
+                Period {
+                    length: 0,
+                    units: TimeUnit::Years,
+                },
+                Period {
+                    length: 0,
+                    units: TimeUnit::Days,
+                },
+            ),
+        ];
+
+        for (input, expected) in cases {
+            let result: Period = input.normalized();
+            assert_eq!(result.length, expected.length);
+            assert_eq!(result.units, expected.units);
+        }
+    }
+
+    #[test]
+    fn normalized_months_multiple_of_12_becomes_years() {
+        let cases: [(Period, Period); 3] = [
+            (
+                Period {
+                    length: 12,
+                    units: TimeUnit::Months,
+                },
+                Period {
+                    length: 1,
+                    units: TimeUnit::Years,
+                },
+            ),
+            (
+                Period {
+                    length: 24,
+                    units: TimeUnit::Months,
+                },
+                Period {
+                    length: 2,
+                    units: TimeUnit::Years,
+                },
+            ),
+            (
+                Period {
+                    length: 36,
+                    units: TimeUnit::Months,
+                },
+                Period {
+                    length: 3,
+                    units: TimeUnit::Years,
+                },
+            ),
+        ];
+
+        for (input, expected) in cases {
+            let result: Period = input.normalized();
+            assert_eq!(
+                (result.length, result.units),
+                (expected.length, expected.units)
+            );
+        }
+    }
+
+    #[test]
+    fn normalized_months_not_multiple_of_12_not_changed() {
+        let cases: [(Period, Period); 2] = [
+            (
+                Period {
+                    length: 14,
+                    units: TimeUnit::Months,
+                },
+                Period {
+                    length: 14,
+                    units: TimeUnit::Months,
+                },
+            ),
+            (
+                Period {
+                    length: 25,
+                    units: TimeUnit::Months,
+                },
+                Period {
+                    length: 25,
+                    units: TimeUnit::Months,
+                },
+            ),
+        ];
+
+        for (input, expected) in cases {
+            let result: Period = input.normalized();
+            assert_eq!(
+                (result.length, result.units),
+                (expected.length, expected.units)
+            );
+        }
+    }
+
+    #[test]
+    fn normalized_days_multiple_of_7_becomes_weeks() {
+        let cases: [(Period, Period); 3] = [
+            (
+                Period {
+                    length: 7,
+                    units: TimeUnit::Days,
+                },
+                Period {
+                    length: 1,
+                    units: TimeUnit::Weeks,
+                },
+            ),
+            (
+                Period {
+                    length: 14,
+                    units: TimeUnit::Days,
+                },
+                Period {
+                    length: 2,
+                    units: TimeUnit::Weeks,
+                },
+            ),
+            (
+                Period {
+                    length: 21,
+                    units: TimeUnit::Days,
+                },
+                Period {
+                    length: 3,
+                    units: TimeUnit::Weeks,
+                },
+            ),
+        ];
+
+        for (input, expected) in cases {
+            let result: Period = input.normalized();
+            assert_eq!(
+                (result.length, result.units),
+                (expected.length, expected.units)
+            );
+        }
+    }
+
+    #[test]
+    fn normalized_days_not_multiple_of_7_not_changed() {
+        let cases: [(Period, Period); 2] = [
+            (
+                Period {
+                    length: 8,
+                    units: TimeUnit::Days,
+                },
+                Period {
+                    length: 8,
+                    units: TimeUnit::Days,
+                },
+            ),
+            (
+                Period {
+                    length: 17,
+                    units: TimeUnit::Days,
+                },
+                Period {
+                    length: 17,
+                    units: TimeUnit::Days,
+                },
+            ),
+        ];
+
+        for (input, expected) in cases {
+            let result: Period = input.normalized();
+            assert_eq!(
+                (result.length, result.units),
+                (expected.length, expected.units)
+            );
+        }
+    }
+
+    #[test]
+    fn normalized_weeks_and_years_remain_unchanged() {
+        let cases: [Period; 2] = [
+            Period {
+                length: 5,
+                units: TimeUnit::Weeks,
+            },
+            Period {
+                length: 3,
+                units: TimeUnit::Years,
+            },
+        ];
+
+        for input in cases {
+            let result: Period = input.normalized();
+            assert_eq!((result.length, result.units), (input.length, input.units));
+        }
+    }
+
+    #[test]
+    fn normalize_panics_on_not_implemented_timeunits() {
+        let cases: [Period; 5] = [
+            Period::new(1, TimeUnit::Milliseconds),
+            Period::new(1, TimeUnit::Hours),
+            Period::new(1, TimeUnit::Microseconds),
+            Period::new(1, TimeUnit::Minutes),
+            Period::new(1, TimeUnit::Seconds),
+        ];
+
+        for p in cases {
+            let result = panic::catch_unwind(|| {
+                let _ = p.normalized();
             });
             assert!(
                 result.is_err(),

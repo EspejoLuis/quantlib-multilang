@@ -283,7 +283,7 @@
     - `iso_date`, `short_date`, `long_date`.
     - `is_end_of_month`,`end_of_month`.
 
-## 25 August 2025: Rust Date:
+## 25 August 2025: Rust Date
 
 - From now onwards, the strategy will be to start from the cpp/hpp files in quantlib. Upload them in ChatGPT. Focus on just those function that can be implemented (i.e. dont need other files). Afterwards, start adding the other functions (cpp/hpp) that are needed.
 - Start from CPP version and cascade to the other ones
@@ -297,22 +297,60 @@
   - ✅ `next_weekday()`
   - ✅ `nth_weekday()`
 
-## 26 August 2025: Rust time unit, frequency:
+## 26 August 2025: Rust time unit, frequency
 
 - ✅ `time_unit.rs`.
 - ✅ `frequency.rs`.
 - Working on improving the detail,io structure for `date.rs`.
 
-## 27 August 2025: Rust time unit, frequency:
+## 27 August 2025: Rust time unit, frequency
 
 - Changed structure to allign with Quantlib.
 - Add unit tests for `time_unit.rs`,`frequency.rs`,`dateformatter.rs`,`weekdays.rs`.
 
-## 28 August 2025: Rust period:
+## 28 August 2025 - Rust
 
 - Added `period.rs`.
-- Added unite tests.
-- ❌ Period --> Checking coverage. One branch missing.
+- Added unit tests...heavily relying on ChatGPT. The prompt is based on having loops, one max two assertion per functions. When panic, tests using `panic::catch_unwind`.
+- ❌ Period --> Checking coverage. One branch missing: done it was because of the two condition in here:
+
+  - Version 1 (old):
+
+  ```rust
+  if 12 % abs_length == 0 && abs_length <= 12 { ... }
+  ```
+
+  B was never evaluated as false:
+
+  | abs_length | Left (A = `12 % abs == 0`) | Right (B = `<= 12`) | Expression | Coverage note        |
+  | ---------- | -------------------------- | ------------------- | ---------- | -------------------- |
+  | 6          | true                       | true                | true       | ✅ A=true, B=true    |
+  | 5          | false                      | (skipped)           | false      | ⚠️ B never evaluated |
+  | 13         | false                      | (skipped)           | false      | ⚠️ B never evaluated |
+  | 12         | true                       | true                | true       | ✅ same as 6         |
+
+  - Version 2 (new):
+
+  ```rust
+  if abs_length <= 12 && 12 % abs_length == 0 { ... }
+  ```
+
+  | abs_length | Left (A = `<= 12`) | Right (B = `12 % abs == 0`) | Expression | Coverage note           |
+  | ---------- | ------------------ | --------------------------- | ---------- | ----------------------- |
+  | 6          | true               | true                        | true       | ✅ A=true, B=true       |
+  | 5          | true               | false                       | false      | ✅ A=true, B=false      |
+  | 13         | false              | (skipped)                   | false      | ✅ A=false case covered |
+
+- Added `normalize()` and `normalized()`. C++ code uses the below in `period.hpp`
+  ```cpp
+  inline Period Period::normalized() const {
+          Period p = *this;
+          p.normalize();
+          return p;
+      }
+  ```
+  - Small function inline in the header means it doesn’t get compiled into its own symbol in the .o file.
+  - Instead, its body is copied directly into every caller at compile time.
 
 ### TODO:
 
@@ -348,3 +386,7 @@
 
   - Python: Review:
     - We are using datetime + day,month,year. Is it correct ? should we store just datime so as to have one soruce of true ?
+
+```
+
+```
