@@ -117,6 +117,63 @@ impl Period {
         period.normalize();
         period
     }
+
+    pub fn years(&self) -> f64 {
+        // Convert into years
+        if self.length == 0 {
+            return 0.0;
+        }
+
+        match self.units {
+            TimeUnit::Days => panic!("cannot convert Days into Years"),
+            TimeUnit::Weeks => panic!("cannot convert Weeks into Years"),
+            TimeUnit::Months => self.length as f64 / 12.0,
+            TimeUnit::Years => self.length as f64,
+            _ => panic!("unknown time unit {:?}", self.units),
+        }
+    }
+    pub fn months(&self) -> f64 {
+        // Convert into months
+        if self.length == 0 {
+            return 0.0;
+        }
+
+        match self.units {
+            TimeUnit::Days => panic!("cannot convert Days into Months"),
+            TimeUnit::Weeks => panic!("cannot convert Weeks into Months"),
+            TimeUnit::Months => self.length as f64,
+            TimeUnit::Years => self.length as f64 * 12.0,
+            _ => panic!("unknown time unit {:?}", self.units),
+        }
+    }
+    pub fn weeks(&self) -> f64 {
+        // Convert into weeks
+        if self.length == 0 {
+            return 0.0;
+        }
+
+        match self.units {
+            TimeUnit::Days => self.length as f64 / 7.0,
+            TimeUnit::Weeks => self.length as f64,
+            TimeUnit::Months => panic!("cannot convert Months into Weeks"),
+            TimeUnit::Years => panic!("cannot convert Years into Weeks"),
+            _ => panic!("unknown time unit {:?}", self.units),
+        }
+    }
+    pub fn days(&self) -> f64 {
+        // Convert into days
+        if self.length == 0 {
+            return 0.0;
+        }
+
+        match self.units {
+            TimeUnit::Days => self.length as f64,
+            TimeUnit::Weeks => self.length as f64 * 7.0,
+            TimeUnit::Months => panic!("cannot convert Months into Days"),
+            TimeUnit::Years => panic!("cannot convert Years into Days"),
+            _ => panic!("unknown time unit {:?}", self.units),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -134,8 +191,22 @@ mod tests {
 
         for (len, unit) in cases {
             let p: Period = Period::new(len, unit);
-            assert_eq!(p.length(), len, "Length mismatch for {:?}", unit);
-            assert_eq!(p.units(), unit, "Unit mismatch for {:?}", unit);
+            assert_eq!(
+                p.length(),
+                len,
+                "Length mismatch for unit {:?}: got {}, expected {}",
+                unit,
+                p.length(),
+                len
+            );
+            assert_eq!(
+                p.units(),
+                unit,
+                "Unit mismatch for length {}: got {:?}, expected {:?}",
+                len,
+                p.units(),
+                unit
+            );
         }
     }
 
@@ -279,7 +350,8 @@ mod tests {
             });
             assert!(
                 result.is_err(),
-                "Expected panic for not implemented time units but got Ok"
+                "Expected panic for not implemented time unit {:?} but got Ok",
+                p,
             );
         }
     }
@@ -311,8 +383,16 @@ mod tests {
 
         for (input, expected) in cases {
             let result: Period = input.normalized();
-            assert_eq!(result.length, expected.length);
-            assert_eq!(result.units, expected.units);
+            assert_eq!(
+                (result.length, result.units),
+                (expected.length, expected.units),
+                "normalized({:?}) failed: got ({}, {:?}), expected ({}, {:?})",
+                input,
+                result.length,
+                result.units,
+                expected.length,
+                expected.units
+            );
         }
     }
 
@@ -355,7 +435,13 @@ mod tests {
             let result: Period = input.normalized();
             assert_eq!(
                 (result.length, result.units),
-                (expected.length, expected.units)
+                (expected.length, expected.units),
+                "normalized({:?}) failed: got ({}, {:?}), expected ({}, {:?})",
+                input,
+                result.length,
+                result.units,
+                expected.length,
+                expected.units
             );
         }
     }
@@ -389,7 +475,13 @@ mod tests {
             let result: Period = input.normalized();
             assert_eq!(
                 (result.length, result.units),
-                (expected.length, expected.units)
+                (expected.length, expected.units),
+                "normalized({:?}) failed: got ({}, {:?}), expected ({}, {:?})",
+                input,
+                result.length,
+                result.units,
+                expected.length,
+                expected.units
             );
         }
     }
@@ -433,7 +525,13 @@ mod tests {
             let result: Period = input.normalized();
             assert_eq!(
                 (result.length, result.units),
-                (expected.length, expected.units)
+                (expected.length, expected.units),
+                "normalized({:?}) failed: got ({}, {:?}), expected ({}, {:?})",
+                input,
+                result.length,
+                result.units,
+                expected.length,
+                expected.units
             );
         }
     }
@@ -467,7 +565,13 @@ mod tests {
             let result: Period = input.normalized();
             assert_eq!(
                 (result.length, result.units),
-                (expected.length, expected.units)
+                (expected.length, expected.units),
+                "normalized({:?}) failed: got ({}, {:?}), expected ({}, {:?})",
+                input,
+                result.length,
+                result.units,
+                expected.length,
+                expected.units
             );
         }
     }
@@ -487,7 +591,16 @@ mod tests {
 
         for input in cases {
             let result: Period = input.normalized();
-            assert_eq!((result.length, result.units), (input.length, input.units));
+            assert_eq!(
+                (result.length, result.units),
+                (input.length, input.units),
+                "normalized({:?}) failed: got ({}, {:?}), expected ({}, {:?})",
+                input,
+                result.length,
+                result.units,
+                input.length,
+                input.units
+            );
         }
     }
 
@@ -505,9 +618,248 @@ mod tests {
             let result = panic::catch_unwind(|| {
                 let _ = p.normalized();
             });
+            assert!(result.is_err(), "Expected panic for {:?} but got Ok", p);
+        }
+    }
+
+    // ---- years ----
+    #[test]
+    fn test_years_ok() {
+        let cases = vec![
+            (0, TimeUnit::Years, 0.0),
+            (1, TimeUnit::Years, 1.0),
+            (24, TimeUnit::Months, 2.0),
+        ];
+
+        for (len, unit, expected) in cases {
+            let p = Period::new(len, unit);
+            let result = p.years();
+            assert!(
+                (result - expected).abs() < 1e-12,
+                "years(): failed for {:?} {:?}, got {}, expected {}",
+                len,
+                unit,
+                result,
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn test_years_panic_timeunit_implemented() {
+        let cases = vec![(10, TimeUnit::Days), (5, TimeUnit::Weeks)];
+
+        for (len, unit) in cases {
+            let p = Period::new(len, unit);
+            let result = panic::catch_unwind(|| p.years());
             assert!(
                 result.is_err(),
-                "Expected panic for not implemented time units but got Ok"
+                "years(): expected panic for {:?} {:?}, but got Ok",
+                len,
+                unit
+            );
+        }
+    }
+
+    #[test]
+    fn test_years_panic_timeunit_not_implemented() {
+        let cases: [(i32, TimeUnit); 5] = [
+            (1, TimeUnit::Microseconds),
+            (1, TimeUnit::Hours),
+            (1, TimeUnit::Milliseconds),
+            (1, TimeUnit::Minutes),
+            (1, TimeUnit::Seconds),
+        ];
+
+        for (len, unit) in cases {
+            let p: Period = Period::new(len, unit);
+            let result = panic::catch_unwind(|| p.years());
+            assert!(
+                result.is_err(),
+                "days(): expected panic for {:?} {:?}, but got Ok",
+                len,
+                unit
+            );
+        }
+    }
+    // ---- months ----
+    #[test]
+    fn test_months_ok() {
+        let cases = vec![
+            (0, TimeUnit::Months, 0.0),
+            (12, TimeUnit::Months, 12.0),
+            (2, TimeUnit::Years, 24.0),
+        ];
+
+        for (len, unit, expected) in cases {
+            let p = Period::new(len, unit);
+            let result = p.months();
+            assert!(
+                (result - expected).abs() < 1e-12,
+                "months(): failed for {:?} {:?}, got {}, expected {}",
+                len,
+                unit,
+                result,
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn test_months_panic_timeunit_implemented() {
+        let cases = vec![(7, TimeUnit::Days), (3, TimeUnit::Weeks)];
+
+        for (len, unit) in cases {
+            let p = Period::new(len, unit);
+            let result = panic::catch_unwind(|| p.months());
+            assert!(
+                result.is_err(),
+                "months(): expected panic for {:?} {:?}, but got Ok",
+                len,
+                unit
+            );
+        }
+    }
+
+    #[test]
+    fn test_months_panic_timeunit_not_implemented() {
+        let cases: [(i32, TimeUnit); 5] = [
+            (1, TimeUnit::Microseconds),
+            (1, TimeUnit::Hours),
+            (1, TimeUnit::Milliseconds),
+            (1, TimeUnit::Minutes),
+            (1, TimeUnit::Seconds),
+        ];
+
+        for (len, unit) in cases {
+            let p: Period = Period::new(len, unit);
+            let result = panic::catch_unwind(|| p.months());
+            assert!(
+                result.is_err(),
+                "days(): expected panic for {:?} {:?}, but got Ok",
+                len,
+                unit
+            );
+        }
+    }
+    // ---- weeks ----
+    #[test]
+    fn test_weeks_ok() {
+        let cases = vec![
+            (0, TimeUnit::Weeks, 0.0),
+            (2, TimeUnit::Weeks, 2.0),
+            (14, TimeUnit::Days, 2.0),
+        ];
+
+        for (len, unit, expected) in cases {
+            let p = Period::new(len, unit);
+            let result = p.weeks();
+            assert!(
+                (result - expected).abs() < 1e-12,
+                "weeks(): failed for {:?} {:?}, got {}, expected {}",
+                len,
+                unit,
+                result,
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn test_weeks_panic_timeunit_implemented() {
+        let cases: [(i32, TimeUnit); 2] = [(1, TimeUnit::Months), (1, TimeUnit::Years)];
+
+        for (len, unit) in cases {
+            let p: Period = Period::new(len, unit);
+            let result = panic::catch_unwind(|| p.weeks());
+            assert!(
+                result.is_err(),
+                "weeks(): expected panic for {:?} {:?}, but got Ok",
+                len,
+                unit
+            );
+        }
+    }
+
+    #[test]
+    fn test_weekds_panic_timeunit_not_implemented() {
+        let cases: [(i32, TimeUnit); 5] = [
+            (1, TimeUnit::Microseconds),
+            (1, TimeUnit::Hours),
+            (1, TimeUnit::Milliseconds),
+            (1, TimeUnit::Minutes),
+            (1, TimeUnit::Seconds),
+        ];
+
+        for (len, unit) in cases {
+            let p: Period = Period::new(len, unit);
+            let result = panic::catch_unwind(|| p.weeks());
+            assert!(
+                result.is_err(),
+                "days(): expected panic for {:?} {:?}, but got Ok",
+                len,
+                unit
+            );
+        }
+    }
+
+    // ---- days ----
+    #[test]
+    fn test_days_ok() {
+        let cases: [(i32, TimeUnit, f64); 3] = [
+            (0, TimeUnit::Days, 0.0),
+            (7, TimeUnit::Days, 7.0),
+            (3, TimeUnit::Weeks, 21.0),
+        ];
+
+        for (len, unit, expected) in cases {
+            let p: Period = Period::new(len, unit);
+            let result: f64 = p.days();
+            assert!(
+                (result - expected).abs() < 1e-12,
+                "days(): failed for {:?} {:?}, got {}, expected {}",
+                len,
+                unit,
+                result,
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn test_days_panic_timeunit_implemented() {
+        let cases: [(i32, TimeUnit); 2] = [(1, TimeUnit::Months), (1, TimeUnit::Years)];
+
+        for (len, unit) in cases {
+            let p: Period = Period::new(len, unit);
+            let result = panic::catch_unwind(|| p.days());
+            assert!(
+                result.is_err(),
+                "days(): expected panic for {:?} {:?}, but got Ok",
+                len,
+                unit
+            );
+        }
+    }
+
+    #[test]
+    fn test_days_panic_timeunit_not_implemented() {
+        let cases: [(i32, TimeUnit); 5] = [
+            (1, TimeUnit::Microseconds),
+            (1, TimeUnit::Hours),
+            (1, TimeUnit::Milliseconds),
+            (1, TimeUnit::Minutes),
+            (1, TimeUnit::Seconds),
+        ];
+
+        for (len, unit) in cases {
+            let p: Period = Period::new(len, unit);
+            let result = panic::catch_unwind(|| p.days());
+            assert!(
+                result.is_err(),
+                "days(): expected panic for {:?} {:?}, but got Ok",
+                len,
+                unit
             );
         }
     }

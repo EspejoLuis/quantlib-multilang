@@ -352,6 +352,17 @@
   - Small function inline in the header means it doesn’t get compiled into its own symbol in the .o file.
   - Instead, its body is copied directly into every caller at compile time.
 
+## 29 August 2025 - Rust
+
+- Conversion methods `years()`, `months()`, `weeks()`, `days()` + tests.
+  - QuantLib only allows conversions that are always exact:
+    - ✅ Years - Months
+    - ✅ Weeks - Days
+  - And it rejects conversions that depend on a calendar or context:
+    - ❌ Months - Days
+    - ❌ Years - Days
+    - ❌ Weeks - Months
+
 ### TODO:
 
 - ❓ Thinking about having `enum month` in a proper `month.rs`
@@ -359,33 +370,26 @@
 - Date:
 
   - Rust:
+    +=, -=, \*=, /= (and +,-,/)
 
-        - ❌ Integration tests.
-        - ❌ Check coverage. Some issue
-        - ❌ Null cases
-        - ❌ Parsing
-          - ❌ parseISO(const std::string&) (takes "2024-07-23" and turns it into a Date)
-        - ❌ Operators:
-          - Date& operator+=(const Period&);
-          - Date& operator-=(const Period&);
-          - Date operator+(const Period&) const;
-          - Date operator-(const Period&) const;
-        - ❌ d.toFormattedString("%d-%b-%Y");
+operator< logic (custom comparison)
 
-  - C++:
+Formatting (Display / long_period, short_period) - ❌ Integration tests. - ❌ Check coverage. Some issue - ❌ Null cases - ❌ Parsing - ❌ parseISO(const std::string&) (takes "2024-07-23" and turns it into a Date) - ❌ Operators: - Date& operator+=(const Period&); - Date& operator-=(const Period&); - Date operator+(const Period&) const; - Date operator-(const Period&) const; - ❌ d.toFormattedString("%d-%b-%Y");
 
-    - ❌ EVERYTHING!!!
+- C++:
 
-  - C#: review everything according to new strategy:
+  - ❌ EVERYTHING!!!
 
-    - ❌ EVERYTHING!!!
+- C#: review everything according to new strategy:
 
-  - Python: review everything according to new strategy:
+  - ❌ EVERYTHING!!!
 
-    - ❌ EVERYTHING!!!
+- Python: review everything according to new strategy:
 
-  - Python: Review:
-    - We are using datetime + day,month,year. Is it correct ? should we store just datime so as to have one soruce of true ?
+  - ❌ EVERYTHING!!!
+
+- Python: Review:
+  - We are using datetime + day,month,year. Is it correct ? should we store just datime so as to have one soruce of true ?
 
 ```
 
