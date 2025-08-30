@@ -362,6 +362,8 @@
     - ❌ Months - Days
     - ❌ Years - Days
     - ❌ Weeks - Months
+- `+=` implementation with `AddAssign` trait ✅. Unit test as well.
+  - ❌ The panick unknow time unit cases still to do.
 
 ### TODO:
 
@@ -370,11 +372,20 @@
 - Date:
 
   - Rust:
-    +=, -=, \*=, /= (and +,-,/)
-
-operator< logic (custom comparison)
-
-Formatting (Display / long_period, short_period) - ❌ Integration tests. - ❌ Check coverage. Some issue - ❌ Null cases - ❌ Parsing - ❌ parseISO(const std::string&) (takes "2024-07-23" and turns it into a Date) - ❌ Operators: - Date& operator+=(const Period&); - Date& operator-=(const Period&); - Date operator+(const Period&) const; - Date operator-(const Period&) const; - ❌ d.toFormattedString("%d-%b-%Y");
+    - +=, -=, \*=, /= (and +,-,/)
+    - operator< logic (custom comparison)
+    - Formatting (Display / long_period, short_period)
+    - ❌ Integration tests.
+    - ❌ Check coverage. Some issue
+    - ❌ Null cases
+    - ❌ Parsing
+    - ❌ parseISO(const std::string&) (takes "2024-07-23" and turns it into a Date)
+    - ❌ Operators:
+      - Date& operator+=(const Period&);
+      - Date& operator-=(const Period&);
+      - Date operator+(const Period&) const;
+      - Date operator-(const Period&) const;
+    - ❌ d.toFormattedString("%d-%b-%Y");
 
 - C++:
 

@@ -1,6 +1,6 @@
 use crate::time::frequency::Frequency;
 use crate::time::time_unit::TimeUnit;
-
+use std::ops::AddAssign;
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Period {
     length: i32, // Can be negative...basically saying to go back 3 months
@@ -172,6 +172,77 @@ impl Period {
             TimeUnit::Months => panic!("cannot convert Months into Days"),
             TimeUnit::Years => panic!("cannot convert Years into Days"),
             _ => panic!("unknown time unit {:?}", self.units),
+        }
+    }
+}
+
+impl AddAssign<Period> for Period {
+    // No Output, no new Date returned. SAME Period modified!
+    fn add_assign(&mut self, period_to_add: Period) -> () {
+        if self.length == 0 {
+            self.length = period_to_add.length();
+            self.units = period_to_add.units();
+            // if same units
+        } else if self.units == period_to_add.units() {
+            self.length += period_to_add.length();
+        } else {
+            match self.units {
+                TimeUnit::Years => match period_to_add.units() {
+                    TimeUnit::Months => {
+                        // years*12 + month
+                        self.units = TimeUnit::Months;
+                        self.length = self.length * 12 + period_to_add.length();
+                    }
+                    TimeUnit::Weeks | TimeUnit::Days => {
+                        panic!(
+                            "Impossible addition between {:?} and {:?}",
+                            self, period_to_add
+                        )
+                    }
+                    _ => panic!("unknown time unit {:?}", self.units),
+                },
+                TimeUnit::Months => match period_to_add.units() {
+                    TimeUnit::Years => {
+                        // months + years*12
+                        self.length += 12 * period_to_add.length();
+                    }
+                    TimeUnit::Weeks | TimeUnit::Days => {
+                        panic!(
+                            "Impossible addition between {:?} and {:?}",
+                            self, period_to_add
+                        )
+                    }
+                    _ => panic!("unknown time unit {:?}", self.units),
+                },
+                TimeUnit::Weeks => match period_to_add.units() {
+                    TimeUnit::Days => {
+                        // weeks*7 + days
+                        self.units = TimeUnit::Days;
+                        self.length = self.length * 7 + period_to_add.length();
+                    }
+                    TimeUnit::Years | TimeUnit::Months => {
+                        panic!(
+                            "Impossible addition between {:?} and {:?}",
+                            self, period_to_add
+                        )
+                    }
+                    _ => panic!("unknown time unit {:?}", self.units),
+                },
+                TimeUnit::Days => match period_to_add.units() {
+                    TimeUnit::Weeks => {
+                        // days + weeks*7
+                        self.length += 7 * period_to_add.length();
+                    }
+                    TimeUnit::Years | TimeUnit::Months => {
+                        panic!(
+                            "Impossible addition between {:?} and {:?}",
+                            self, period_to_add
+                        )
+                    }
+                    _ => panic!("unknown time unit {:?}", self.units),
+                },
+                _ => panic!("unknown time unit {:?}", self.units),
+            }
         }
     }
 }
@@ -860,6 +931,121 @@ mod tests {
                 "days(): expected panic for {:?} {:?}, but got Ok",
                 len,
                 unit
+            );
+        }
+    }
+
+    #[test]
+    fn add_assign_works_correctly() {
+        let cases: [(Period, Period, (i32, TimeUnit)); 6] = [
+            // length == 0
+            (
+                Period::new(0, TimeUnit::Years),
+                Period::new(3, TimeUnit::Months),
+                (3, TimeUnit::Months),
+            ),
+            // same units
+            (
+                Period::new(2, TimeUnit::Years),
+                Period::new(3, TimeUnit::Years),
+                (5, TimeUnit::Years),
+            ),
+            // Years += Months
+            (
+                Period::new(2, TimeUnit::Years),
+                Period::new(6, TimeUnit::Months),
+                (30, TimeUnit::Months),
+            ), // 2Y=24M + 6M
+            // Months += Years
+            (
+                Period::new(6, TimeUnit::Months),
+                Period::new(2, TimeUnit::Years),
+                (30, TimeUnit::Months),
+            ), // 6M + 24M
+            // Weeks += Days
+            (
+                Period::new(2, TimeUnit::Weeks),
+                Period::new(3, TimeUnit::Days),
+                (17, TimeUnit::Days),
+            ), // 2W=14D + 3D
+            // Days += Weeks
+            (
+                Period::new(3, TimeUnit::Days),
+                Period::new(2, TimeUnit::Weeks),
+                (17, TimeUnit::Days),
+            ), // 3D + 14D
+        ];
+
+        for (mut lhs, rhs, (expected_len, expected_unit)) in cases {
+            lhs += rhs;
+            assert_eq!(
+                (lhs.length(), lhs.units()),
+                (expected_len, expected_unit),
+                "add_assign OK failed: initial lhs={:?}, rhs={:?}, got=({:?},{:?}), expected=({:?},{:?})",
+                lhs,
+                rhs,
+                lhs.length(),
+                lhs.units(),
+                expected_len,
+                expected_unit
+            );
+        }
+    }
+
+    #[test]
+    fn add_assign_panics() {
+        let cases: [(Period, Period); 8] = [
+            // Years += Days
+            (
+                Period::new(1, TimeUnit::Years),
+                Period::new(5, TimeUnit::Days),
+            ),
+            // Years += Weeks
+            (
+                Period::new(1, TimeUnit::Years),
+                Period::new(2, TimeUnit::Weeks),
+            ),
+            // Months += Days
+            (
+                Period::new(1, TimeUnit::Months),
+                Period::new(5, TimeUnit::Days),
+            ),
+            // Months += Weeks
+            (
+                Period::new(1, TimeUnit::Months),
+                Period::new(2, TimeUnit::Weeks),
+            ),
+            // Weeks += Years
+            (
+                Period::new(1, TimeUnit::Weeks),
+                Period::new(1, TimeUnit::Years),
+            ),
+            // Weeks += Months
+            (
+                Period::new(1, TimeUnit::Weeks),
+                Period::new(2, TimeUnit::Months),
+            ),
+            // Days += Years
+            (
+                Period::new(1, TimeUnit::Days),
+                Period::new(1, TimeUnit::Years),
+            ),
+            // Days += Months
+            (
+                Period::new(1, TimeUnit::Days),
+                Period::new(2, TimeUnit::Months),
+            ),
+        ];
+
+        for (mut lhs, rhs) in cases {
+            let result = panic::catch_unwind(move || {
+                lhs += rhs;
+            });
+            assert!(
+                result.is_err(),
+                "add_assign PANIC expected but got Ok: lhs={:?}, rhs={:?}",
+                lhs,
+                rhs
             );
         }
     }
