@@ -378,9 +378,22 @@
   - `+=` `/=` `\*=` `-=` always return the same object modified.
   - `-` `/` `*` `/` always return a new object.
 - Operations always act on days < weeks < months < years.
+- `days_min_max`: It takes a Period (length + unit) and returns a range of possible days (min_days, max_days).This is needed because some periods (like “1 month”) don’t map to a fixed number of days.
+- Wanted to implement just `<` like C++ does. But cannot do the same in Rust. Have to implement all the `partila_ord` trait. Kinda Annoying because this means that i have to have one specific cases for Great/Less/Equal
+- Note:
+  ```md
+  Once == and < exist, you can always write the others in terms of them:
+  a > b → b < a
+  a <= b → !(b < a)
+  a >= b → !(a < b)
+  So you don’t need >, <=, >= explicitly.
+  ```
 
 ### TODO:
 
+- Check Coverage in Period!
+- Should i call length and unit with .length or .length()
+- Remove some partialOrd where not needed
 - Should we keep hours,seconds,milliseconds,microseconds, minutes
 - ❓ Thinking about having `enum month` in a proper `month.rs`
 - What about using Size (usize) instead of MonthIndex or WeekDayIndex

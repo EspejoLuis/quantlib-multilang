@@ -89,7 +89,6 @@ pub struct Date {
                                //pub month: Month,
                                //pub day: u32,
 }
-
 impl Date {
     const MIN_SERIAL: i32 = 367; // 1901-01-01
     const MAX_SERIAL: i32 = 109574; // 2199-12-31

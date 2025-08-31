@@ -1,9 +1,11 @@
 use crate::time::frequency::Frequency;
 use crate::time::time_unit::TimeUnit;
+use std::cmp::Ordering;
+use std::cmp::PartialOrd;
 use std::ops::Neg;
 use std::ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub, SubAssign};
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Period {
     length: i32, // Can be negative...basically saying to go back 3 months
     units: TimeUnit,
@@ -35,6 +37,13 @@ impl Period {
         }
     }
 
+    // Inspectors public
+    pub fn length(&self) -> i32 {
+        self.length
+    }
+    pub fn units(&self) -> TimeUnit {
+        self.units
+    }
     pub fn frequency(&self) -> Frequency {
         // Period -> Frequency
         let abs_length: u32 = self.length.abs() as u32; // abs because length can be negative
@@ -78,14 +87,6 @@ impl Period {
             }
         }
     }
-
-    // Inspectors public
-    pub fn length(&self) -> i32 {
-        self.length
-    }
-    pub fn units(&self) -> TimeUnit {
-        self.units
-    }
     pub fn normalize(&mut self) {
         // If object is owned and want to mutate
         let units: TimeUnit = self.units;
@@ -116,7 +117,6 @@ impl Period {
         period.normalize();
         period
     }
-
     pub fn years(&self) -> f64 {
         // Convert into years
         if self.length == 0 {
@@ -167,6 +167,24 @@ impl Period {
             TimeUnit::Weeks => self.length as f64 * 7.0,
             TimeUnit::Months => panic!("cannot convert Months into Days"),
             TimeUnit::Years => panic!("cannot convert Years into Days"),
+        }
+    }
+
+    // Private Static
+    fn days_min_max(period: &Period) -> (i32, i32) {
+        /*
+        It takes a Period (length + unit) and returns a range of possible days (min_days, max_days).
+        This is needed because some periods (like “1 month”) don’t map to a fixed number of days.
+        */
+        match period.units {
+            // Min and Max are the same in days
+            TimeUnit::Days => (period.length(), period.length()),
+            // Min and Max are the the same in days
+            TimeUnit::Weeks => (period.length() * 7, period.length() * 7),
+            // Min and Max could be different in days according to the month
+            TimeUnit::Months => (period.length() * 28, period.length() * 31),
+            // Min and Max could be different in days according to the year
+            TimeUnit::Years => (period.length() * 365, period.length() * 366),
         }
     }
 }
@@ -310,10 +328,100 @@ impl MulAssign<i32> for Period {
         self.length *= multiplier
     }
 }
+impl PartialOrd for Period {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if self.length() == 0 {
+            if other.length() > 0 {
+                return Some(Ordering::Less);
+            } else if other.length() < 0 {
+                return Some(Ordering::Greater);
+            } else {
+                return Some(Ordering::Equal);
+            }
+        }
+
+        if other.length() == 0 {
+            if self.length() < 0 {
+                return Some(Ordering::Less);
+            } else if self.length() > 0 {
+                return Some(Ordering::Greater);
+            } else {
+                return Some(Ordering::Equal);
+            }
+        }
+
+        // --- Exact comparisons ---
+        if self.units() == other.units() {
+            return if self.length() < other.length() {
+                Some(Ordering::Less)
+            } else if self.length() > other.length() {
+                Some(Ordering::Greater)
+            } else {
+                Some(Ordering::Equal)
+            };
+        }
+
+        // --- Convertible units (Months <-> Years, Days <-> Weeks) ---
+        if self.units() == TimeUnit::Months && other.units() == TimeUnit::Years {
+            return if self.length() < 12 * other.length() {
+                Some(Ordering::Less)
+            } else if self.length() > 12 * other.length() {
+                Some(Ordering::Greater)
+            } else {
+                Some(Ordering::Equal)
+            };
+        }
+
+        if self.units() == TimeUnit::Years && other.units() == TimeUnit::Months {
+            return if 12 * self.length() < other.length() {
+                Some(Ordering::Less)
+            } else if 12 * self.length() > other.length() {
+                Some(Ordering::Greater)
+            } else {
+                Some(Ordering::Equal)
+            };
+        }
+
+        if self.units() == TimeUnit::Days && other.units() == TimeUnit::Weeks {
+            return if self.length() < 7 * other.length() {
+                Some(Ordering::Less)
+            } else if self.length() > 7 * other.length() {
+                Some(Ordering::Greater)
+            } else {
+                Some(Ordering::Equal)
+            };
+        }
+
+        if self.units() == TimeUnit::Weeks && other.units() == TimeUnit::Days {
+            return if 7 * self.length() < other.length() {
+                Some(Ordering::Less)
+            } else if 7 * self.length() > other.length() {
+                Some(Ordering::Greater)
+            } else {
+                Some(Ordering::Equal)
+            };
+        }
+
+        // --- Inexact comparisons: fallback to days_min_max ---
+        let (self_min, self_max) = Period::days_min_max(self);
+        let (other_min, other_max) = Period::days_min_max(other);
+
+        if self_max < other_min {
+            // The largest possible value of self is still less than the smallest possible value of other.
+            return Some(Ordering::Less);
+        } else if self_min > other_max {
+            // The smallest possible value of self is still greater than the largest possible value of other
+            return Some(Ordering::Greater);
+        } else {
+            panic!("Undecidable comparison between {:?} and {:?}", self, other);
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cmp::Ordering;
     use std::panic;
 
     #[test]
@@ -717,7 +825,6 @@ mod tests {
         }
     }
 
-    // ---- years ----
     #[test]
     fn years_works() {
         let cases = vec![
@@ -756,7 +863,6 @@ mod tests {
         }
     }
 
-    // ---- months ----
     #[test]
     fn months_works() {
         let cases = vec![
@@ -795,7 +901,6 @@ mod tests {
         }
     }
 
-    // ---- weeks ----
     #[test]
     fn weeks_works() {
         let cases = vec![
@@ -834,7 +939,6 @@ mod tests {
         }
     }
 
-    // ---- days ----
     #[test]
     fn days_works() {
         let cases: [(i32, TimeUnit, f64); 3] = [
@@ -873,7 +977,6 @@ mod tests {
         }
     }
 
-    // --- ADD ---
     #[test]
     fn add_assign_works() {
         let cases: [(Period, Period, (i32, TimeUnit)); 7] = [
@@ -1052,7 +1155,6 @@ mod tests {
         }
     }
 
-    // --- SUB_ASSIGN ---
     #[test]
     fn sub_assign_works() {
         let cases: [(Period, Period, (i32, TimeUnit)); 3] = [
@@ -1092,7 +1194,6 @@ mod tests {
         }
     }
 
-    // --- SUB (creates new Period) ---
     #[test]
     fn sub_works() {
         let cases: [(Period, Period, (i32, TimeUnit)); 3] = [
@@ -1132,7 +1233,6 @@ mod tests {
         }
     }
 
-    // --- MUL_ASSIGN ---
     #[test]
     fn mul_assign_works() {
         let cases: [(Period, i32, (i32, TimeUnit)); 3] = [
@@ -1160,7 +1260,6 @@ mod tests {
         }
     }
 
-    // --- DIV_ASSIGN ---
     #[test]
     fn div_assign_works() {
         let cases: [(Period, i32, (i32, TimeUnit)); 5] = [
@@ -1192,7 +1291,6 @@ mod tests {
         }
     }
 
-    // --- DIV_ASSIGN (PANIC) ---
     #[test]
     fn div_assign_panics() {
         let cases: [(Period, i32); 5] = [
@@ -1221,7 +1319,6 @@ mod tests {
         }
     }
 
-    // --- DIV (creates new Period) ---
     #[test]
     fn div_operator_works() {
         let cases: [(Period, i32, (i32, TimeUnit)); 2] = [
@@ -1243,6 +1340,191 @@ mod tests {
                 result.units(),
                 expected_len,
                 expected_unit
+            );
+        }
+    }
+
+    #[test]
+    fn partial_cmp_all_cases() {
+        // Result<Ordering, ()>
+        // Ok(Ordering) -> the comparison succeeded with a definite result.
+        // Err(()) -> represents a panic case (we use () here as a placeholder type
+        // when we don’t care about extra info).
+
+        // Each tuple: (left, right, expected_result, description)
+        let cases: [(Period, Period, Option<Result<Ordering, ()>>, &str); 25] = [
+            // --- Zero length vs positive/negative/zero
+            (
+                Period::new(0, TimeUnit::Days),
+                Period::new(5, TimeUnit::Days),
+                Some(Ok(Ordering::Less)),
+                "0D < 5D",
+            ),
+            (
+                Period::new(0, TimeUnit::Days),
+                Period::new(-5, TimeUnit::Days),
+                Some(Ok(Ordering::Greater)),
+                "0D > -5D",
+            ),
+            (
+                Period::new(0, TimeUnit::Days),
+                Period::new(0, TimeUnit::Days),
+                Some(Ok(Ordering::Equal)),
+                "0D == 0D",
+            ),
+            // --- Positive/negative vs zero length
+            (
+                Period::new(5, TimeUnit::Days),
+                Period::new(0, TimeUnit::Days),
+                Some(Ok(Ordering::Greater)),
+                "5D > 0D",
+            ),
+            (
+                Period::new(-5, TimeUnit::Days),
+                Period::new(0, TimeUnit::Days),
+                Some(Ok(Ordering::Less)),
+                "-5D < 0D",
+            ),
+            // --- Exact comparisons (same units)
+            (
+                Period::new(3, TimeUnit::Years),
+                Period::new(5, TimeUnit::Years),
+                Some(Ok(Ordering::Less)),
+                "3Y < 5Y",
+            ),
+            (
+                Period::new(5, TimeUnit::Years),
+                Period::new(3, TimeUnit::Years),
+                Some(Ok(Ordering::Greater)),
+                "5Y > 3Y",
+            ),
+            (
+                Period::new(3, TimeUnit::Years),
+                Period::new(3, TimeUnit::Years),
+                Some(Ok(Ordering::Equal)),
+                "3Y == 3Y",
+            ),
+            // --- Convertible Months <-> Years
+            (
+                Period::new(12, TimeUnit::Months),
+                Period::new(1, TimeUnit::Years),
+                Some(Ok(Ordering::Equal)),
+                "12M == 1Y",
+            ),
+            (
+                Period::new(24, TimeUnit::Months),
+                Period::new(1, TimeUnit::Years),
+                Some(Ok(Ordering::Greater)),
+                "24M > 1Y",
+            ),
+            (
+                Period::new(6, TimeUnit::Months),
+                Period::new(1, TimeUnit::Years),
+                Some(Ok(Ordering::Less)),
+                "6M < 1Y",
+            ),
+            (
+                Period::new(1, TimeUnit::Years),
+                Period::new(24, TimeUnit::Months),
+                Some(Ok(Ordering::Less)),
+                "1Y < 24M",
+            ),
+            (
+                Period::new(1, TimeUnit::Years),
+                Period::new(12, TimeUnit::Months),
+                Some(Ok(Ordering::Equal)),
+                "1Y == 12M",
+            ), // <- equal branch hit
+            // --- Convertible Days <-> Weeks
+            (
+                Period::new(7, TimeUnit::Days),
+                Period::new(1, TimeUnit::Weeks),
+                Some(Ok(Ordering::Equal)),
+                "7D == 1W",
+            ),
+            (
+                Period::new(14, TimeUnit::Days),
+                Period::new(1, TimeUnit::Weeks),
+                Some(Ok(Ordering::Greater)),
+                "14D > 1W",
+            ),
+            (
+                Period::new(3, TimeUnit::Days),
+                Period::new(1, TimeUnit::Weeks),
+                Some(Ok(Ordering::Less)),
+                "3D < 1W",
+            ),
+            (
+                Period::new(15, TimeUnit::Days),
+                Period::new(2, TimeUnit::Weeks),
+                Some(Ok(Ordering::Greater)),
+                "15D > 2W",
+            ), // <- greater branch hit
+            (
+                Period::new(2, TimeUnit::Weeks),
+                Period::new(14, TimeUnit::Days),
+                Some(Ok(Ordering::Equal)),
+                "2W == 14D",
+            ), // <- equal branch hit
+            (
+                Period::new(3, TimeUnit::Weeks),
+                Period::new(20, TimeUnit::Days),
+                Some(Ok(Ordering::Greater)),
+                "3W > 20D",
+            ), // <- greater branch hit
+            // --- Fallback days_min_max (cover Weeks + Years inside days_min_max)
+            (
+                Period::new(2, TimeUnit::Weeks),
+                Period::new(20, TimeUnit::Days),
+                Some(Ok(Ordering::Less)),
+                "2W < 20D (days_min_max: Weeks)",
+            ),
+            (
+                Period::new(1, TimeUnit::Years),
+                Period::new(400, TimeUnit::Days),
+                Some(Ok(Ordering::Less)),
+                "1Y < 400D (days_min_max: Years)",
+            ),
+            // --- Fallback clear inequality
+            (
+                Period::new(1, TimeUnit::Months),
+                Period::new(60, TimeUnit::Days),
+                Some(Ok(Ordering::Less)),
+                "1M < 60D (min=28, max=31)",
+            ),
+            (
+                Period::new(2, TimeUnit::Years),
+                Period::new(10, TimeUnit::Months),
+                Some(Ok(Ordering::Greater)),
+                "2Y > 10M",
+            ),
+            (
+                Period::new(24, TimeUnit::Months),
+                Period::new(1, TimeUnit::Years),
+                Some(Ok(Ordering::Greater)),
+                "24M > 1Y (min>max branch)",
+            ), // <- self_min > other_max
+            // --- Panic case: undecidable overlap
+            (
+                Period::new(1, TimeUnit::Months),
+                Period::new(30, TimeUnit::Days),
+                Some(Err(())),
+                "1M vs 30D undecidable",
+            ),
+        ];
+
+        for (left, right, expected, description) in cases {
+            let result = panic::catch_unwind(|| left.partial_cmp(&right));
+
+            let mapped = match result {
+                Ok(v) => v.map(|ord: Ordering| Ok(ord)), // wrap Ordering
+                Err(_) => Some(Err(())),                 // panic -> Err(())
+            };
+
+            assert_eq!(
+                mapped, expected,
+                "Failed case: {} (left={:?}, right={:?})",
+                description, left, right
             );
         }
     }
