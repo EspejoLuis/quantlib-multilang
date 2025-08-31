@@ -6,11 +6,11 @@ pub enum TimeUnit {
     Weeks,
     Months,
     Years,
-    Hours,
-    Minutes,
-    Seconds,
-    Milliseconds,
-    Microseconds,
+    //Hours,
+    //Minutes,
+    //Seconds,
+    //Milliseconds,
+    //Microseconds,
 }
 
 impl fmt::Display for TimeUnit {
@@ -20,11 +20,11 @@ impl fmt::Display for TimeUnit {
             TimeUnit::Weeks => "Weeks",
             TimeUnit::Months => "Months",
             TimeUnit::Years => "Years",
-            TimeUnit::Hours => "Hours",
-            TimeUnit::Minutes => "Minutes",
-            TimeUnit::Seconds => "Seconds",
-            TimeUnit::Milliseconds => "Milliseconds",
-            TimeUnit::Microseconds => "Microseconds",
+            //TimeUnit::Hours => "Hours",
+            //TimeUnit::Minutes => "Minutes",
+            //TimeUnit::Seconds => "Seconds",
+            //TimeUnit::Milliseconds => "Milliseconds",
+            //TimeUnit::Microseconds => "Microseconds",
         };
         write!(f, "{}", time_unit)
     }
@@ -37,16 +37,11 @@ mod tests {
 
     #[test]
     fn display_timeunit_outputs_correct_format() {
-        let cases: [(TimeUnit, &str); 9] = [
+        let cases: [(TimeUnit, &str); 4] = [
             (TimeUnit::Days, "Days"),
             (TimeUnit::Weeks, "Weeks"),
             (TimeUnit::Months, "Months"),
             (TimeUnit::Years, "Years"),
-            (TimeUnit::Hours, "Hours"),
-            (TimeUnit::Minutes, "Minutes"),
-            (TimeUnit::Seconds, "Seconds"),
-            (TimeUnit::Milliseconds, "Milliseconds"),
-            (TimeUnit::Microseconds, "Microseconds"),
         ];
 
         for (time_unit, expected) in cases {

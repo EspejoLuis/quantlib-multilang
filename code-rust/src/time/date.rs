@@ -689,7 +689,7 @@ mod tests {
     use std::panic;
 
     #[test]
-    fn creates_date_correctly() {
+    fn new_sets_day_month_year_correctly() {
         let cases: [(Date, Day, Month, Year, &str); 6] = [
             (
                 Date::new(1, Month::October, 1989),
@@ -761,7 +761,7 @@ mod tests {
     }
 
     #[test]
-    fn invalid_dates_panic() {
+    fn new_panics_invalid_dates() {
         let cases: [(Day, Month, Year, &str); 5] = [
             (29, Month::February, 1901, "Feb 29 non-leap year"),
             (1, Month::January, 1800, "year before min"),
@@ -787,7 +787,7 @@ mod tests {
     }
 
     #[test]
-    fn year_offset_invalid_panics() {
+    fn year_offset_panics_invalid_years() {
         let invalid_years: [Year; 2] = [1899, 2201];
 
         for year in invalid_years {
@@ -804,7 +804,7 @@ mod tests {
     }
 
     #[test]
-    fn month_offset_invalid_panics() {
+    fn month_offset_panics_invalida_months() {
         let invalid_month_indices: [MonthIndex; 3] = [15, 0, 17];
 
         for month_index in invalid_month_indices {
@@ -956,7 +956,7 @@ mod tests {
     }
 
     #[test]
-    fn add_days_works_correctly() {
+    fn add_days_works() {
         let cases: [(Date, Day, Date, &str); 6] = [
             // --- Within same month ---
             (
@@ -1013,7 +1013,7 @@ mod tests {
     }
 
     #[test]
-    fn subtract_days_works_correctly() {
+    fn subtract_days_works() {
         let cases: [(Day, Month, Year, Day, Day, Month, Year); 5] = [
             (20, Month::May, 1989, 5, 15, Month::May, 1989), // within same month
             (15, Month::May, 1989, 15, 30, Month::April, 1989), // cross month
@@ -1041,7 +1041,7 @@ mod tests {
     }
 
     #[test]
-    fn subtract_dates_works_correctly() {
+    fn subtract_dates_works() {
         let cases: [(Day, Month, Year, Day, Month, Year, Day); 5] = [
             (14, Month::February, 1989, 15, Month::February, 1989, 1),
             (28, Month::February, 1989, 1, Month::March, 1989, 1),
@@ -1060,7 +1060,7 @@ mod tests {
     }
 
     #[test]
-    fn to_serial_number_works_correctly() {
+    fn to_serial_number_works() {
         let cases: [(Day, Month, Year); 6] = [
             (1, Month::January, 1901),   // epoch start (first usable date)
             (29, Month::February, 1904), // leap day
@@ -1083,7 +1083,7 @@ mod tests {
     }
 
     #[test]
-    fn from_serial_number_works_correctly() {
+    fn from_serial_number_works() {
         let cases: [Date; 4] = [
             Date::new(1, Month::January, 1956),
             Date::new(1, Month::January, 2100),
@@ -1400,7 +1400,7 @@ mod tests {
     }
 
     #[test]
-    fn year_length_works_correctly() {
+    fn year_length_works() {
         let cases: [(Year, i32); 4] = [
             (1900, 366), // Fake leap year
             (1901, 365), // No leap
@@ -1418,7 +1418,7 @@ mod tests {
         }
     }
     #[test]
-    fn is_end_of_month_works_correctly() {
+    fn is_end_of_month_works() {
         let cases: [(Date, bool); 6] = [
             // True cases
             (Date::new(31, Month::January, 2024), true), // 31-day month
@@ -1499,7 +1499,7 @@ mod tests {
     }
 
     #[test]
-    fn add_assign_days_works_correctly() {
+    fn add_assign_days_works() {
         let cases: [(Date, Day, Date); 3] = [
             // Within same month
             (
@@ -1532,7 +1532,7 @@ mod tests {
     }
 
     #[test]
-    fn sub_assign_days_works_correctly() {
+    fn sub_assign_days_works() {
         let cases: [(Date, Day, Date); 3] = [
             // Within same month
             (

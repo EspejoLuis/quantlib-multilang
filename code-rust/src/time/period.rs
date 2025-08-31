@@ -1,6 +1,8 @@
 use crate::time::frequency::Frequency;
 use crate::time::time_unit::TimeUnit;
-use std::ops::AddAssign;
+use std::ops::Neg;
+use std::ops::{AddAssign, SubAssign};
+
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Period {
     length: i32, // Can be negative...basically saying to go back 3 months
@@ -75,7 +77,6 @@ impl Period {
                     Frequency::OtherFrequency
                 }
             }
-            _ => panic!("unknown time unit {:?}", units),
         }
     }
 
@@ -107,7 +108,6 @@ impl Period {
                     }
                 }
                 TimeUnit::Weeks | TimeUnit::Years => {}
-                _ => panic!("unknown time unit {:?}", units),
             }
         }
     }
@@ -129,7 +129,6 @@ impl Period {
             TimeUnit::Weeks => panic!("cannot convert Weeks into Years"),
             TimeUnit::Months => self.length as f64 / 12.0,
             TimeUnit::Years => self.length as f64,
-            _ => panic!("unknown time unit {:?}", self.units),
         }
     }
     pub fn months(&self) -> f64 {
@@ -143,7 +142,6 @@ impl Period {
             TimeUnit::Weeks => panic!("cannot convert Weeks into Months"),
             TimeUnit::Months => self.length as f64,
             TimeUnit::Years => self.length as f64 * 12.0,
-            _ => panic!("unknown time unit {:?}", self.units),
         }
     }
     pub fn weeks(&self) -> f64 {
@@ -157,7 +155,6 @@ impl Period {
             TimeUnit::Weeks => self.length as f64,
             TimeUnit::Months => panic!("cannot convert Months into Weeks"),
             TimeUnit::Years => panic!("cannot convert Years into Weeks"),
-            _ => panic!("unknown time unit {:?}", self.units),
         }
     }
     pub fn days(&self) -> f64 {
@@ -171,23 +168,32 @@ impl Period {
             TimeUnit::Weeks => self.length as f64 * 7.0,
             TimeUnit::Months => panic!("cannot convert Months into Days"),
             TimeUnit::Years => panic!("cannot convert Years into Days"),
-            _ => panic!("unknown time unit {:?}", self.units),
         }
     }
 }
 
+impl Neg for Period {
+    // We need -a not a-b so that's why use Neg instead of Sub
+    type Output = Period;
+    fn neg(self) -> Period {
+        // New period as output
+        Period::new(-self.length, self.units)
+    }
+}
+
 impl AddAssign<Period> for Period {
+    // AddAssign -> right hand side
+    // for Period -> left hand side
     // No Output, no new Date returned. SAME Period modified!
     fn add_assign(&mut self, period_to_add: Period) -> () {
         if self.length == 0 {
             self.length = period_to_add.length();
             self.units = period_to_add.units();
             // if same units
-        } else if self.units == period_to_add.units() {
-            self.length += period_to_add.length();
         } else {
             match self.units {
                 TimeUnit::Years => match period_to_add.units() {
+                    TimeUnit::Years => self.length += period_to_add.length(),
                     TimeUnit::Months => {
                         // years*12 + month
                         self.units = TimeUnit::Months;
@@ -199,9 +205,9 @@ impl AddAssign<Period> for Period {
                             self, period_to_add
                         )
                     }
-                    _ => panic!("unknown time unit {:?}", self.units),
                 },
                 TimeUnit::Months => match period_to_add.units() {
+                    TimeUnit::Months => self.length += period_to_add.length(),
                     TimeUnit::Years => {
                         // months + years*12
                         self.length += 12 * period_to_add.length();
@@ -212,9 +218,9 @@ impl AddAssign<Period> for Period {
                             self, period_to_add
                         )
                     }
-                    _ => panic!("unknown time unit {:?}", self.units),
                 },
                 TimeUnit::Weeks => match period_to_add.units() {
+                    TimeUnit::Weeks => self.length += period_to_add.length(),
                     TimeUnit::Days => {
                         // weeks*7 + days
                         self.units = TimeUnit::Days;
@@ -226,9 +232,9 @@ impl AddAssign<Period> for Period {
                             self, period_to_add
                         )
                     }
-                    _ => panic!("unknown time unit {:?}", self.units),
                 },
                 TimeUnit::Days => match period_to_add.units() {
+                    TimeUnit::Days => self.length += period_to_add.length(),
                     TimeUnit::Weeks => {
                         // days + weeks*7
                         self.length += 7 * period_to_add.length();
@@ -239,11 +245,16 @@ impl AddAssign<Period> for Period {
                             self, period_to_add
                         )
                     }
-                    _ => panic!("unknown time unit {:?}", self.units),
                 },
-                _ => panic!("unknown time unit {:?}", self.units),
             }
         }
+    }
+}
+
+impl SubAssign<Period> for Period {
+    // No Output, no new Date returned. SAME Period modified!
+    fn sub_assign(&mut self, period_to_add: Period) -> () {
+        *self += -period_to_add
     }
 }
 
@@ -401,28 +412,6 @@ mod tests {
                 Frequency::OtherFrequency,
                 "Expected OtherFrequency for {:?}",
                 p
-            );
-        }
-    }
-
-    #[test]
-    fn frequency_panics_on_not_implemented_timeunits() {
-        let cases: [Period; 5] = [
-            Period::new(1, TimeUnit::Milliseconds),
-            Period::new(1, TimeUnit::Hours),
-            Period::new(1, TimeUnit::Microseconds),
-            Period::new(1, TimeUnit::Minutes),
-            Period::new(1, TimeUnit::Seconds),
-        ];
-
-        for p in cases {
-            let result = panic::catch_unwind(|| {
-                let _ = p.frequency();
-            });
-            assert!(
-                result.is_err(),
-                "Expected panic for not implemented time unit {:?} but got Ok",
-                p,
             );
         }
     }
@@ -675,27 +664,9 @@ mod tests {
         }
     }
 
-    #[test]
-    fn normalize_panics_on_not_implemented_timeunits() {
-        let cases: [Period; 5] = [
-            Period::new(1, TimeUnit::Milliseconds),
-            Period::new(1, TimeUnit::Hours),
-            Period::new(1, TimeUnit::Microseconds),
-            Period::new(1, TimeUnit::Minutes),
-            Period::new(1, TimeUnit::Seconds),
-        ];
-
-        for p in cases {
-            let result = panic::catch_unwind(|| {
-                let _ = p.normalized();
-            });
-            assert!(result.is_err(), "Expected panic for {:?} but got Ok", p);
-        }
-    }
-
     // ---- years ----
     #[test]
-    fn test_years_ok() {
+    fn years_works() {
         let cases = vec![
             (0, TimeUnit::Years, 0.0),
             (1, TimeUnit::Years, 1.0),
@@ -717,7 +688,7 @@ mod tests {
     }
 
     #[test]
-    fn test_years_panic_timeunit_implemented() {
+    fn years_panics_timeunit_implemented() {
         let cases = vec![(10, TimeUnit::Days), (5, TimeUnit::Weeks)];
 
         for (len, unit) in cases {
@@ -732,30 +703,9 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_years_panic_timeunit_not_implemented() {
-        let cases: [(i32, TimeUnit); 5] = [
-            (1, TimeUnit::Microseconds),
-            (1, TimeUnit::Hours),
-            (1, TimeUnit::Milliseconds),
-            (1, TimeUnit::Minutes),
-            (1, TimeUnit::Seconds),
-        ];
-
-        for (len, unit) in cases {
-            let p: Period = Period::new(len, unit);
-            let result = panic::catch_unwind(|| p.years());
-            assert!(
-                result.is_err(),
-                "days(): expected panic for {:?} {:?}, but got Ok",
-                len,
-                unit
-            );
-        }
-    }
     // ---- months ----
     #[test]
-    fn test_months_ok() {
+    fn months_works() {
         let cases = vec![
             (0, TimeUnit::Months, 0.0),
             (12, TimeUnit::Months, 12.0),
@@ -777,7 +727,7 @@ mod tests {
     }
 
     #[test]
-    fn test_months_panic_timeunit_implemented() {
+    fn months_panic_timeunit_implemented() {
         let cases = vec![(7, TimeUnit::Days), (3, TimeUnit::Weeks)];
 
         for (len, unit) in cases {
@@ -792,30 +742,9 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_months_panic_timeunit_not_implemented() {
-        let cases: [(i32, TimeUnit); 5] = [
-            (1, TimeUnit::Microseconds),
-            (1, TimeUnit::Hours),
-            (1, TimeUnit::Milliseconds),
-            (1, TimeUnit::Minutes),
-            (1, TimeUnit::Seconds),
-        ];
-
-        for (len, unit) in cases {
-            let p: Period = Period::new(len, unit);
-            let result = panic::catch_unwind(|| p.months());
-            assert!(
-                result.is_err(),
-                "days(): expected panic for {:?} {:?}, but got Ok",
-                len,
-                unit
-            );
-        }
-    }
     // ---- weeks ----
     #[test]
-    fn test_weeks_ok() {
+    fn weeks_works() {
         let cases = vec![
             (0, TimeUnit::Weeks, 0.0),
             (2, TimeUnit::Weeks, 2.0),
@@ -837,7 +766,7 @@ mod tests {
     }
 
     #[test]
-    fn test_weeks_panic_timeunit_implemented() {
+    fn weeks_panics_timeunit_implemented() {
         let cases: [(i32, TimeUnit); 2] = [(1, TimeUnit::Months), (1, TimeUnit::Years)];
 
         for (len, unit) in cases {
@@ -852,31 +781,9 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_weekds_panic_timeunit_not_implemented() {
-        let cases: [(i32, TimeUnit); 5] = [
-            (1, TimeUnit::Microseconds),
-            (1, TimeUnit::Hours),
-            (1, TimeUnit::Milliseconds),
-            (1, TimeUnit::Minutes),
-            (1, TimeUnit::Seconds),
-        ];
-
-        for (len, unit) in cases {
-            let p: Period = Period::new(len, unit);
-            let result = panic::catch_unwind(|| p.weeks());
-            assert!(
-                result.is_err(),
-                "days(): expected panic for {:?} {:?}, but got Ok",
-                len,
-                unit
-            );
-        }
-    }
-
     // ---- days ----
     #[test]
-    fn test_days_ok() {
+    fn days_works() {
         let cases: [(i32, TimeUnit, f64); 3] = [
             (0, TimeUnit::Days, 0.0),
             (7, TimeUnit::Days, 7.0),
@@ -898,7 +805,7 @@ mod tests {
     }
 
     #[test]
-    fn test_days_panic_timeunit_implemented() {
+    fn days_panics_timeunit_implemented() {
         let cases: [(i32, TimeUnit); 2] = [(1, TimeUnit::Months), (1, TimeUnit::Years)];
 
         for (len, unit) in cases {
@@ -914,29 +821,7 @@ mod tests {
     }
 
     #[test]
-    fn test_days_panic_timeunit_not_implemented() {
-        let cases: [(i32, TimeUnit); 5] = [
-            (1, TimeUnit::Microseconds),
-            (1, TimeUnit::Hours),
-            (1, TimeUnit::Milliseconds),
-            (1, TimeUnit::Minutes),
-            (1, TimeUnit::Seconds),
-        ];
-
-        for (len, unit) in cases {
-            let p: Period = Period::new(len, unit);
-            let result = panic::catch_unwind(|| p.days());
-            assert!(
-                result.is_err(),
-                "days(): expected panic for {:?} {:?}, but got Ok",
-                len,
-                unit
-            );
-        }
-    }
-
-    #[test]
-    fn add_assign_works_correctly() {
+    fn add_assign_works() {
         let cases: [(Period, Period, (i32, TimeUnit)); 6] = [
             // length == 0
             (

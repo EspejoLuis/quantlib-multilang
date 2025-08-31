@@ -365,8 +365,15 @@
 - `+=` implementation with `AddAssign` trait ✅. Unit test as well.
   - ❌ The panick unknow time unit cases still to do.
 
+## 30 August 2025 - Rust
+
+- Delete timunits: seconds, microseconds, milliseconds, hours, minutes. Adjust unit tests.
+- `-` and `-=` implementation with `SubAssign` and `Neg` traits:
+  - We need `-a` not `a-b` so that's why use Neg instead of Sub!
+
 ### TODO:
 
+- Should we keep hours,seconds,milliseconds,microseconds, minutes
 - ❓ Thinking about having `enum month` in a proper `month.rs`
 - What about using Size (usize) instead of MonthIndex or WeekDayIndex
 - Date:
