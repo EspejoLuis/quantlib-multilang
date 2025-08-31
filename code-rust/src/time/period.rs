@@ -1,7 +1,7 @@
 use crate::time::frequency::Frequency;
 use crate::time::time_unit::TimeUnit;
 use std::ops::Neg;
-use std::ops::{AddAssign, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub, SubAssign};
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Period {
@@ -172,6 +172,71 @@ impl Period {
 }
 
 // Traits
+impl AddAssign<Period> for Period {
+    // AddAssign -> right hand side
+    // for Period -> left hand side
+    // No Output, no new Date returned. SAME Period modified!
+    fn add_assign(&mut self, rhs: Period) -> () {
+        if self.length == 0 {
+            self.length = rhs.length();
+            self.units = rhs.units();
+            // if same units
+        } else {
+            match self.units {
+                TimeUnit::Years => match rhs.units() {
+                    TimeUnit::Years => self.length += rhs.length(),
+                    TimeUnit::Months => {
+                        // years*12 + month
+                        self.units = TimeUnit::Months;
+                        self.length = self.length * 12 + rhs.length();
+                    }
+                    TimeUnit::Weeks | TimeUnit::Days => {
+                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
+                    }
+                },
+                TimeUnit::Months => match rhs.units() {
+                    TimeUnit::Months => self.length += rhs.length(),
+                    TimeUnit::Years => {
+                        // months + years*12
+                        self.length += 12 * rhs.length();
+                    }
+                    TimeUnit::Weeks | TimeUnit::Days => {
+                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
+                    }
+                },
+                TimeUnit::Weeks => match rhs.units() {
+                    TimeUnit::Weeks => self.length += rhs.length(),
+                    TimeUnit::Days => {
+                        // weeks*7 + days
+                        self.units = TimeUnit::Days;
+                        self.length = self.length * 7 + rhs.length();
+                    }
+                    TimeUnit::Years | TimeUnit::Months => {
+                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
+                    }
+                },
+                TimeUnit::Days => match rhs.units() {
+                    TimeUnit::Days => self.length += rhs.length(),
+                    TimeUnit::Weeks => {
+                        // days + weeks*7
+                        self.length += 7 * rhs.length();
+                    }
+                    TimeUnit::Years | TimeUnit::Months => {
+                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
+                    }
+                },
+            }
+        }
+    }
+}
+impl Add<Period> for Period {
+    type Output = Period;
+    fn add(self, rhs: Period) -> Period {
+        let mut period: Period = self;
+        period += rhs;
+        return period;
+    }
+}
 impl Neg for Period {
     // We need -a not a-b so that's why use Neg instead of Sub
     type Output = Period;
@@ -180,79 +245,69 @@ impl Neg for Period {
         Period::new(-self.length, self.units)
     }
 }
-impl AddAssign<Period> for Period {
-    // AddAssign -> right hand side
-    // for Period -> left hand side
+impl SubAssign<Period> for Period {
     // No Output, no new Date returned. SAME Period modified!
-    fn add_assign(&mut self, period_to_add: Period) -> () {
-        if self.length == 0 {
-            self.length = period_to_add.length();
-            self.units = period_to_add.units();
-            // if same units
+    fn sub_assign(&mut self, rhs: Period) -> () {
+        *self += -rhs
+    }
+}
+impl Sub<Period> for Period {
+    type Output = Period;
+    fn sub(self, rhs: Period) -> Period {
+        let mut period: Period = self;
+        period += -rhs;
+        return period;
+    }
+}
+impl DivAssign<i32> for Period {
+    fn div_assign(&mut self, divider: i32) {
+        if divider == 0 {
+            panic!("cannot be divided by zero");
+        }
+        // Assumption:
+        if self.length % divider == 0 {
+            // clean division, keep units
+            self.length /= divider;
         } else {
+            let mut new_units: TimeUnit = self.units;
+            let mut new_length: i32 = self.length;
+
             match self.units {
-                TimeUnit::Years => match period_to_add.units() {
-                    TimeUnit::Years => self.length += period_to_add.length(),
-                    TimeUnit::Months => {
-                        // years*12 + month
-                        self.units = TimeUnit::Months;
-                        self.length = self.length * 12 + period_to_add.length();
-                    }
-                    TimeUnit::Weeks | TimeUnit::Days => {
-                        panic!(
-                            "Impossible addition between {:?} and {:?}",
-                            self, period_to_add
-                        )
-                    }
-                },
-                TimeUnit::Months => match period_to_add.units() {
-                    TimeUnit::Months => self.length += period_to_add.length(),
-                    TimeUnit::Years => {
-                        // months + years*12
-                        self.length += 12 * period_to_add.length();
-                    }
-                    TimeUnit::Weeks | TimeUnit::Days => {
-                        panic!(
-                            "Impossible addition between {:?} and {:?}",
-                            self, period_to_add
-                        )
-                    }
-                },
-                TimeUnit::Weeks => match period_to_add.units() {
-                    TimeUnit::Weeks => self.length += period_to_add.length(),
-                    TimeUnit::Days => {
-                        // weeks*7 + days
-                        self.units = TimeUnit::Days;
-                        self.length = self.length * 7 + period_to_add.length();
-                    }
-                    TimeUnit::Years | TimeUnit::Months => {
-                        panic!(
-                            "Impossible addition between {:?} and {:?}",
-                            self, period_to_add
-                        )
-                    }
-                },
-                TimeUnit::Days => match period_to_add.units() {
-                    TimeUnit::Days => self.length += period_to_add.length(),
-                    TimeUnit::Weeks => {
-                        // days + weeks*7
-                        self.length += 7 * period_to_add.length();
-                    }
-                    TimeUnit::Years | TimeUnit::Months => {
-                        panic!(
-                            "Impossible addition between {:?} and {:?}",
-                            self, period_to_add
-                        )
-                    }
-                },
+                TimeUnit::Years => {
+                    new_length *= 12;
+                    new_units = TimeUnit::Months;
+                }
+                TimeUnit::Weeks => {
+                    new_length *= 7;
+                    new_units = TimeUnit::Days;
+                }
+                _ => { /* Days, Months — no conversion attempted */ }
             }
+
+            if new_length % divider != 0 {
+                panic!("{:?} cannot be divided by {}", self, divider);
+            }
+
+            self.length = new_length / divider;
+            self.units = new_units;
         }
     }
 }
-impl SubAssign<Period> for Period {
+impl Div<i32> for Period {
+    type Output = Period;
+    fn div(self, divider: i32) -> Period {
+        // += /= *= -= always return the same object modified
+        // + / * / always return a new object
+        let mut period: Period = self;
+        period /= divider;
+        return period;
+    }
+}
+impl MulAssign<i32> for Period {
     // No Output, no new Date returned. SAME Period modified!
-    fn sub_assign(&mut self, period_to_add: Period) -> () {
-        *self += -period_to_add
+    fn mul_assign(&mut self, multiplier: i32) -> () {
+        // Scale the length
+        self.length *= multiplier
     }
 }
 
@@ -818,9 +873,10 @@ mod tests {
         }
     }
 
+    // --- ADD ---
     #[test]
     fn add_assign_works() {
-        let cases: [(Period, Period, (i32, TimeUnit)); 6] = [
+        let cases: [(Period, Period, (i32, TimeUnit)); 7] = [
             // length == 0
             (
                 Period::new(0, TimeUnit::Years),
@@ -857,6 +913,12 @@ mod tests {
                 Period::new(2, TimeUnit::Weeks),
                 (17, TimeUnit::Days),
             ), // 3D + 14D
+            // Days += Days
+            (
+                Period::new(5, TimeUnit::Days),
+                Period::new(3, TimeUnit::Days),
+                (8, TimeUnit::Days),
+            ),
         ];
 
         for (mut lhs, rhs, (expected_len, expected_unit)) in cases {
@@ -929,6 +991,258 @@ mod tests {
                 "add_assign PANIC expected but got Ok: lhs={:?}, rhs={:?}",
                 lhs,
                 rhs
+            );
+        }
+    }
+
+    #[test]
+    fn add_works() {
+        let cases: [(Period, Period, (i32, TimeUnit)); 6] = [
+            // Years + Years
+            (
+                Period::new(2, TimeUnit::Years),
+                Period::new(3, TimeUnit::Years),
+                (5, TimeUnit::Years),
+            ),
+            // Years + Months (converted to Months)
+            (
+                Period::new(1, TimeUnit::Years),
+                Period::new(6, TimeUnit::Months),
+                (18, TimeUnit::Months),
+            ), // 1Y=12M + 6M
+            // Months + Years (converted to Months)
+            (
+                Period::new(6, TimeUnit::Months),
+                Period::new(2, TimeUnit::Years),
+                (30, TimeUnit::Months),
+            ), // 6M + 24M
+            // Weeks + Weeks
+            (
+                Period::new(2, TimeUnit::Weeks),
+                Period::new(3, TimeUnit::Weeks),
+                (5, TimeUnit::Weeks),
+            ),
+            // Weeks + Days (converted to Days)
+            (
+                Period::new(2, TimeUnit::Weeks),
+                Period::new(3, TimeUnit::Days),
+                (17, TimeUnit::Days),
+            ), // 2W=14D + 3D
+            // Days + Weeks (converted to Days)
+            (
+                Period::new(3, TimeUnit::Days),
+                Period::new(2, TimeUnit::Weeks),
+                (17, TimeUnit::Days),
+            ), // 3D + 14D
+        ];
+
+        for (lhs, rhs, (expected_len, expected_unit)) in cases {
+            let result = lhs + rhs;
+            assert_eq!(
+                (result.length(), result.units()),
+                (expected_len, expected_unit),
+                "add OK failed: lhs={:?}, rhs={:?}, got=({:?},{:?}), expected=({:?},{:?})",
+                lhs,
+                rhs,
+                result.length(),
+                result.units(),
+                expected_len,
+                expected_unit
+            );
+        }
+    }
+
+    // --- SUB_ASSIGN ---
+    #[test]
+    fn sub_assign_works() {
+        let cases: [(Period, Period, (i32, TimeUnit)); 3] = [
+            // Years -= Years
+            (
+                Period::new(5, TimeUnit::Years),
+                Period::new(2, TimeUnit::Years),
+                (3, TimeUnit::Years),
+            ),
+            // Months -= Months
+            (
+                Period::new(12, TimeUnit::Months),
+                Period::new(6, TimeUnit::Months),
+                (6, TimeUnit::Months),
+            ),
+            // Weeks -= Weeks
+            (
+                Period::new(4, TimeUnit::Weeks),
+                Period::new(1, TimeUnit::Weeks),
+                (3, TimeUnit::Weeks),
+            ),
+        ];
+
+        for (mut lhs, rhs, (expected_len, expected_unit)) in cases {
+            lhs -= rhs;
+            assert_eq!(
+                (lhs.length(), lhs.units()),
+                (expected_len, expected_unit),
+                "sub_assign OK failed: lhs={:?}, rhs={:?}, got=({:?},{:?}), expected=({:?},{:?})",
+                lhs,
+                rhs,
+                lhs.length(),
+                lhs.units(),
+                expected_len,
+                expected_unit
+            );
+        }
+    }
+
+    // --- SUB (creates new Period) ---
+    #[test]
+    fn sub_works() {
+        let cases: [(Period, Period, (i32, TimeUnit)); 3] = [
+            // Years - Years
+            (
+                Period::new(5, TimeUnit::Years),
+                Period::new(2, TimeUnit::Years),
+                (3, TimeUnit::Years),
+            ),
+            // Months - Years (converted to Months)
+            (
+                Period::new(24, TimeUnit::Months),
+                Period::new(1, TimeUnit::Years),
+                (12, TimeUnit::Months),
+            ), // 24M - 12M
+            // Weeks - Days (converted to Days)
+            (
+                Period::new(2, TimeUnit::Weeks),
+                Period::new(7, TimeUnit::Days),
+                (7, TimeUnit::Days),
+            ), // 14D - 7D
+        ];
+
+        for (lhs, rhs, (expected_len, expected_unit)) in cases {
+            let result = lhs - rhs;
+            assert_eq!(
+                (result.length(), result.units()),
+                (expected_len, expected_unit),
+                "sub OK failed: lhs={:?}, rhs={:?}, got=({:?},{:?}), expected=({:?},{:?})",
+                lhs,
+                rhs,
+                result.length(),
+                result.units(),
+                expected_len,
+                expected_unit
+            );
+        }
+    }
+
+    // --- MUL_ASSIGN ---
+    #[test]
+    fn mul_assign_works() {
+        let cases: [(Period, i32, (i32, TimeUnit)); 3] = [
+            // Years *= positive
+            (Period::new(2, TimeUnit::Years), 3, (6, TimeUnit::Years)),
+            // Months *= negative
+            (Period::new(4, TimeUnit::Months), -2, (-8, TimeUnit::Months)),
+            // Days *= zero
+            (Period::new(5, TimeUnit::Days), 0, (0, TimeUnit::Days)),
+        ];
+
+        for (mut lhs, factor, (expected_len, expected_unit)) in cases {
+            lhs *= factor;
+            assert_eq!(
+                (lhs.length(), lhs.units()),
+                (expected_len, expected_unit),
+                "mul_assign OK failed: lhs={:?}, factor={}, got=({:?},{:?}), expected=({:?},{:?})",
+                lhs,
+                factor,
+                lhs.length(),
+                lhs.units(),
+                expected_len,
+                expected_unit
+            );
+        }
+    }
+
+    // --- DIV_ASSIGN ---
+    #[test]
+    fn div_assign_works() {
+        let cases: [(Period, i32, (i32, TimeUnit)); 5] = [
+            // Months /= exact
+            (Period::new(12, TimeUnit::Months), 3, (4, TimeUnit::Months)),
+            // Years /= not exact -> convert to Months
+            (Period::new(1, TimeUnit::Years), 2, (6, TimeUnit::Months)),
+            // Weeks /= exact
+            (Period::new(2, TimeUnit::Weeks), 2, (1, TimeUnit::Weeks)),
+            // Days /= exact
+            (Period::new(10, TimeUnit::Days), 2, (5, TimeUnit::Days)),
+            // Months /= exact
+            (Period::new(6, TimeUnit::Months), 3, (2, TimeUnit::Months)),
+        ];
+
+        for (mut lhs, divider, (expected_len, expected_unit)) in cases {
+            lhs /= divider;
+            assert_eq!(
+                (lhs.length(), lhs.units()),
+                (expected_len, expected_unit),
+                "div_assign OK failed: lhs={:?}, divider={}, got=({:?},{:?}), expected=({:?},{:?})",
+                lhs,
+                divider,
+                lhs.length(),
+                lhs.units(),
+                expected_len,
+                expected_unit
+            );
+        }
+    }
+
+    // --- DIV_ASSIGN (PANIC) ---
+    #[test]
+    fn div_assign_panics() {
+        let cases: [(Period, i32); 5] = [
+            // divide by zero
+            (Period::new(1, TimeUnit::Years), 0),
+            // Years not divisible even after conversion
+            (Period::new(1, TimeUnit::Years), 5),
+            // Weeks not divisible
+            (Period::new(1, TimeUnit::Weeks), 4),
+            // Months not divisible (no conversion attempted)
+            (Period::new(5, TimeUnit::Months), 2),
+            // Days not divisible (no conversion attempted)
+            (Period::new(5, TimeUnit::Days), 3),
+        ];
+
+        for (mut lhs, divider) in cases {
+            let result = panic::catch_unwind(move || {
+                lhs /= divider;
+            });
+            assert!(
+                result.is_err(),
+                "div_assign PANIC expected but got Ok: lhs={:?}, divider={}",
+                lhs,
+                divider
+            );
+        }
+    }
+
+    // --- DIV (creates new Period) ---
+    #[test]
+    fn div_operator_works() {
+        let cases: [(Period, i32, (i32, TimeUnit)); 2] = [
+            // Months / exact
+            (Period::new(12, TimeUnit::Months), 6, (2, TimeUnit::Months)),
+            // Years / not exact -> convert to Months
+            (Period::new(1, TimeUnit::Years), 2, (6, TimeUnit::Months)),
+        ];
+
+        for (lhs, divider, (expected_len, expected_unit)) in cases {
+            let result = lhs / divider;
+            assert_eq!(
+                (result.length(), result.units()),
+                (expected_len, expected_unit),
+                "div operator OK failed: lhs={:?}, divider={}, got=({:?},{:?}), expected=({:?},{:?})",
+                lhs,
+                divider,
+                result.length(),
+                result.units(),
+                expected_len,
+                expected_unit
             );
         }
     }

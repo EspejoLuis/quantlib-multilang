@@ -363,13 +363,21 @@
     - ❌ Years - Days
     - ❌ Weeks - Months
 - `+=` implementation with `AddAssign` trait ✅. Unit test as well.
-  - ❌ The panick unknow time unit cases still to do.
+  - ❌ The panic unknown time unit cases still to do.
 
 ## 30 August 2025 - Rust
 
 - Delete timunits: seconds, microseconds, milliseconds, hours, minutes. Adjust unit tests.
 - `-` and `-=` implementation with `SubAssign` and `Neg` traits:
   - We need `-a` not `a-b` so that's why use Neg instead of Sub!
+- `*-` implemented with `MulAssign`
+- `/=` implemented with `DivAssign`
+- `+`, `/`,`-` implemented with `Add`,`Div`,`Sub`
+- Unit test for all !!
+- Note:
+  - `+=` `/=` `\*=` `-=` always return the same object modified.
+  - `-` `/` `*` `/` always return a new object.
+- Operations always act on days < weeks < months < years.
 
 ### TODO:
 
@@ -379,7 +387,6 @@
 - Date:
 
   - Rust:
-    - +=, -=, \*=, /= (and +,-,/)
     - operator< logic (custom comparison)
     - Formatting (Display / long_period, short_period)
     - ❌ Integration tests.
@@ -387,11 +394,6 @@
     - ❌ Null cases
     - ❌ Parsing
     - ❌ parseISO(const std::string&) (takes "2024-07-23" and turns it into a Date)
-    - ❌ Operators:
-      - Date& operator+=(const Period&);
-      - Date& operator-=(const Period&);
-      - Date operator+(const Period&) const;
-      - Date operator-(const Period&) const;
     - ❌ d.toFormattedString("%d-%b-%Y");
 
 - C++:
