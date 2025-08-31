@@ -1,5 +1,5 @@
 pub type WeekDayIndex = usize;
-use std::fmt;
+use std::fmt::{Display, Formatter, Result};
 use std::ops::{Add, Sub}; // Addition, Subtraction
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
@@ -13,7 +13,6 @@ pub enum Weekday {
     Friday,
     Saturday,
 }
-
 impl Weekday {
     pub fn from_index(number: WeekDayIndex) -> Self {
         if (1..=7).contains(&number) {
@@ -32,8 +31,8 @@ impl Weekday {
 }
 
 // Traits
-impl fmt::Display for Weekday {
-    fn fmt(&self, formatter_buffer: &mut fmt::Formatter) -> fmt::Result {
+impl Display for Weekday {
+    fn fmt(&self, formatter_buffer: &mut Formatter) -> Result {
         write!(formatter_buffer, "{}", io::long_weekday(*self))
     }
 }

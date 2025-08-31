@@ -1,4 +1,4 @@
-use std::fmt;
+use std::fmt::{Display, Formatter, Result};
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum Frequency {
@@ -16,9 +16,23 @@ pub enum Frequency {
     Daily = 365,          // once a day
     OtherFrequency = 999, // some other unknown frequency
 }
+impl Frequency {
+    pub fn from_nth_times_per_year(nth_times: u32) -> Frequency {
+        match nth_times {
+            12 => Frequency::Monthly,
+            6 => Frequency::Bimonthly,
+            4 => Frequency::Quarterly,
+            3 => Frequency::EveryFourthMonth,
+            2 => Frequency::Semiannual,
+            1 => Frequency::Annual,
+            _ => Frequency::OtherFrequency,
+        }
+    }
+}
 
-impl fmt::Display for Frequency {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+// Traits
+impl Display for Frequency {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         let frequency: &'static str = match self {
             Frequency::NoFrequency => "No-Frequency",
             Frequency::Once => "Once",
@@ -35,20 +49,6 @@ impl fmt::Display for Frequency {
             Frequency::OtherFrequency => "Unknown frequency",
         };
         write!(f, "{}", frequency)
-    }
-}
-
-impl Frequency {
-    pub fn from_nth_times_per_year(nth_times: u32) -> Frequency {
-        match nth_times {
-            12 => Frequency::Monthly,
-            6 => Frequency::Bimonthly,
-            4 => Frequency::Quarterly,
-            3 => Frequency::EveryFourthMonth,
-            2 => Frequency::Semiannual,
-            1 => Frequency::Annual,
-            _ => Frequency::OtherFrequency,
-        }
     }
 }
 

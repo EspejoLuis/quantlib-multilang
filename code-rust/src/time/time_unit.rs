@@ -1,4 +1,4 @@
-use std::fmt;
+use std::fmt::{Display, Formatter, Result};
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub enum TimeUnit {
@@ -13,8 +13,9 @@ pub enum TimeUnit {
     //Microseconds,
 }
 
-impl fmt::Display for TimeUnit {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+// Traits
+impl Display for TimeUnit {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         let time_unit: &'static str = match self {
             TimeUnit::Days => "Days",
             TimeUnit::Weeks => "Weeks",
@@ -30,7 +31,6 @@ impl fmt::Display for TimeUnit {
     }
 }
 
-// Tests
 #[cfg(test)]
 mod tests {
     use super::*;

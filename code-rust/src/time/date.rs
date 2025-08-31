@@ -1,6 +1,6 @@
 use super::weekday::{WeekDayIndex, Weekday};
 use chrono::{Datelike, Local, NaiveDate}; // Todays' date
-use std::fmt; // Display
+use std::fmt::{Display, Formatter, Result}; // Display
 use std::ops::{Add, Sub}; // Addition, Subtraction
 use std::ops::{AddAssign, SubAssign};
 
@@ -54,8 +54,8 @@ impl Month {
 }
 
 // Traits:
-impl fmt::Display for Month {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl Display for Month {
+    fn fmt(&self, f: &mut Formatter) -> Result {
         // `&'static str` means a reference to a string literal that
         // lives for the entire program (string literals never expire).
         // Example: "January" is compiled into the binary and always safe.
@@ -495,7 +495,7 @@ impl Date {
 }
 
 // Traits:
-impl fmt::Display for Date {
+impl Display for Date {
     /*
     - impl: we are implementing something.
     - fmt::Display: this is a TRAIT:
@@ -521,7 +521,7 @@ impl fmt::Display for Date {
         - &self -> fields of the struct can be looked at, but cannot be changed
         - &mut fmt::Formatter -> allowed to write into this formatter buffer
         */
-    fn fmt(&self, formatter_buffer: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, formatter_buffer: &mut Formatter) -> Result {
         write!(formatter_buffer, "{}", io::long_date(*self))
     }
 }

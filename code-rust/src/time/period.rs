@@ -8,7 +8,6 @@ pub struct Period {
     length: i32, // Can be negative...basically saying to go back 3 months
     units: TimeUnit,
 }
-
 impl Period {
     // Constructor
     pub fn new(length: i32, units: TimeUnit) -> Period {
@@ -172,6 +171,7 @@ impl Period {
     }
 }
 
+// Traits
 impl Neg for Period {
     // We need -a not a-b so that's why use Neg instead of Sub
     type Output = Period;
@@ -180,7 +180,6 @@ impl Neg for Period {
         Period::new(-self.length, self.units)
     }
 }
-
 impl AddAssign<Period> for Period {
     // AddAssign -> right hand side
     // for Period -> left hand side
@@ -250,7 +249,6 @@ impl AddAssign<Period> for Period {
         }
     }
 }
-
 impl SubAssign<Period> for Period {
     // No Output, no new Date returned. SAME Period modified!
     fn sub_assign(&mut self, period_to_add: Period) -> () {
