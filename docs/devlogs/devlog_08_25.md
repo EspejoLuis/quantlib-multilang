@@ -365,7 +365,7 @@
 - `+=` implementation with `AddAssign` trait ✅. Unit test as well.
   - ❌ The panic unknown time unit cases still to do.
 
-## 30 August 2025 - Rust
+## 31 August 2025 - Rust
 
 - Delete timunits: seconds, microseconds, milliseconds, hours, minutes. Adjust unit tests.
 - `-` and `-=` implementation with `SubAssign` and `Neg` traits:
