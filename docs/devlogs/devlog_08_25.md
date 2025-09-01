@@ -391,21 +391,18 @@
 
 ## 1 Sep 2025 - Rust:
 
-- Checking coverage in period.
+- Checking coverage in period --> completed.
+- ✅ Formatting (Display / long_period, short_period) with unit test!
 
 ### TODO:
 
-- Check Coverage in Period!
 - Should i call length and unit with .length or .length()
 - Remove some partialOrd where not needed
-- Should we keep hours,seconds,milliseconds,microseconds, minutes
 - ❓ Thinking about having `enum month` in a proper `month.rs`
 - What about using Size (usize) instead of MonthIndex or WeekDayIndex
 - Date:
 
   - Rust:
-    - operator< logic (custom comparison)
-    - Formatting (Display / long_period, short_period)
     - ❌ Integration tests.
     - ❌ Check coverage. Some issue
     - ❌ Null cases

@@ -2,6 +2,7 @@ use crate::time::frequency::Frequency;
 use crate::time::time_unit::TimeUnit;
 use std::cmp::Ordering;
 use std::cmp::PartialOrd;
+use std::fmt::{Display, Formatter, Result};
 use std::ops::Neg;
 use std::ops::{Add, AddAssign, Div, DivAssign, MulAssign, Sub, SubAssign};
 
@@ -417,12 +418,94 @@ impl PartialOrd for Period {
         }
     }
 }
+impl Display for Period {
+    fn fmt(&self, formatter_buffer: &mut Formatter) -> Result {
+        write!(formatter_buffer, "{}", io::short_period(*self))
+    }
+}
+// Private
+mod detail {
+    use super::Period;
+    use super::*;
+    use std::fmt::{Display, Formatter, Result};
+
+    pub(crate) struct LongPeriod {
+        pub(crate) period: Period,
+    }
+    pub(crate) struct ShortPeriod {
+        pub(crate) period: Period,
+    }
+
+    // impl Display is not a string, it’s just a wrapper that knows how to print itself.
+    impl Display for LongPeriod {
+        fn fmt(&self, f: &mut Formatter) -> Result {
+            let length: i32 = self.period.length();
+            let long_length: &'static str = match &self.period.units() {
+                TimeUnit::Days => {
+                    if length == 1 {
+                        "Day"
+                    } else {
+                        "Days"
+                    }
+                }
+                TimeUnit::Weeks => {
+                    if length == 1 {
+                        "Week"
+                    } else {
+                        "Weeks"
+                    }
+                }
+                TimeUnit::Months => {
+                    if length == 1 {
+                        "Month"
+                    } else {
+                        "Months"
+                    }
+                }
+                TimeUnit::Years => {
+                    if length == 1 {
+                        "Year"
+                    } else {
+                        "Years"
+                    }
+                }
+            };
+            write!(f, "{} {}", length, long_length)
+        }
+    }
+    impl Display for ShortPeriod {
+        fn fmt(&self, f: &mut Formatter) -> Result {
+            let length: i32 = self.period.length();
+            let short_length: &'static str = match &self.period.units() {
+                TimeUnit::Days => "D",
+                TimeUnit::Weeks => "W",
+                TimeUnit::Months => "M",
+                TimeUnit::Years => "Y",
+            };
+            write!(f, "{}{}", length, short_length)
+        }
+    }
+}
+
+// Public API
+pub(crate) mod io {
+
+    use super::{Period, detail};
+
+    pub fn long_period(p: Period) -> impl std::fmt::Display {
+        detail::LongPeriod { period: p }
+    }
+    pub fn short_period(p: Period) -> impl std::fmt::Display {
+        detail::ShortPeriod { period: p }
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::cmp::Ordering;
     use std::panic;
+    use std::result::Result;
 
     #[test]
     fn new_sets_length_and_units() {
@@ -1352,7 +1435,7 @@ mod tests {
         // when we don’t care about extra info).
 
         // Each tuple: (left, right, expected_result, description)
-        let cases: [(Period, Period, Option<Result<Ordering, ()>>, &str); 27] = [
+        let cases: [(Period, Period, Option<Result<Ordering, ()>>, &str); 29] = [
             // --- Zero length vs positive/negative/zero
             (
                 Period::new(0, TimeUnit::Days),
@@ -1461,6 +1544,12 @@ mod tests {
                 "15D > 2W",
             ),
             (
+                Period::new(1, TimeUnit::Days),
+                Period::new(1, TimeUnit::Months),
+                Some(Ok(Ordering::Less)),
+                "1D < 1M (covers Days && not Weeks RHS-false branch)",
+            ),
+            (
                 Period::new(2, TimeUnit::Weeks),
                 Period::new(14, TimeUnit::Days),
                 Some(Ok(Ordering::Equal)),
@@ -1477,6 +1566,12 @@ mod tests {
                 Period::new(7, TimeUnit::Days),
                 Some(Ok(Ordering::Equal)),
                 "1W == 7D",
+            ),
+            (
+                Period::new(1, TimeUnit::Weeks),
+                Period::new(1, TimeUnit::Months),
+                Some(Ok(Ordering::Less)),
+                "1W < 1M (covers Weels && not Days RHS-false branch)",
             ),
             // --- Fallback days_min_max (cover Weeks + Years inside days_min_max)
             (
@@ -1562,6 +1657,58 @@ mod tests {
                 description,
                 period
             );
+        }
+    }
+
+    #[test]
+    fn long_period_displays_correctly() {
+        let cases: [((i32, TimeUnit), &str); 8] = [
+            ((1, TimeUnit::Days), "1 Day"),
+            ((2, TimeUnit::Days), "2 Days"),
+            ((1, TimeUnit::Weeks), "1 Week"),
+            ((3, TimeUnit::Weeks), "3 Weeks"),
+            ((1, TimeUnit::Months), "1 Month"),
+            ((3, TimeUnit::Months), "3 Months"),
+            ((1, TimeUnit::Years), "1 Year"),
+            ((10, TimeUnit::Years), "10 Years"),
+        ];
+
+        for ((len, unit), expected) in cases {
+            let p = Period::new(len, unit);
+            let result = format!("{}", io::long_period(p));
+            assert_eq!(result, expected, "Failed case: {} {:?}", expected, p);
+        }
+    }
+
+    #[test]
+    fn short_period_displays_correctly() {
+        let cases: [((i32, TimeUnit), &str); 4] = [
+            ((1, TimeUnit::Days), "1D"),
+            ((2, TimeUnit::Weeks), "2W"),
+            ((3, TimeUnit::Months), "3M"),
+            ((4, TimeUnit::Years), "4Y"),
+        ];
+
+        for ((len, unit), expected) in cases {
+            let p: Period = Period::new(len, unit);
+            let result: String = format!("{}", io::short_period(p));
+            assert_eq!(result, expected, "Failed case: {} {:?}", expected, p);
+        }
+    }
+
+    #[test]
+    fn period_display_outputs_correctly() {
+        let cases: [((i32, TimeUnit), &str); 4] = [
+            ((1, TimeUnit::Days), "1D"),
+            ((2, TimeUnit::Weeks), "2W"),
+            ((3, TimeUnit::Months), "3M"),
+            ((4, TimeUnit::Years), "4Y"),
+        ];
+
+        for ((len, unit), expected) in cases {
+            let p: Period = Period::new(len, unit);
+            let result = format!("{}", p);
+            assert_eq!(result, expected, "Failed case: {} {:?}", expected, p);
         }
     }
 }
