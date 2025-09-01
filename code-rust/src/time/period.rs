@@ -343,10 +343,10 @@ impl PartialOrd for Period {
         if other.length() == 0 {
             if self.length() < 0 {
                 return Some(Ordering::Less);
-            } else if self.length() > 0 {
+            } else
+            //self.length() > 0
+            {
                 return Some(Ordering::Greater);
-            } else {
-                return Some(Ordering::Equal);
             }
         }
 
@@ -1352,57 +1352,57 @@ mod tests {
         // when we don’t care about extra info).
 
         // Each tuple: (left, right, expected_result, description)
-        let cases: [(Period, Period, Option<Result<Ordering, ()>>, &str); 25] = [
+        let cases: [(Period, Period, Option<Result<Ordering, ()>>, &str); 27] = [
             // --- Zero length vs positive/negative/zero
             (
                 Period::new(0, TimeUnit::Days),
                 Period::new(5, TimeUnit::Days),
                 Some(Ok(Ordering::Less)),
-                "0D < 5D",
+                "0D < 5D - Days",
             ),
             (
                 Period::new(0, TimeUnit::Days),
                 Period::new(-5, TimeUnit::Days),
                 Some(Ok(Ordering::Greater)),
-                "0D > -5D",
+                "0D > -5D - Days",
             ),
             (
                 Period::new(0, TimeUnit::Days),
                 Period::new(0, TimeUnit::Days),
                 Some(Ok(Ordering::Equal)),
-                "0D == 0D",
+                "0D == 0D - Days",
             ),
             // --- Positive/negative vs zero length
             (
                 Period::new(5, TimeUnit::Days),
                 Period::new(0, TimeUnit::Days),
                 Some(Ok(Ordering::Greater)),
-                "5D > 0D",
+                "5D > 0D - Days",
             ),
             (
                 Period::new(-5, TimeUnit::Days),
                 Period::new(0, TimeUnit::Days),
                 Some(Ok(Ordering::Less)),
-                "-5D < 0D",
+                "-5D < 0D - Days",
             ),
             // --- Exact comparisons (same units)
             (
                 Period::new(3, TimeUnit::Years),
                 Period::new(5, TimeUnit::Years),
                 Some(Ok(Ordering::Less)),
-                "3Y < 5Y",
+                "3Y < 5Y - Years",
             ),
             (
                 Period::new(5, TimeUnit::Years),
                 Period::new(3, TimeUnit::Years),
                 Some(Ok(Ordering::Greater)),
-                "5Y > 3Y",
+                "5Y > 3Y - Years",
             ),
             (
                 Period::new(3, TimeUnit::Years),
                 Period::new(3, TimeUnit::Years),
                 Some(Ok(Ordering::Equal)),
-                "3Y == 3Y",
+                "3Y == 3Y - Years",
             ),
             // --- Convertible Months <-> Years
             (
@@ -1434,7 +1434,7 @@ mod tests {
                 Period::new(12, TimeUnit::Months),
                 Some(Ok(Ordering::Equal)),
                 "1Y == 12M",
-            ), // <- equal branch hit
+            ),
             // --- Convertible Days <-> Weeks
             (
                 Period::new(7, TimeUnit::Days),
@@ -1459,19 +1459,25 @@ mod tests {
                 Period::new(2, TimeUnit::Weeks),
                 Some(Ok(Ordering::Greater)),
                 "15D > 2W",
-            ), // <- greater branch hit
+            ),
             (
                 Period::new(2, TimeUnit::Weeks),
                 Period::new(14, TimeUnit::Days),
                 Some(Ok(Ordering::Equal)),
                 "2W == 14D",
-            ), // <- equal branch hit
+            ),
             (
                 Period::new(3, TimeUnit::Weeks),
                 Period::new(20, TimeUnit::Days),
                 Some(Ok(Ordering::Greater)),
                 "3W > 20D",
-            ), // <- greater branch hit
+            ),
+            (
+                Period::new(1, TimeUnit::Weeks),
+                Period::new(7, TimeUnit::Days),
+                Some(Ok(Ordering::Equal)),
+                "1W == 7D",
+            ),
             // --- Fallback days_min_max (cover Weeks + Years inside days_min_max)
             (
                 Period::new(2, TimeUnit::Weeks),
@@ -1499,11 +1505,17 @@ mod tests {
                 "2Y > 10M",
             ),
             (
+                Period::new(2, TimeUnit::Years),
+                Period::new(400, TimeUnit::Days),
+                Some(Ok(Ordering::Greater)),
+                "2Y > 400D (fallback self_min > other_max)",
+            ),
+            (
                 Period::new(24, TimeUnit::Months),
                 Period::new(1, TimeUnit::Years),
                 Some(Ok(Ordering::Greater)),
                 "24M > 1Y (min>max branch)",
-            ), // <- self_min > other_max
+            ),
             // --- Panic case: undecidable overlap
             (
                 Period::new(1, TimeUnit::Months),
@@ -1516,7 +1528,7 @@ mod tests {
         for (left, right, expected, description) in cases {
             let result = panic::catch_unwind(|| left.partial_cmp(&right));
 
-            let mapped = match result {
+            let mapped: Option<Result<Ordering, ()>> = match result {
                 Ok(v) => v.map(|ord: Ordering| Ok(ord)), // wrap Ordering
                 Err(_) => Some(Err(())),                 // panic -> Err(())
             };
@@ -1525,6 +1537,30 @@ mod tests {
                 mapped, expected,
                 "Failed case: {} (left={:?}, right={:?})",
                 description, left, right
+            );
+        }
+    }
+
+    #[test]
+    fn days_min_max_all_units() {
+        // Each tuple: (Period, expected_min, expected_max, description)
+        let cases: [(Period, i32, i32, &str); 6] = [
+            (Period::new(5, TimeUnit::Days), 5, 5, "5D"),
+            (Period::new(2, TimeUnit::Weeks), 14, 14, "2W"),
+            (Period::new(1, TimeUnit::Months), 28, 31, "1M"),
+            (Period::new(2, TimeUnit::Months), 56, 62, "2M"),
+            (Period::new(1, TimeUnit::Years), 365, 366, "1Y"),
+            (Period::new(2, TimeUnit::Years), 730, 732, "2Y"),
+        ];
+
+        for (period, expected_min, expected_max, description) in cases {
+            let (min_days, max_days) = Period::days_min_max(&period);
+            assert_eq!(
+                (min_days, max_days),
+                (expected_min, expected_max),
+                "Failed case: {} (period={:?})",
+                description,
+                period
             );
         }
     }

@@ -389,6 +389,10 @@
   So you don’t need >, <=, >= explicitly.
   ```
 
+## 1 Sep 2025 - Rust:
+
+- Checking coverage in period.
+
 ### TODO:
 
 - Check Coverage in Period!
