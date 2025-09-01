@@ -609,7 +609,7 @@ mod detail {
     use super::Date;
     use super::MonthIndex;
     use crate::io;
-    use std::fmt;
+    use std::fmt::{Display, Formatter, Result};
 
     pub(crate) struct LongDate {
         pub(crate) date: Date,
@@ -621,8 +621,8 @@ mod detail {
         pub(crate) date: Date,
     }
 
-    impl fmt::Display for LongDate {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    impl Display for LongDate {
+        fn fmt(&self, f: &mut Formatter) -> Result {
             let d: &Date = &self.date;
             // Example: "July 23, 2024"
             write!(
@@ -634,8 +634,8 @@ mod detail {
             )
         }
     }
-    impl fmt::Display for ShortDate {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    impl Display for ShortDate {
+        fn fmt(&self, f: &mut Formatter) -> Result {
             let d: &Date = &self.date;
             write!(
                 f,
@@ -646,8 +646,8 @@ mod detail {
             )
         }
     }
-    impl fmt::Display for IsoDate {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    impl Display for IsoDate {
+        fn fmt(&self, f: &mut Formatter) -> Result {
             let d: &Date = &self.date;
             write!(
                 f,
@@ -668,14 +668,15 @@ pub(crate) mod io {
     println!("{}", io::iso_date(d));    // 2024-07-23
     */
     use super::{Date, detail};
+    use std::fmt::Display;
 
-    pub fn long_date(d: Date) -> impl std::fmt::Display {
+    pub fn long_date(d: Date) -> impl Display {
         detail::LongDate { date: d }
     }
-    pub fn short_date(d: Date) -> impl std::fmt::Display {
+    pub fn short_date(d: Date) -> impl Display {
         detail::ShortDate { date: d }
     }
-    pub fn iso_date(d: Date) -> impl std::fmt::Display {
+    pub fn iso_date(d: Date) -> impl Display {
         detail::IsoDate { date: d }
     }
 }
