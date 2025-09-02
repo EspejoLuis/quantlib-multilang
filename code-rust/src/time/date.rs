@@ -103,10 +103,8 @@ impl Date {
             "year {} out of bounds, must be [1901,2199]",
             year
         );
-
         // 2. Leap year
         let is_leap: bool = Date::is_leap(year);
-
         // 3. Month length & offset
         let month_length: i32 = Date::month_length(month as MonthIndex, is_leap);
         let month_offset: i32 = Date::month_offset(month as MonthIndex, is_leap);
@@ -119,20 +117,14 @@ impl Date {
             month as MonthIndex,
             month_length
         );
-
         // 5. Serial number
         let serial_number: SerialType = day + month_offset + year_offset;
-
+        // 6. Check serial number
+        Date::check_serial_number(serial_number);
         Date { serial_number }
     }
     pub fn from_serial_number(serial_number: SerialType) -> Date {
-        assert!(
-            (Date::MIN_SERIAL..=Date::MAX_SERIAL).contains(&serial_number),
-            "Serial number {} out of bounds, must be [{}..={}]",
-            serial_number,
-            Date::MIN_SERIAL,
-            Date::MAX_SERIAL
-        );
+        Date::check_serial_number(serial_number);
         Date {
             serial_number: serial_number,
         }
@@ -334,7 +326,17 @@ impl Date {
 
         YEAR_IS_LEAP[(year - 1900) as usize]
     }
-
+    fn check_serial_number(serial_number: SerialType) {
+        assert!(
+            (Date::MIN_SERIAL..=Date::MAX_SERIAL).contains(&serial_number),
+            "Serial number {} out of bounds, must be [{}..={}] or in dates [{} - {}]",
+            serial_number,
+            Date::MIN_SERIAL,
+            Date::MAX_SERIAL,
+            Date::max_date(),
+            Date::min_date()
+        );
+    }
     // Inspectors private
 
     // Inspectors public
@@ -568,6 +570,7 @@ impl Add<Day> for Date {
 impl AddAssign<Day> for Date {
     // No Output, no new Date returned. SAME DATE modified!
     fn add_assign(&mut self, right_hand_side: Day) -> () {
+        Date::check_serial_number(right_hand_side);
         self.serial_number += right_hand_side
     }
 }
@@ -592,6 +595,7 @@ impl Sub<Day> for Date {
 impl SubAssign<Day> for Date {
     // No Output, no new Date returned. SAME DATE modified!
     fn sub_assign(&mut self, right_hand_side: Day) -> () {
+        Date::check_serial_number(right_hand_side);
         self.serial_number -= right_hand_side
     }
 }
