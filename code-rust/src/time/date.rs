@@ -623,12 +623,17 @@ impl Sub<Date> for Date {
         self.to_serial_number() - right_hand_side.to_serial_number()
     }
 }
-
+impl Default for Date {
+    fn default() -> Self {
+        Date { serial_number: 0 }
+    }
+}
 // Private
 mod detail {
     use super::Date;
     use super::MonthIndex;
     use crate::io;
+    use chrono::NaiveDate;
     use std::fmt::{Display, Formatter, Result};
 
     pub(crate) struct LongDate {
@@ -639,6 +644,10 @@ mod detail {
     }
     pub(crate) struct IsoDate {
         pub(crate) date: Date,
+    }
+    pub(crate) struct FormattedDate {
+        pub(crate) date: Date,
+        pub(crate) format: String,
     }
 
     impl Display for LongDate {
@@ -678,6 +687,22 @@ mod detail {
             )
         }
     }
+    impl Display for FormattedDate {
+        fn fmt(&self, f: &mut Formatter) -> Result {
+            if self.date.serial_number == 0 {
+                return write!(f, "null date");
+            }
+
+            match NaiveDate::from_ymd_opt(
+                self.date.year(),
+                self.date.month() as u32,
+                self.date.day() as u32,
+            ) {
+                Some(naive) => write!(f, "{}", naive.format(&self.format)),
+                None => panic!("Invalid date"),
+            }
+        }
+    }
 }
 
 // Public String API
@@ -698,6 +723,12 @@ pub(crate) mod io {
     }
     pub fn iso_date(d: Date) -> impl Display {
         detail::IsoDate { date: d }
+    }
+    pub fn formatted_date(d: Date, format: String) -> impl Display {
+        detail::FormattedDate {
+            date: d,
+            format: format,
+        }
     }
 }
 
@@ -1665,7 +1696,7 @@ mod tests {
     }
 
     #[test]
-    fn increment_normal_cases() {
+    fn test_increment_normal_cases() {
         let cases: [(Date, Date); 3] = [
             (
                 Date::new(14, Month::February, 1989),
@@ -1681,39 +1712,34 @@ mod tests {
             ), // year boundary
         ];
 
-        for (i, (input, expected)) in cases.into_iter().enumerate() {
-            let mut d: Date = input;
+        for (input, expected) in cases {
+            let mut d = input;
             d.increment();
-            assert_eq!(
-                d, expected,
-                "Increment test case {} failed: start={:?}",
-                i, input
-            );
+            assert_eq!(d, expected, "Increment failed: start={:?}", input);
         }
     }
 
     #[test]
-    fn increment_panic_cases() {
+    fn test_increment_panic_cases() {
         let cases: [Date; 1] = [
             Date::new(31, Month::December, 2199), // beyond max date
         ];
 
-        for (i, input) in cases.into_iter().enumerate() {
+        for input in cases {
             let result = panic::catch_unwind(|| {
                 let mut d = input;
                 d.increment();
             });
             assert!(
                 result.is_err(),
-                "Increment panic test case {} failed: start={:?} did not panic",
-                i,
+                "Increment panic failed: start={:?} did not panic",
                 input
             );
         }
     }
 
     #[test]
-    fn decrement_normal_cases() {
+    fn test_decrement_normal_cases() {
         let cases: [(Date, Date); 4] = [
             (
                 Date::new(14, Month::February, 1989),
@@ -1733,32 +1759,88 @@ mod tests {
             ), // leap year
         ];
 
-        for (i, (input, expected)) in cases.into_iter().enumerate() {
-            let mut d: Date = input;
+        for (input, expected) in cases {
+            let mut d = input;
             d.decrement();
-            assert_eq!(
-                d, expected,
-                "Decrement test case {} failed: start={:?}",
-                i, input
+            assert_eq!(d, expected, "Decrement failed: start={:?}", input);
+        }
+    }
+
+    #[test]
+    fn test_decrement_panic_cases() {
+        let cases: [Date; 1] = [
+            Date::new(1, Month::January, 1901), // before min date
+        ];
+
+        for input in cases {
+            let result = panic::catch_unwind(|| {
+                let mut d = input;
+                d.decrement();
+            });
+            assert!(
+                result.is_err(),
+                "Decrement panic failed: start={:?} did not panic",
+                input
             );
         }
     }
 
     #[test]
-    fn decrement_panic_cases() {
-        let cases: [Date; 1] = [
-            Date::new(1, Month::January, 1901), // before min date
+    fn test_formatted_date_normal_cases() {
+        let cases: [(Date, &str, &str); 3] = [
+            (
+                Date::new(14, Month::February, 1989),
+                "%Y-%m-%d",
+                "1989-02-14",
+            ),
+            (
+                Date::new(14, Month::February, 1989),
+                "%m/%d/%Y",
+                "02/14/1989",
+            ),
+            (
+                Date::new(14, Month::February, 1989),
+                "%B %d, %Y",
+                "February 14, 1989",
+            ),
         ];
 
-        for (i, input) in cases.into_iter().enumerate() {
+        for (input, format, expected) in cases {
+            let result = format!("{}", io::formatted_date(input, format.to_string()));
+            assert_eq!(
+                result, expected,
+                "Formatted date failed: date={:?}, format={}",
+                input, format
+            );
+        }
+    }
+
+    #[test]
+    fn test_formatted_date_null_cases() {
+        let cases: [(Date, &str, &str); 1] = [(Date::default(), "%Y-%m-%d", "null date")];
+
+        for (input, format, expected) in cases {
+            let result = format!("{}", io::formatted_date(input, format.to_string()));
+            assert_eq!(
+                result, expected,
+                "Formatted date null failed: date={:?}, format={}",
+                input, format
+            );
+        }
+    }
+    #[test]
+    fn test_formatted_date_invalid_date_panics() {
+        let cases: [Date; 1] = [
+            Date { serial_number: -1 }, // bypass Date::new()
+        ];
+
+        for input in cases {
             let result = panic::catch_unwind(|| {
-                let mut d: Date = input;
-                d.decrement();
+                let _ = format!("{}", io::formatted_date(input, "%Y-%m-%d".to_string()));
             });
             assert!(
                 result.is_err(),
-                "Decrement panic test case {} failed: start={:?} did not panic",
-                i,
+                "Formatted date invalid case failed: date={:?} did not panic",
                 input
             );
         }

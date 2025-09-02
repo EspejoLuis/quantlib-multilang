@@ -35,30 +35,45 @@
 
   This could potentially allow to do a += 4 += 5 (like C++).
 
+- Implemented `formatted_date()`. Using `String`:
+  - String (owned string)
+    - You own the text.
+    - Stored on the heap (memory has to be manually allocated)
+    - You can keep it as long as you like, change it, grow it.
+    - Example --> let s: String = String::from("Hello");
+    - Analogy: you bought the book → it’s yours, you can write notes, rip pages, keep it forever.
+  - &str (string slice):
+    - You borrow the text.
+    - It’s just a view into some existing string (or literal).
+    - You can’t change it, and it only lives as long as the original string.
+    - Example --> let s: &str = "Hello"; // literal is &'static str
+    - Analogy: you borrowed the book from a library → you can read it, but can’t keep it, and it must go back.
 - If an iterator is used in the future, need to implement this :
+
   ```rust
   for d in start.iter_to(end) {
   // body
   }
   ```
 
+- Implemented `default()` as trait for `Default`
+
 ### TODO:
 
+- [TODO] For operators, C++ always returns a reference to the object itself for `Date&` or `Period&`. In Rust, we should do the same i.e. returning a mutable reference to the same object. Not only as output but as input as well. In case of input we should use lifetime `'a`
 - Should i call length and unit with .length or .length()
 - Remove some partialOrd where not needed
 - ❓ Thinking about having `enum month` in a proper `month.rs`
 - What about using Size (usize) instead of MonthIndex or WeekDayIndex
-- Date:
+  Date:
 
-  - Rust:
+  - Rust: [from ChatGPT]
 
     - Integration with Period and TimeUnit
       - In QuantLib, Date supports advancing by a Period (+= Period, -= Period, + Period, - Period).
       - This requires calling advance(self, n, TimeUnit) which handles days, weeks, months, and years.
       - Currently, your Rust Date only supports +/- Day and Date - Date. No handling of Period.
-    - Increment / Decrement Operators
-
-    - advance Function
+    - Advance Function
 
       - A key part of QuantLib: moves a date forward/backward by n units (Days, Weeks, Months, Years).
       - Your Rust code doesn’t yet have an equivalent.
@@ -67,9 +82,6 @@
       - QuantLib defines Date() as a null date (serial = 0).
       - Your Rust Date always has a valid serial number — no concept of null.
       - If you want to stay consistent with QuantLib, you should add pub fn null_date() -> Date returning serial_number = 0, and handle it in Display as "null date".
-    - Comparison Traits Beyond <
-      - In QuantLib, Date has ==, !=, <, <=, >, >=.
-      - Rust derives PartialEq, Eq, PartialOrd, Ord already, so this part is fine.
     - Hashing
       - C++ provides hash_value(const Date&).
       - In Rust, you can implement impl std::hash::Hash for Date to support use in HashMap.
@@ -77,7 +89,6 @@
 
       - You already added io::long_date, io::short_date, io::iso_date.
       - QuantLib also has io::formatted_date (custom pattern) and, in high-resolution mode, iso_datetime.
-      - You may skip high-resolution for now, but formatted_date is still missing.
 
     - ❌ Integration tests.
     - ❌ Check coverage. Some issue
