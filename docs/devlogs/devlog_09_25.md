@@ -7,8 +7,40 @@
 
 ## 2 Sep 2025 - Date - Rust:
 
-- Asked ChatGPT to list the differences. Added the list below
+- Asked ChatGPT to list the differences. Added the list below.
 - `check_serial_number` added. Have to add it in ++d and --d but dont have them so have to create them.
+- Increments. We are going to implement only pre-increments (they are used in `calendar.cpp` and `calendar.hpp`).
+
+  - Pre-increment (++d):
+    - Increment first, then return reference to the updated object
+    - Example: int x=5; int y=++x; // x=6, y=6
+    - Reference to updated object
+  - Post-increment (d++):
+    - Copy current value, then increment, return the old copy
+    - Example: int x=5; int y=x++; // x=6, y=5
+    - Copy of old object
+
+- Important. For operators, C++ always returns a reference to the object itself for `Date&` or `Period&`. In Rust, we should do the same i.e. returning a mutable reference to the same object.
+  Instead of having:
+
+  ```rust
+  sub_assign(&mut self, right_hand_side: Day) -> ()
+  ```
+
+  we should have
+
+  ```rust
+  sub_assign(&mut self, right_hand_side: Day) -> &mut self
+  ```
+
+  This could potentially allow to do a += 4 += 5 (like C++).
+
+- If an iterator is used in the future, need to implement this :
+  ```rust
+  for d in start.iter_to(end) {
+  // body
+  }
+  ```
 
 ### TODO:
 
@@ -25,10 +57,7 @@
       - This requires calling advance(self, n, TimeUnit) which handles days, weeks, months, and years.
       - Currently, your Rust Date only supports +/- Day and Date - Date. No handling of Period.
     - Increment / Decrement Operators
-      - C++ implements both pre/post increment (++d, d++) and pre/post decrement (--d, d--) on dates.
-      - Rust can’t overload ++, but you should still expose equivalents:
-      - pub fn increment(&mut self) → like ++d.
-      - pub fn decrement(&mut self) → like --d.
+
     - advance Function
 
       - A key part of QuantLib: moves a date forward/backward by n units (Days, Weeks, Months, Years).

@@ -493,6 +493,20 @@ impl Date {
 
         Date::new(1 + day_of_week + skip * 7 - first_day_of_week, month, year)
     }
+    pub fn increment(&mut self) -> &mut Self {
+        // With -> &mut Self d.increment().increment() could be done
+        let serial_number: SerialType = self.serial_number + 1;
+        Date::check_serial_number(serial_number);
+        self.serial_number = serial_number;
+        return self;
+    }
+    pub fn decrement(&mut self) -> &mut Self {
+        // With -> &mut Self d.decrement().decrement() could be done
+        let serial_number: SerialType = self.serial_number - 1;
+        Date::check_serial_number(serial_number);
+        self.serial_number = serial_number;
+        return self;
+    }
 }
 
 // Traits:
@@ -1646,6 +1660,106 @@ mod tests {
             assert!(
                 result.is_err(),
                 "Expected panic for nth={nth}, wd={wd:?}, month={month:?}, year={year} but got Ok"
+            );
+        }
+    }
+
+    #[test]
+    fn increment_normal_cases() {
+        let cases: [(Date, Date); 3] = [
+            (
+                Date::new(14, Month::February, 1989),
+                Date::new(15, Month::February, 1989),
+            ), // simple
+            (
+                Date::new(31, Month::January, 1989),
+                Date::new(1, Month::February, 1989),
+            ), // month boundary
+            (
+                Date::new(31, Month::December, 1989),
+                Date::new(1, Month::January, 1990),
+            ), // year boundary
+        ];
+
+        for (i, (input, expected)) in cases.into_iter().enumerate() {
+            let mut d: Date = input;
+            d.increment();
+            assert_eq!(
+                d, expected,
+                "Increment test case {} failed: start={:?}",
+                i, input
+            );
+        }
+    }
+
+    #[test]
+    fn increment_panic_cases() {
+        let cases: [Date; 1] = [
+            Date::new(31, Month::December, 2199), // beyond max date
+        ];
+
+        for (i, input) in cases.into_iter().enumerate() {
+            let result = panic::catch_unwind(|| {
+                let mut d = input;
+                d.increment();
+            });
+            assert!(
+                result.is_err(),
+                "Increment panic test case {} failed: start={:?} did not panic",
+                i,
+                input
+            );
+        }
+    }
+
+    #[test]
+    fn decrement_normal_cases() {
+        let cases: [(Date, Date); 4] = [
+            (
+                Date::new(14, Month::February, 1989),
+                Date::new(13, Month::February, 1989),
+            ), // simple
+            (
+                Date::new(1, Month::January, 1990),
+                Date::new(31, Month::December, 1989),
+            ), // year boundary
+            (
+                Date::new(1, Month::March, 1989),
+                Date::new(28, Month::February, 1989),
+            ), // non-leap year
+            (
+                Date::new(1, Month::March, 1988),
+                Date::new(29, Month::February, 1988),
+            ), // leap year
+        ];
+
+        for (i, (input, expected)) in cases.into_iter().enumerate() {
+            let mut d: Date = input;
+            d.decrement();
+            assert_eq!(
+                d, expected,
+                "Decrement test case {} failed: start={:?}",
+                i, input
+            );
+        }
+    }
+
+    #[test]
+    fn decrement_panic_cases() {
+        let cases: [Date; 1] = [
+            Date::new(1, Month::January, 1901), // before min date
+        ];
+
+        for (i, input) in cases.into_iter().enumerate() {
+            let result = panic::catch_unwind(|| {
+                let mut d: Date = input;
+                d.decrement();
+            });
+            assert!(
+                result.is_err(),
+                "Decrement panic test case {} failed: start={:?} did not panic",
+                i,
+                input
             );
         }
     }
