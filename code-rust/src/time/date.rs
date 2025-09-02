@@ -570,7 +570,8 @@ impl Add<Day> for Date {
 impl AddAssign<Day> for Date {
     // No Output, no new Date returned. SAME DATE modified!
     fn add_assign(&mut self, right_hand_side: Day) -> () {
-        Date::check_serial_number(right_hand_side);
+        let serial_number: SerialType = self.serial_number + right_hand_side;
+        Date::check_serial_number(serial_number);
         self.serial_number += right_hand_side
     }
 }
@@ -595,7 +596,8 @@ impl Sub<Day> for Date {
 impl SubAssign<Day> for Date {
     // No Output, no new Date returned. SAME DATE modified!
     fn sub_assign(&mut self, right_hand_side: Day) -> () {
-        Date::check_serial_number(right_hand_side);
+        let serial_number: SerialType = self.serial_number - right_hand_side;
+        Date::check_serial_number(serial_number);
         self.serial_number -= right_hand_side
     }
 }
