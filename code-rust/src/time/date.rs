@@ -493,19 +493,15 @@ impl Date {
 
         Date::new(1 + day_of_week + skip * 7 - first_day_of_week, month, year)
     }
-    pub fn increment(&mut self) -> &mut Self {
-        // With -> &mut Self d.increment().increment() could be done
+    pub fn increment(&mut self) -> () {
         let serial_number: SerialType = self.serial_number + 1;
         Date::check_serial_number(serial_number);
-        self.serial_number = serial_number;
-        return self;
+        self.serial_number = serial_number
     }
-    pub fn decrement(&mut self) -> &mut Self {
-        // With -> &mut Self d.decrement().decrement() could be done
+    pub fn decrement(&mut self) -> () {
         let serial_number: SerialType = self.serial_number - 1;
         Date::check_serial_number(serial_number);
-        self.serial_number = serial_number;
-        return self;
+        self.serial_number = serial_number
     }
 }
 
@@ -537,7 +533,7 @@ impl Display for Date {
         - &mut fmt::Formatter -> allowed to write into this formatter buffer
         */
     fn fmt(&self, formatter_buffer: &mut Formatter) -> Result {
-        write!(formatter_buffer, "{}", io::long_date(*self))
+        write!(formatter_buffer, "{}", io::long_date(self))
     }
 }
 impl Add<Day> for Date {
@@ -636,58 +632,57 @@ mod detail {
     use chrono::NaiveDate;
     use std::fmt::{Display, Formatter, Result};
 
-    pub(crate) struct LongDate {
-        pub(crate) date: Date,
+    pub(crate) struct LongDate<'a> {
+        pub(crate) date: &'a Date,
     }
-    pub(crate) struct ShortDate {
-        pub(crate) date: Date,
+    pub(crate) struct ShortDate<'a> {
+        pub(crate) date: &'a Date,
     }
-    pub(crate) struct IsoDate {
-        pub(crate) date: Date,
+    pub(crate) struct IsoDate<'a> {
+        pub(crate) date: &'a Date,
     }
-    pub(crate) struct FormattedDate {
-        pub(crate) date: Date,
-        pub(crate) format: String,
+    pub(crate) struct FormattedDate<'a> {
+        pub(crate) date: &'a Date,
+        pub(crate) format: &'a str,
     }
 
-    impl Display for LongDate {
+    impl<'a> Display for LongDate<'a> {
         fn fmt(&self, f: &mut Formatter) -> Result {
-            let d: &Date = &self.date;
             // Example: "July 23, 2024"
             write!(
                 f,
                 "{} {}, {}",
-                d.month(),
-                io::ordinal(d.day() as usize),
-                d.year()
+                self.date.month(),
+                io::ordinal(self.date.day() as usize),
+                self.date.year()
             )
         }
     }
-    impl Display for ShortDate {
+    impl<'a> Display for ShortDate<'a> {
         fn fmt(&self, f: &mut Formatter) -> Result {
-            let d: &Date = &self.date;
+            // Example: "05-31-2025"
             write!(
                 f,
                 "{:02}/{:02}/{}",
-                d.month() as MonthIndex,
-                d.day(),
-                d.year()
+                self.date.month() as MonthIndex,
+                self.date.day(),
+                self.date.year()
             )
         }
     }
-    impl Display for IsoDate {
+    impl<'a> Display for IsoDate<'a> {
         fn fmt(&self, f: &mut Formatter) -> Result {
-            let d: &Date = &self.date;
+            // Example: "2025-05-12"
             write!(
                 f,
                 "{:04}-{:02}-{:02}",
-                d.year(),
-                d.month() as MonthIndex,
-                d.day()
+                self.date.year(),
+                self.date.month() as MonthIndex,
+                self.date.day()
             )
         }
     }
-    impl Display for FormattedDate {
+    impl<'a> Display for FormattedDate<'a> {
         fn fmt(&self, f: &mut Formatter) -> Result {
             if self.date.serial_number == 0 {
                 return write!(f, "null date");
@@ -698,7 +693,7 @@ mod detail {
                 self.date.month() as u32,
                 self.date.day() as u32,
             ) {
-                Some(naive) => write!(f, "{}", naive.format(&self.format)),
+                Some(naive) => write!(f, "{}", naive.format(self.format)),
                 None => panic!("Invalid date"),
             }
         }
@@ -715,16 +710,16 @@ pub(crate) mod io {
     use super::{Date, detail};
     use std::fmt::Display;
 
-    pub fn long_date(d: Date) -> impl Display {
+    pub fn long_date<'a>(d: &'a Date) -> impl Display + 'a {
         detail::LongDate { date: d }
     }
-    pub fn short_date(d: Date) -> impl Display {
+    pub fn short_date<'a>(d: &'a Date) -> impl Display + 'a {
         detail::ShortDate { date: d }
     }
-    pub fn iso_date(d: Date) -> impl Display {
+    pub fn iso_date<'a>(d: &'a Date) -> impl Display + 'a {
         detail::IsoDate { date: d }
     }
-    pub fn formatted_date(d: Date, format: String) -> impl Display {
+    pub fn formatted_date<'a>(d: &'a Date, format: &'a str) -> impl Display + 'a {
         detail::FormattedDate {
             date: d,
             format: format,
@@ -1405,7 +1400,7 @@ mod tests {
 
         for (date, expected) in cases {
             assert_eq!(
-                format!("{}", io::long_date(date)),
+                format!("{}", io::long_date(&date)),
                 expected,
                 "Failed for date {:?}",
                 date
@@ -1423,7 +1418,7 @@ mod tests {
 
         for (date, expected) in cases {
             assert_eq!(
-                format!("{}", io::short_date(date)),
+                format!("{}", io::short_date(&date)),
                 expected,
                 "Failed for date {:?}",
                 date
@@ -1442,7 +1437,7 @@ mod tests {
 
         for (date, expected) in cases {
             assert_eq!(
-                format!("{}", io::iso_date(date)),
+                format!("{}", io::iso_date(&date)),
                 expected,
                 "Failed for date {:?}",
                 date
@@ -1806,7 +1801,7 @@ mod tests {
         ];
 
         for (input, format, expected) in cases {
-            let result = format!("{}", io::formatted_date(input, format.to_string()));
+            let result = format!("{}", io::formatted_date(&input, format));
             assert_eq!(
                 result, expected,
                 "Formatted date failed: date={:?}, format={}",
@@ -1820,7 +1815,7 @@ mod tests {
         let cases: [(Date, &str, &str); 1] = [(Date::default(), "%Y-%m-%d", "null date")];
 
         for (input, format, expected) in cases {
-            let result = format!("{}", io::formatted_date(input, format.to_string()));
+            let result = format!("{}", io::formatted_date(&input, format));
             assert_eq!(
                 result, expected,
                 "Formatted date null failed: date={:?}, format={}",
@@ -1836,7 +1831,7 @@ mod tests {
 
         for input in cases {
             let result = panic::catch_unwind(|| {
-                let _ = format!("{}", io::formatted_date(input, "%Y-%m-%d".to_string()));
+                let _ = format!("{}", io::formatted_date(&input, "%Y-%m-%d"));
             });
             assert!(
                 result.is_err(),

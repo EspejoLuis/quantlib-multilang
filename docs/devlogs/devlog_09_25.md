@@ -58,6 +58,27 @@
 
 - Implemented `default()` as trait for `Default`
 
+## 3 Sep 2025 - Date - Rust:
+
+- Change to lifetime `'a`:
+  - In C++, const Date& means “borrow this Date, don’t copy it.”
+  - In Rust, this is expressed with &'a Date: a reference tied to a lifetime 'a.
+  - The impl<'a> tells Rust: this implementation works for any lifetime 'a:
+  ```rust
+  impl<'a> Display for IsoDate<'a> {
+      fn fmt(&self, f: &mut Formatter) -> Result { ... }
+  }
+  ```
+  - The public API must also carry the lifetime forward, ensuring the returned object cannot outlive the borrowed date:
+  ```rust
+  pub fn iso_date<'a>(d: &'a Date) -> impl Display + 'a {
+      detail::IsoDate { date: d }
+  }
+  ```
+  - `impl<'a> Display for IsoDate<'a>` -> implement Display for borrowed dates with lifetime 'a.
+  - `impl Display + 'a ` -> the returned object implements Display and is valid only as long as the borrowed Date lives.
+    This makes Rust’s API faithful to QuantLib: borrowed views of a Date instead of copying.
+
 ### TODO:
 
 - [TODO] For operators, C++ always returns a reference to the object itself for `Date&` or `Period&`. In Rust, we should do the same i.e. returning a mutable reference to the same object. Not only as output but as input as well. In case of input we should use lifetime `'a`
