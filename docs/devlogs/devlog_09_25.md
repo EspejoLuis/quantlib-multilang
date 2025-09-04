@@ -81,7 +81,18 @@
 
 ## 4 Sep 2025 - Thursday - Date - Rust:
 
-- Updated `period.rs` with the lifetime `'a`.
+- Updated `period.rs` with lifetime `'a`.
+- Update `weekday.rs` with lifetime `'a`:
+  ```rust
+  pub(crate) struct LongWeekday<'a> {
+      pub(crate) weekday: &'a Weekday,
+  }
+  ```
+  'a does not exist at runtime. It’s not a variable, not memory, not data. It’s purely for the compiler to enforce borrowing rules. Example with a car:
+  Imagine 'a is a parking permit:
+  - You borrow a car (&Weekday) but the permit says you can only keep it until 'a expires.
+  - LongWeekday<'a> is the parking lot that stores the borrowed car.
+  - When 'a ends, you must return the car — you can’t keep using it.
 
 ### TODO:
 

@@ -33,7 +33,7 @@ impl Weekday {
 // Traits
 impl Display for Weekday {
     fn fmt(&self, formatter_buffer: &mut Formatter) -> Result {
-        write!(formatter_buffer, "{}", io::long_weekday(*self))
+        write!(formatter_buffer, "{}", io::long_weekday(self))
     }
 }
 impl Add<WeekDayIndex> for Weekday {
@@ -53,23 +53,22 @@ impl Sub<WeekDayIndex> for Weekday {
 // Private
 mod detail {
     use super::Weekday;
-    use std::fmt;
+    use std::fmt::{Display, Formatter, Result};
 
-    pub(crate) struct LongWeekday {
-        pub(crate) weekday: Weekday,
+    pub(crate) struct LongWeekday<'a> {
+        pub(crate) weekday: &'a Weekday,
     }
-    pub(crate) struct ShortWeekday {
-        pub(crate) weekday: Weekday,
+    pub(crate) struct ShortWeekday<'a> {
+        pub(crate) weekday: &'a Weekday,
     }
-    pub(crate) struct ShortestWeekday {
-        pub(crate) weekday: Weekday,
+    pub(crate) struct ShortestWeekday<'a> {
+        pub(crate) weekday: &'a Weekday,
     }
 
     // impl Display is not a string, it’s just a wrapper that knows how to print itself.
-    impl fmt::Display for LongWeekday {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            let weekday: &Weekday = &self.weekday;
-            let long_weekday: &'static str = match weekday {
+    impl<'a> Display for LongWeekday<'a> {
+        fn fmt(&self, f: &mut Formatter) -> Result {
+            let long_weekday: &'static str = match self.weekday {
                 Weekday::Monday => "Monday",
                 Weekday::Tuesday => "Tuesday",
                 Weekday::Wednesday => "Wednesday",
@@ -81,10 +80,9 @@ mod detail {
             write!(f, "{}", long_weekday)
         }
     }
-    impl fmt::Display for ShortWeekday {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            let weekday: &Weekday = &self.weekday;
-            let short_weekday: &'static str = match weekday {
+    impl<'a> Display for ShortWeekday<'a> {
+        fn fmt(&self, f: &mut Formatter) -> Result {
+            let short_weekday: &'static str = match self.weekday {
                 Weekday::Monday => "Mon",
                 Weekday::Tuesday => "Tue",
                 Weekday::Wednesday => "Wed",
@@ -96,10 +94,9 @@ mod detail {
             write!(f, "{}", short_weekday)
         }
     }
-    impl fmt::Display for ShortestWeekday {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            let weekday: &Weekday = &self.weekday;
-            let shortest_weekday: &'static str = match weekday {
+    impl<'a> Display for ShortestWeekday<'a> {
+        fn fmt(&self, f: &mut Formatter) -> Result {
+            let shortest_weekday: &'static str = match self.weekday {
                 Weekday::Monday => "Mo",
                 Weekday::Tuesday => "Tu",
                 Weekday::Wednesday => "We",
@@ -112,18 +109,18 @@ mod detail {
         }
     }
 }
-
 // Public API
 pub(crate) mod io {
     use super::{Weekday, detail};
+    use std::fmt::Display;
 
-    pub fn long_weekday(wd: Weekday) -> impl std::fmt::Display {
+    pub fn long_weekday<'a>(wd: &'a Weekday) -> impl Display + 'a {
         detail::LongWeekday { weekday: wd }
     }
-    pub fn short_weekday(wd: Weekday) -> impl std::fmt::Display {
+    pub fn short_weekday<'a>(wd: &'a Weekday) -> impl Display + 'a {
         detail::ShortWeekday { weekday: wd }
     }
-    pub fn shortest_weekday(wd: Weekday) -> impl std::fmt::Display {
+    pub fn shortest_weekday<'a>(wd: &'a Weekday) -> impl Display + 'a {
         detail::ShortestWeekday { weekday: wd }
     }
 }
@@ -149,7 +146,7 @@ mod tests {
 
         for (weekday, expected) in cases {
             assert_eq!(
-                format!("{}", io::long_weekday(weekday)),
+                format!("{}", io::long_weekday(&weekday)),
                 expected,
                 "Failed for {:?}",
                 weekday
@@ -171,7 +168,7 @@ mod tests {
 
         for (weekday, expected) in cases {
             assert_eq!(
-                format!("{}", io::short_weekday(weekday)),
+                format!("{}", io::short_weekday(&weekday)),
                 expected,
                 "Failed for {:?}",
                 weekday
@@ -193,7 +190,7 @@ mod tests {
 
         for (weekday, expected) in cases {
             assert_eq!(
-                format!("{}", io::shortest_weekday(weekday)),
+                format!("{}", io::shortest_weekday(&weekday)),
                 expected,
                 "Failed for {:?}",
                 weekday
