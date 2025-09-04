@@ -420,7 +420,7 @@ impl PartialOrd for Period {
 }
 impl Display for Period {
     fn fmt(&self, formatter_buffer: &mut Formatter) -> Result {
-        write!(formatter_buffer, "{}", io::short_period(*self))
+        write!(formatter_buffer, "{}", io::short_period(self))
     }
 }
 // Private
@@ -429,15 +429,15 @@ mod detail {
     use super::*;
     use std::fmt::{Display, Formatter, Result};
 
-    pub(crate) struct LongPeriod {
-        pub(crate) period: Period,
+    pub(crate) struct LongPeriod<'a> {
+        pub(crate) period: &'a Period,
     }
-    pub(crate) struct ShortPeriod {
-        pub(crate) period: Period,
+    pub(crate) struct ShortPeriod<'a> {
+        pub(crate) period: &'a Period,
     }
 
     // impl Display is not a string, it’s just a wrapper that knows how to print itself.
-    impl Display for LongPeriod {
+    impl<'a> Display for LongPeriod<'a> {
         fn fmt(&self, f: &mut Formatter) -> Result {
             let length: i32 = self.period.length();
             let long_length: &'static str = match &self.period.units() {
@@ -473,7 +473,7 @@ mod detail {
             write!(f, "{} {}", length, long_length)
         }
     }
-    impl Display for ShortPeriod {
+    impl<'a> Display for ShortPeriod<'a> {
         fn fmt(&self, f: &mut Formatter) -> Result {
             let length: i32 = self.period.length();
             let short_length: &'static str = match &self.period.units() {
@@ -486,16 +486,15 @@ mod detail {
         }
     }
 }
-
 // Public API
 pub(crate) mod io {
-
     use super::{Period, detail};
+    use std::fmt::Display;
 
-    pub fn long_period(p: Period) -> impl std::fmt::Display {
+    pub fn long_period<'a>(p: &'a Period) -> impl Display + 'a {
         detail::LongPeriod { period: p }
     }
-    pub fn short_period(p: Period) -> impl std::fmt::Display {
+    pub fn short_period<'a>(p: &'a Period) -> impl Display + 'a {
         detail::ShortPeriod { period: p }
     }
 }
@@ -1675,7 +1674,7 @@ mod tests {
 
         for ((len, unit), expected) in cases {
             let p = Period::new(len, unit);
-            let result = format!("{}", io::long_period(p));
+            let result = format!("{}", io::long_period(&p));
             assert_eq!(result, expected, "Failed case: {} {:?}", expected, p);
         }
     }
@@ -1691,7 +1690,7 @@ mod tests {
 
         for ((len, unit), expected) in cases {
             let p: Period = Period::new(len, unit);
-            let result: String = format!("{}", io::short_period(p));
+            let result: String = format!("{}", io::short_period(&p));
             assert_eq!(result, expected, "Failed case: {} {:?}", expected, p);
         }
     }
@@ -1707,7 +1706,7 @@ mod tests {
 
         for ((len, unit), expected) in cases {
             let p: Period = Period::new(len, unit);
-            let result = format!("{}", p);
+            let result: String = format!("{}", p);
             assert_eq!(result, expected, "Failed case: {} {:?}", expected, p);
         }
     }

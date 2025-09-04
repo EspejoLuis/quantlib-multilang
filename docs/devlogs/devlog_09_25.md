@@ -79,6 +79,10 @@
   - `impl Display + 'a ` -> the returned object implements Display and is valid only as long as the borrowed Date lives.
     This makes Rust’s API faithful to QuantLib: borrowed views of a Date instead of copying.
 
+## 4 Sep 2025 - Thursday - Date - Rust:
+
+- Updated `period.rs` with the lifetime `'a`.
+
 ### TODO:
 
 - [TODO] For operators, C++ always returns a reference to the object itself for `Date&` or `Period&`. In Rust, we should do the same i.e. returning a mutable reference to the same object. Not only as output but as input as well. In case of input we should use lifetime `'a`

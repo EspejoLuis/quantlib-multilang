@@ -699,7 +699,6 @@ mod detail {
         }
     }
 }
-
 // Public String API
 pub(crate) mod io {
     /*
@@ -1823,6 +1822,7 @@ mod tests {
             );
         }
     }
+
     #[test]
     fn test_formatted_date_invalid_date_panics() {
         let cases: [Date; 1] = [
