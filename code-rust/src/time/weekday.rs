@@ -109,6 +109,7 @@ mod detail {
         }
     }
 }
+
 // Public API
 pub(crate) mod io {
     use super::{Weekday, detail};

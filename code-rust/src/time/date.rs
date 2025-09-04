@@ -624,6 +624,7 @@ impl Default for Date {
         Date { serial_number: 0 }
     }
 }
+
 // Private
 mod detail {
     use super::Date;
@@ -699,6 +700,7 @@ mod detail {
         }
     }
 }
+
 // Public String API
 pub(crate) mod io {
     /*

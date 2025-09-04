@@ -423,6 +423,7 @@ impl Display for Period {
         write!(formatter_buffer, "{}", io::short_period(self))
     }
 }
+
 // Private
 mod detail {
     use super::Period;
@@ -486,6 +487,7 @@ mod detail {
         }
     }
 }
+
 // Public API
 pub(crate) mod io {
     use super::{Period, detail};
