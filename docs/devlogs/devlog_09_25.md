@@ -96,7 +96,7 @@
 
 ### TODO:
 
-- [TODO] For operators, C++ always returns a reference to the object itself for `Date&` or `Period&`. In Rust, we should do the same i.e. returning a mutable reference to the same object. Not only as output but as input as well. In case of input we should use lifetime `'a`
+- Should MonthIndex and WeekdayIndex go ? simply use Month and WeekDay and then cast as usize where needed ?
 - Should i call length and unit with .length or .length()
 - Remove some partialOrd where not needed
 - ❓ Thinking about having `enum month` in a proper `month.rs`
@@ -119,12 +119,9 @@
       - Your Rust Date always has a valid serial number — no concept of null.
       - If you want to stay consistent with QuantLib, you should add pub fn null_date() -> Date returning serial_number = 0, and handle it in Display as "null date".
     - Hashing
+
       - C++ provides hash_value(const Date&).
       - In Rust, you can implement impl std::hash::Hash for Date to support use in HashMap.
-    - Formatting Helpers
-
-      - You already added io::long_date, io::short_date, io::iso_date.
-      - QuantLib also has io::formatted_date (custom pattern) and, in high-resolution mode, iso_datetime.
 
     - ❌ Integration tests.
     - ❌ Check coverage. Some issue

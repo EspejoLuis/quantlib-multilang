@@ -106,7 +106,7 @@ impl Date {
         // 2. Leap year
         let is_leap: bool = Date::is_leap(year);
         // 3. Month length & offset
-        let month_length: i32 = Date::month_length(month as MonthIndex, is_leap);
+        let month_length: i32 = Date::month_length(month, is_leap);
         let month_offset: i32 = Date::month_offset(month as MonthIndex, is_leap);
         let year_offset: i32 = Date::year_offset(year);
         // 4. Day check
@@ -242,14 +242,14 @@ impl Date {
             MONTH_OFFSET[month_index as usize]
         }
     }
-    fn month_length(month_index: MonthIndex, is_leap: bool) -> i32 {
+    fn month_length(month: Month, is_leap: bool) -> i32 {
         // Days from 1-Jan to start of each month
         const MONTH_LENGTH: [i32; 13] = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         const MONTH_LEAP_LENGTH: [i32; 13] = [0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
         match is_leap {
-            true => MONTH_LEAP_LENGTH[month_index as usize],
-            false => MONTH_LENGTH[month_index as usize],
+            true => MONTH_LEAP_LENGTH[month as MonthIndex],
+            false => MONTH_LENGTH[month as MonthIndex],
         }
     }
     fn is_leap(year: Year) -> bool {
@@ -395,16 +395,12 @@ impl Date {
         Date::from_serial_number(Date::MAX_SERIAL)
     }
     pub fn is_end_of_month(&self) -> bool {
-        self.day() == Date::month_length(self.month() as MonthIndex, Date::is_leap(self.year()))
+        self.day() == Date::month_length(self.month(), Date::is_leap(self.year()))
     }
     pub fn end_of_month(&self) -> Date {
         let month: Month = self.month();
         let year: Year = self.year();
-        Date::new(
-            Date::month_length(month as MonthIndex, Date::is_leap(year)),
-            month,
-            year,
-        )
+        Date::new(Date::month_length(month, Date::is_leap(year)), month, year)
     }
     pub fn todays_date() -> Date {
         let today: NaiveDate = Local::now().date_naive();
@@ -1266,7 +1262,7 @@ mod tests {
         ];
         for (days, month) in cases {
             assert_eq!(
-                Date::month_length(month as MonthIndex, false),
+                Date::month_length(month, false),
                 days,
                 "Month {} for year {} does not have right number of days {}",
                 month,
@@ -1294,7 +1290,7 @@ mod tests {
         ];
         for (days, month) in cases {
             assert_eq!(
-                Date::month_length(month as MonthIndex, true),
+                Date::month_length(month, true),
                 days,
                 "Month {} for year {} does not have right number of days {}",
                 month,
