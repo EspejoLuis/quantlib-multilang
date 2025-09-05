@@ -94,9 +94,15 @@
   - LongWeekday<'a> is the parking lot that stores the borrowed car.
   - When 'a ends, you must return the car — you can’t keep using it.
 
+## 5 Sep 2025 - Friday - Date - Rust:
+
+- Modified MonthIndex for `month_length()`. Didn't need to pass MonthIndex. Month was better
+- Implement `advance()` to increase `date` by a timeunit. Unit test but check coverage.
+- Note: `year_offset()` allows you to have 2200 because year=2200 gives you the offset for 31-Dec-2199. But `year` cannot be higher than 2199.
+
 ### TODO:
 
-- Should MonthIndex and WeekdayIndex go ? simply use Month and WeekDay and then cast as usize where needed ?
+- Check coverage unit test for `advance()`
 - Should i call length and unit with .length or .length()
 - Remove some partialOrd where not needed
 - ❓ Thinking about having `enum month` in a proper `month.rs`
@@ -114,10 +120,6 @@
       - A key part of QuantLib: moves a date forward/backward by n units (Days, Weeks, Months, Years).
       - Your Rust code doesn’t yet have an equivalent.
 
-    - Null Date Handling
-      - QuantLib defines Date() as a null date (serial = 0).
-      - Your Rust Date always has a valid serial number — no concept of null.
-      - If you want to stay consistent with QuantLib, you should add pub fn null_date() -> Date returning serial_number = 0, and handle it in Display as "null date".
     - Hashing
 
       - C++ provides hash_value(const Date&).

@@ -1,5 +1,7 @@
 use super::weekday::{WeekDayIndex, Weekday};
-use chrono::{Datelike, Local, NaiveDate}; // Todays' date
+use crate::time::time_unit::TimeUnit;
+use chrono::{Datelike, Local, NaiveDate};
+// Todays' date
 use std::fmt::{Display, Formatter, Result}; // Display
 use std::ops::{Add, Sub}; // Addition, Subtraction
 use std::ops::{AddAssign, SubAssign};
@@ -498,6 +500,61 @@ impl Date {
         let serial_number: SerialType = self.serial_number - 1;
         Date::check_serial_number(serial_number);
         self.serial_number = serial_number
+    }
+    pub fn advance(date: Date, number: i32, units: TimeUnit) -> Date {
+        match units {
+            TimeUnit::Days => date + number,
+            TimeUnit::Weeks => date + 7 * number,
+            TimeUnit::Months => {
+                let mut day: Day = date.day_of_month();
+                let month: Month = date.month();
+                let mut month_number: i32 = (month as i32) + number;
+                let mut year: i32 = date.year();
+                while month_number > 12 {
+                    // If we have month_number = 13, need to subtract 12
+                    // Example 13 will go to January
+                    month_number -= 12;
+                    year += 1;
+                }
+                while month_number < 1 {
+                    // if we have month_number = -1, need to add 12
+                    // Example -1 will go to November
+                    month_number += 12;
+                    year -= 1;
+                }
+
+                assert!(
+                    (1900..=2199).contains(&year),
+                    "year {} outside valid range [1900,2199]",
+                    year
+                );
+
+                let month_updated: Month = Month::from_index(month_number as usize);
+
+                let length: i32 = Date::month_length(month_updated, Date::is_leap(year));
+
+                if day > length {
+                    day = length
+                }
+
+                Date::new(day, month_updated, year)
+            }
+            TimeUnit::Years => {
+                let mut day: Day = date.day_of_month();
+                let month: Month = date.month();
+                let year: i32 = date.year() + number;
+                assert!(
+                    (1900..=2199).contains(&year),
+                    "year {} outside valid range [1900,2199]",
+                    year
+                );
+
+                if day == 29 && month == Month::February && !Date::is_leap(year) {
+                    day = 28
+                }
+                Date::new(day, month, year)
+            }
+        }
     }
 }
 
@@ -1835,6 +1892,128 @@ mod tests {
                 result.is_err(),
                 "Formatted date invalid case failed: date={:?} did not panic",
                 input
+            );
+        }
+    }
+
+    #[test]
+    fn advance_normal_cases() {
+        let cases: [(Date, i32, TimeUnit, Date, &str); 10] = [
+            // --- Days ---
+            (
+                Date::new(14, Month::February, 1989),
+                1,
+                TimeUnit::Days,
+                Date::new(15, Month::February, 1989),
+                "days +1",
+            ),
+            (
+                Date::new(14, Month::February, 1989),
+                -1,
+                TimeUnit::Days,
+                Date::new(13, Month::February, 1989),
+                "days -1",
+            ),
+            (
+                Date::new(14, Month::February, 1989),
+                30,
+                TimeUnit::Days,
+                Date::new(16, Month::March, 1989),
+                "days +30",
+            ),
+            // --- Weeks ---
+            (
+                Date::new(14, Month::February, 1989),
+                1,
+                TimeUnit::Weeks,
+                Date::new(21, Month::February, 1989),
+                "weeks +1",
+            ),
+            (
+                Date::new(14, Month::February, 1989),
+                -1,
+                TimeUnit::Weeks,
+                Date::new(7, Month::February, 1989),
+                "weeks -1",
+            ),
+            // --- Months ---
+            (
+                Date::new(15, Month::January, 1989),
+                1,
+                TimeUnit::Months,
+                Date::new(15, Month::February, 1989),
+                "months +1",
+            ),
+            (
+                Date::new(31, Month::January, 1989),
+                1,
+                TimeUnit::Months,
+                Date::new(28, Month::February, 1989),
+                "months clamp to 28",
+            ),
+            (
+                Date::new(31, Month::January, 1992),
+                1,
+                TimeUnit::Months,
+                Date::new(29, Month::February, 1992),
+                "months clamp leap 29",
+            ),
+            // --- Years ---
+            (
+                Date::new(14, Month::February, 1989),
+                1,
+                TimeUnit::Years,
+                Date::new(14, Month::February, 1990),
+                "years +1",
+            ),
+            (
+                Date::new(29, Month::February, 1988),
+                1,
+                TimeUnit::Years,
+                Date::new(28, Month::February, 1989),
+                "years leap adjust",
+            ),
+        ];
+
+        for (start, number, unit, expected, label) in cases {
+            let derived: Date = Date::advance(start, number, unit);
+            assert_eq!(
+                derived, expected,
+                "advance failed: {} | start={:?}, number={}, unit={:?}",
+                label, start, number, unit
+            );
+        }
+    }
+
+    #[test]
+    fn advance_panics() {
+        let cases: [(Date, i32, TimeUnit, &str); 2] = [
+            (
+                Date::new(1, Month::January, 1901),
+                -1,
+                TimeUnit::Days,
+                "before min date",
+            ),
+            (
+                Date::new(31, Month::December, 2199),
+                1,
+                TimeUnit::Days,
+                "after max date",
+            ),
+        ];
+
+        for (start, number, unit, label) in cases {
+            let result = panic::catch_unwind(|| {
+                let _ = Date::advance(start, number, unit);
+            });
+
+            assert!(
+                result.is_err(),
+                "Expected panic but got Ok for case: {} | start={:?}, number={}, unit={:?}",
+                label,
+                start,
+                number,
+                unit
             );
         }
     }
