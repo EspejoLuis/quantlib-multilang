@@ -250,10 +250,9 @@ impl AddAssign<Period> for Period {
 }
 impl Add<Period> for Period {
     type Output = Period;
-    fn add(self, rhs: Period) -> Period {
-        let mut period: Period = self;
-        period += rhs;
-        return period;
+    fn add(mut self, rhs: Period) -> Period {
+        self += rhs;
+        self
     }
 }
 impl Neg for Period {
@@ -272,10 +271,9 @@ impl SubAssign<Period> for Period {
 }
 impl Sub<Period> for Period {
     type Output = Period;
-    fn sub(self, rhs: Period) -> Period {
-        let mut period: Period = self;
-        period += -rhs;
-        return period;
+    fn sub(mut self, rhs: Period) -> Period {
+        self += -rhs;
+        self
     }
 }
 impl DivAssign<i32> for Period {
@@ -314,12 +312,11 @@ impl DivAssign<i32> for Period {
 }
 impl Div<i32> for Period {
     type Output = Period;
-    fn div(self, divider: i32) -> Period {
+    fn div(mut self, divider: i32) -> Period {
         // += /= *= -= always return the same object modified
         // + / * / always return a new object
-        let mut period: Period = self;
-        period /= divider;
-        return period;
+        self /= divider;
+        self
     }
 }
 impl MulAssign<i32> for Period {

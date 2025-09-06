@@ -103,6 +103,24 @@
 ## 6 Sep 2025 - Saturday - Date - Rust:
 
 - Checked and completed coverage unit test for `advance()`
+- Adjust `add`,`sub`,`div`from
+
+  ```rust
+  fn add(self, rhs: Period) -> Period {
+      let mut period: Period = self;
+      period += rhs;
+      return period;
+  }
+  ```
+
+  to
+
+  ```rust
+  fn add(mut self, rhs: Period) -> Period {
+      self += rhs;
+      self
+  }
+  ```
 
 ### TODO:
 
@@ -115,13 +133,10 @@
   - Rust: [from ChatGPT]
 
     - Integration with Period and TimeUnit
+
       - In QuantLib, Date supports advancing by a Period (+= Period, -= Period, + Period, - Period).
       - This requires calling advance(self, n, TimeUnit) which handles days, weeks, months, and years.
       - Currently, your Rust Date only supports +/- Day and Date - Date. No handling of Period.
-    - Advance Function
-
-      - A key part of QuantLib: moves a date forward/backward by n units (Days, Weeks, Months, Years).
-      - Your Rust code doesn’t yet have an equivalent.
 
     - Hashing
 
@@ -134,6 +149,18 @@
     - ❌ Parsing
     - ❌ parseISO(const std::string&) (takes "2024-07-23" and turns it into a Date)
     - ❌ d.toFormattedString("%d-%b-%Y");
+
+    bool operator==(const Date&, const Date&);
+    /_! \relates Date _/
+    bool operator!=(const Date&, const Date&);
+    /_! \relates Date _/
+    bool operator<(const Date&, const Date&);
+    /_! \relates Date _/
+    bool operator<=(const Date&, const Date&);
+    /_! \relates Date _/
+    bool operator>(const Date&, const Date&);
+    /_! \relates Date _/
+    bool operator>=(const Date&, const Date&);
 
 - C++:
 
