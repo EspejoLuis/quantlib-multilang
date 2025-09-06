@@ -1,7 +1,7 @@
 use super::weekday::{WeekDayIndex, Weekday};
+use crate::time::period::Period;
 use crate::time::time_unit::TimeUnit;
-use chrono::{Datelike, Local, NaiveDate};
-// Todays' date
+use chrono::{Datelike, Local, NaiveDate}; // Todays' date
 use std::fmt::{Display, Formatter, Result}; // Display
 use std::ops::{Add, Sub}; // Addition, Subtraction
 use std::ops::{AddAssign, SubAssign};
@@ -589,6 +589,20 @@ impl Display for Date {
         write!(formatter_buffer, "{}", io::long_date(self))
     }
 }
+impl Sub<Date> for Date {
+    type Output = SerialType;
+
+    fn sub(self, right_hand_side: Date) -> SerialType {
+        // Subtract dates
+        self.to_serial_number() - right_hand_side.to_serial_number()
+    }
+}
+impl Default for Date {
+    fn default() -> Self {
+        Date { serial_number: 0 }
+    }
+}
+// Traits - Day for Date
 impl Add<Day> for Date {
     /*
     This would be the trait:
@@ -664,17 +678,29 @@ impl SubAssign<Day> for Date {
         self.serial_number -= right_hand_side
     }
 }
-impl Sub<Date> for Date {
-    type Output = SerialType;
-
-    fn sub(self, right_hand_side: Date) -> SerialType {
-        // Subtract dates
-        self.to_serial_number() - right_hand_side.to_serial_number()
+// Traits - Period for Date
+impl AddAssign<Period> for Date {
+    fn add_assign(&mut self, rhs: Period) {
+        *self = Date::advance(*self, rhs.length(), rhs.units())
     }
 }
-impl Default for Date {
-    fn default() -> Self {
-        Date { serial_number: 0 }
+impl Add<Period> for Date {
+    type Output = Date;
+    fn add(mut self, rhs: Period) -> Self::Output {
+        self += rhs;
+        self
+    }
+}
+impl SubAssign<Period> for Date {
+    fn sub_assign(&mut self, rhs: Period) {
+        *self = Date::advance(*self, -rhs.length(), rhs.units())
+    }
+}
+impl Sub<Period> for Date {
+    type Output = Date;
+    fn sub(mut self, rhs: Period) -> Self::Output {
+        self -= rhs;
+        self
     }
 }
 
@@ -2054,6 +2080,114 @@ mod tests {
                 start,
                 number,
                 unit
+            );
+        }
+    }
+
+    #[test]
+    fn add_assign_period_works() {
+        let cases: [(Date, Period, Date, &str); 2] = [
+            (
+                Date::new(14, Month::February, 1989),
+                Period::new(1, TimeUnit::Months),
+                Date::new(14, Month::March, 1989),
+                "add 1 month",
+            ),
+            (
+                Date::new(31, Month::January, 1992),
+                Period::new(1, TimeUnit::Months),
+                Date::new(29, Month::February, 1992),
+                "add 1 month leap",
+            ),
+        ];
+
+        for (mut start, period, expected, label) in cases {
+            start += period;
+            assert_eq!(
+                start, expected,
+                "Failed add_assign: {} | start={:?}, period={:?}",
+                label, start, period
+            );
+        }
+    }
+
+    #[test]
+    fn add_period_works() {
+        let cases: [(Date, Period, Date, &str); 2] = [
+            (
+                Date::new(14, Month::February, 1989),
+                Period::new(1, TimeUnit::Years),
+                Date::new(14, Month::February, 1990),
+                "add 1 year",
+            ),
+            (
+                Date::new(29, Month::February, 1988),
+                Period::new(1, TimeUnit::Years),
+                Date::new(28, Month::February, 1989),
+                "add 1 year leap adjust",
+            ),
+        ];
+
+        for (start, period, expected, label) in cases {
+            let derived = start + period;
+            assert_eq!(
+                derived, expected,
+                "Failed add: {} | start={:?}, period={:?}",
+                label, start, period
+            );
+        }
+    }
+
+    #[test]
+    fn sub_assign_period_works() {
+        let cases: [(Date, Period, Date, &str); 2] = [
+            (
+                Date::new(14, Month::March, 1989),
+                Period::new(1, TimeUnit::Months),
+                Date::new(14, Month::February, 1989),
+                "subtract 1 month",
+            ),
+            (
+                Date::new(29, Month::February, 1992),
+                Period::new(1, TimeUnit::Years),
+                Date::new(28, Month::February, 1991),
+                "subtract 1 year leap adjust",
+            ),
+        ];
+
+        for (mut start, period, expected, label) in cases {
+            start -= period;
+            assert_eq!(
+                start, expected,
+                "Failed sub_assign: {} | start={:?}, period={:?}",
+                label, start, period
+            );
+        }
+    }
+
+    #[test]
+    fn sub_period_works() {
+        let cases: [(Date, Period, Date, &str); 2] = [
+            (
+                Date::new(14, Month::February, 1990),
+                Period::new(1, TimeUnit::Years),
+                Date::new(14, Month::February, 1989),
+                "subtract 1 year",
+            ),
+            (
+                Date::new(1, Month::March, 1989),
+                Period::new(1, TimeUnit::Months),
+                Date::new(1, Month::February, 1989),
+                "subtract 1 month",
+            ),
+        ];
+
+        for (start, period, expected, label) in cases {
+            let derived: Date = start - period;
+            assert_eq!(
+                derived, expected,
+                "Failed sub: {} | start={:?}, period={:?}",
+                label, start, period
             );
         }
     }

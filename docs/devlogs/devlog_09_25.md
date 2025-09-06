@@ -122,6 +122,9 @@
   }
   ```
 
+- Implement `Add`,`AddAssign`,`Sub`,`SubAssign` for date with periods!:
+  - Unit tests as well (ChatGPT!)
+
 ### TODO:
 
 - Should i call length and unit with .length or .length()
