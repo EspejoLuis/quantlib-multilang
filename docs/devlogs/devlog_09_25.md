@@ -135,12 +135,6 @@
 
   - Rust: [from ChatGPT]
 
-    - Integration with Period and TimeUnit
-
-      - In QuantLib, Date supports advancing by a Period (+= Period, -= Period, + Period, - Period).
-      - This requires calling advance(self, n, TimeUnit) which handles days, weeks, months, and years.
-      - Currently, your Rust Date only supports +/- Day and Date - Date. No handling of Period.
-
     - Hashing
 
       - C++ provides hash_value(const Date&).

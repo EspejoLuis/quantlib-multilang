@@ -191,141 +191,6 @@ impl Period {
 }
 
 // Traits
-impl AddAssign<Period> for Period {
-    // AddAssign -> right hand side
-    // for Period -> left hand side
-    // No Output, no new Date returned. SAME Period modified!
-    fn add_assign(&mut self, rhs: Period) -> () {
-        if self.length == 0 {
-            self.length = rhs.length();
-            self.units = rhs.units();
-            // if same units
-        } else {
-            match self.units {
-                TimeUnit::Years => match rhs.units() {
-                    TimeUnit::Years => self.length += rhs.length(),
-                    TimeUnit::Months => {
-                        // years*12 + month
-                        self.units = TimeUnit::Months;
-                        self.length = self.length * 12 + rhs.length();
-                    }
-                    TimeUnit::Weeks | TimeUnit::Days => {
-                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
-                    }
-                },
-                TimeUnit::Months => match rhs.units() {
-                    TimeUnit::Months => self.length += rhs.length(),
-                    TimeUnit::Years => {
-                        // months + years*12
-                        self.length += 12 * rhs.length();
-                    }
-                    TimeUnit::Weeks | TimeUnit::Days => {
-                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
-                    }
-                },
-                TimeUnit::Weeks => match rhs.units() {
-                    TimeUnit::Weeks => self.length += rhs.length(),
-                    TimeUnit::Days => {
-                        // weeks*7 + days
-                        self.units = TimeUnit::Days;
-                        self.length = self.length * 7 + rhs.length();
-                    }
-                    TimeUnit::Years | TimeUnit::Months => {
-                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
-                    }
-                },
-                TimeUnit::Days => match rhs.units() {
-                    TimeUnit::Days => self.length += rhs.length(),
-                    TimeUnit::Weeks => {
-                        // days + weeks*7
-                        self.length += 7 * rhs.length();
-                    }
-                    TimeUnit::Years | TimeUnit::Months => {
-                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
-                    }
-                },
-            }
-        }
-    }
-}
-impl Add<Period> for Period {
-    type Output = Period;
-    fn add(mut self, rhs: Period) -> Period {
-        self += rhs;
-        self
-    }
-}
-impl Neg for Period {
-    // We need -a not a-b so that's why use Neg instead of Sub
-    type Output = Period;
-    fn neg(self) -> Period {
-        // New period as output
-        Period::new(-self.length, self.units)
-    }
-}
-impl SubAssign<Period> for Period {
-    // No Output, no new Date returned. SAME Period modified!
-    fn sub_assign(&mut self, rhs: Period) -> () {
-        *self += -rhs
-    }
-}
-impl Sub<Period> for Period {
-    type Output = Period;
-    fn sub(mut self, rhs: Period) -> Period {
-        self += -rhs;
-        self
-    }
-}
-impl DivAssign<i32> for Period {
-    fn div_assign(&mut self, divider: i32) {
-        if divider == 0 {
-            panic!("cannot be divided by zero");
-        }
-        // Assumption:
-        if self.length % divider == 0 {
-            // clean division, keep units
-            self.length /= divider;
-        } else {
-            let mut new_units: TimeUnit = self.units;
-            let mut new_length: i32 = self.length;
-
-            match self.units {
-                TimeUnit::Years => {
-                    new_length *= 12;
-                    new_units = TimeUnit::Months;
-                }
-                TimeUnit::Weeks => {
-                    new_length *= 7;
-                    new_units = TimeUnit::Days;
-                }
-                _ => { /* Days, Months — no conversion attempted */ }
-            }
-
-            if new_length % divider != 0 {
-                panic!("{:?} cannot be divided by {}", self, divider);
-            }
-
-            self.length = new_length / divider;
-            self.units = new_units;
-        }
-    }
-}
-impl Div<i32> for Period {
-    type Output = Period;
-    fn div(mut self, divider: i32) -> Period {
-        // += /= *= -= always return the same object modified
-        // + / * / always return a new object
-        self /= divider;
-        self
-    }
-}
-impl MulAssign<i32> for Period {
-    // No Output, no new Date returned. SAME Period modified!
-    fn mul_assign(&mut self, multiplier: i32) -> () {
-        // Scale the length
-        self.length *= multiplier
-    }
-}
 impl PartialOrd for Period {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         if self.length() == 0 {
@@ -418,6 +283,142 @@ impl PartialOrd for Period {
 impl Display for Period {
     fn fmt(&self, formatter_buffer: &mut Formatter) -> Result {
         write!(formatter_buffer, "{}", io::short_period(self))
+    }
+}
+impl AddAssign<Period> for Period {
+    // AddAssign -> right hand side
+    // for Period -> left hand side
+    // No Output, no new Date returned. SAME Period modified!
+    fn add_assign(&mut self, rhs: Period) -> () {
+        if self.length == 0 {
+            self.length = rhs.length();
+            self.units = rhs.units();
+            // if same units
+        } else {
+            match self.units {
+                TimeUnit::Years => match rhs.units() {
+                    TimeUnit::Years => self.length += rhs.length(),
+                    TimeUnit::Months => {
+                        // years*12 + month
+                        self.units = TimeUnit::Months;
+                        self.length = self.length * 12 + rhs.length();
+                    }
+                    TimeUnit::Weeks | TimeUnit::Days => {
+                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
+                    }
+                },
+                TimeUnit::Months => match rhs.units() {
+                    TimeUnit::Months => self.length += rhs.length(),
+                    TimeUnit::Years => {
+                        // months + years*12
+                        self.length += 12 * rhs.length();
+                    }
+                    TimeUnit::Weeks | TimeUnit::Days => {
+                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
+                    }
+                },
+                TimeUnit::Weeks => match rhs.units() {
+                    TimeUnit::Weeks => self.length += rhs.length(),
+                    TimeUnit::Days => {
+                        // weeks*7 + days
+                        self.units = TimeUnit::Days;
+                        self.length = self.length * 7 + rhs.length();
+                    }
+                    TimeUnit::Years | TimeUnit::Months => {
+                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
+                    }
+                },
+                TimeUnit::Days => match rhs.units() {
+                    TimeUnit::Days => self.length += rhs.length(),
+                    TimeUnit::Weeks => {
+                        // days + weeks*7
+                        self.length += 7 * rhs.length();
+                    }
+                    TimeUnit::Years | TimeUnit::Months => {
+                        panic!("Impossible addition between {:?} and {:?}", self, rhs)
+                    }
+                },
+            }
+        }
+    }
+}
+impl Add<Period> for Period {
+    type Output = Period;
+    fn add(mut self, rhs: Period) -> Period {
+        self += rhs;
+        self
+    }
+}
+impl Neg for Period {
+    // We need -a not a-b so that's why use Neg instead of Sub
+    type Output = Period;
+    fn neg(self) -> Period {
+        // New period as output
+        Period::new(-self.length, self.units)
+    }
+}
+impl SubAssign<Period> for Period {
+    // No Output, no new Date returned. SAME Period modified!
+    fn sub_assign(&mut self, rhs: Period) -> () {
+        *self += -rhs
+    }
+}
+impl Sub<Period> for Period {
+    type Output = Period;
+    fn sub(mut self, rhs: Period) -> Period {
+        self += -rhs;
+        self
+    }
+}
+// Traits - i32 for Period
+impl DivAssign<i32> for Period {
+    fn div_assign(&mut self, divider: i32) {
+        if divider == 0 {
+            panic!("cannot be divided by zero");
+        }
+        // Assumption:
+        if self.length % divider == 0 {
+            // clean division, keep units
+            self.length /= divider;
+        } else {
+            let mut new_units: TimeUnit = self.units;
+            let mut new_length: i32 = self.length;
+
+            match self.units {
+                TimeUnit::Years => {
+                    new_length *= 12;
+                    new_units = TimeUnit::Months;
+                }
+                TimeUnit::Weeks => {
+                    new_length *= 7;
+                    new_units = TimeUnit::Days;
+                }
+                _ => { /* Days, Months — no conversion attempted */ }
+            }
+
+            if new_length % divider != 0 {
+                panic!("{:?} cannot be divided by {}", self, divider);
+            }
+
+            self.length = new_length / divider;
+            self.units = new_units;
+        }
+    }
+}
+impl Div<i32> for Period {
+    type Output = Period;
+    fn div(mut self, divider: i32) -> Period {
+        // += /= *= -= always return the same object modified
+        // + / * / always return a new object
+        self /= divider;
+        self
+    }
+}
+impl MulAssign<i32> for Period {
+    // No Output, no new Date returned. SAME Period modified!
+    fn mul_assign(&mut self, multiplier: i32) -> () {
+        // Scale the length
+        self.length *= multiplier
     }
 }
 
