@@ -122,8 +122,12 @@
   }
   ```
 
-- Implement `Add`,`AddAssign`,`Sub`,`SubAssign` for date with periods!:
-  - Unit tests as well (ChatGPT!)
+- Implemented `Add`,`AddAssign`,`Sub`,`SubAssign` for date with periods:
+
+  - Unit tests as well (ChatGPT!).
+
+- Implemented hash by simply adding `hash` in `#derive` definitions:
+  - Unit test as well.
 
 ### TODO:
 
@@ -143,9 +147,6 @@
     - ❌ Integration tests.
     - ❌ Check coverage. Some issue
     - ❌ Null cases
-    - ❌ Parsing
-    - ❌ parseISO(const std::string&) (takes "2024-07-23" and turns it into a Date)
-    - ❌ d.toFormattedString("%d-%b-%Y");
 
     bool operator==(const Date&, const Date&);
     /_! \relates Date _/
@@ -158,6 +159,29 @@
     bool operator>(const Date&, const Date&);
     /_! \relates Date _/
     bool operator>=(const Date&, const Date&);
+
+    nline bool operator==(const Date& d1, const Date& d2) {
+    return (d1.serialNumber() == d2.serialNumber());
+    }
+
+    inline bool operator!=(const Date& d1, const Date& d2) {
+    return (d1.serialNumber() != d2.serialNumber());
+    }
+
+    inline bool operator<(const Date& d1, const Date& d2) {
+    return (d1.serialNumber() < d2.serialNumber());
+    }
+
+    inline bool operator<=(const Date& d1, const Date& d2) {
+    return (d1.serialNumber() <= d2.serialNumber());
+    }
+
+    inline bool operator>(const Date& d1, const Date& d2) {
+    return (d1.serialNumber() > d2.serialNumber());
+    }
+
+    inline bool operator>=(const Date& d1, const Date& d2) {
+    return (d1.serialNumber() >= d2.serialNumber());
 
 - C++:
 

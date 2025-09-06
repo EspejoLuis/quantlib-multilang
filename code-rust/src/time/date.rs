@@ -79,7 +79,7 @@ impl Display for Month {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
 pub struct Date {
     // Defines a struct named Date, just like a class in C++ or C# with only data (no methods yet).
     // pub --> public so they can be access by other files like main.rs
@@ -2189,6 +2189,72 @@ mod tests {
                 "Failed sub: {} | start={:?}, period={:?}",
                 label, start, period
             );
+        }
+    }
+
+    #[test]
+    fn date_hashset_works() {
+        use std::collections::HashSet;
+
+        let cases: [([Date; 3], usize, &str); 2] = [
+            (
+                [
+                    Date::new(25, Month::December, 2025),
+                    Date::new(25, Month::December, 2025), // duplicate
+                    Date::new(1, Month::January, 2026),
+                ],
+                2,
+                "duplicate should collapse",
+            ),
+            (
+                [
+                    Date::new(1, Month::January, 2024),
+                    Date::new(2, Month::January, 2024),
+                    Date::new(3, Month::January, 2024),
+                ],
+                3,
+                "all unique dates kept",
+            ),
+        ];
+
+        for (input, expected_len, label) in cases {
+            let mut set: HashSet<Date> = HashSet::new();
+            for d in input {
+                set.insert(d);
+            }
+            assert_eq!(set.len(), expected_len, "HashSet length failed: {}", label);
+        }
+    }
+
+    #[test]
+    fn date_hashmap_works() {
+        use std::collections::HashMap;
+
+        let cases: [([(Date, f64); 2], usize, &str); 2] = [
+            (
+                [
+                    (Date::new(25, Month::December, 2025), 100.0),
+                    (Date::new(25, Month::December, 2025), 200.0), // overwrite
+                ],
+                1,
+                "duplicate key overwrites value",
+            ),
+            (
+                [
+                    (Date::new(1, Month::January, 2026), 111.0),
+                    (Date::new(2, Month::January, 2026), 222.0),
+                ],
+                2,
+                "two unique keys stored",
+            ),
+        ];
+
+        for (input, expected_len, label) in cases {
+            let mut map: HashMap<Date, f64> = HashMap::new();
+            for (date, value) in input {
+                map.insert(date, value);
+            }
+            assert_eq!(map.len(), expected_len, "HashMap length failed: {}", label);
         }
     }
 }
