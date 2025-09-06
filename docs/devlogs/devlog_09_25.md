@@ -100,9 +100,12 @@
 - Implement `advance()` to increase `date` by a timeunit. Unit test but check coverage.
 - Note: `year_offset()` allows you to have 2200 because year=2200 gives you the offset for 31-Dec-2199. But `year` cannot be higher than 2199.
 
+## 6 Sep 2025 - Saturday - Date - Rust:
+
+- Checked and completed coverage unit test for `advance()`
+
 ### TODO:
 
-- Check coverage unit test for `advance()`
 - Should i call length and unit with .length or .length()
 - Remove some partialOrd where not needed
 - ❓ Thinking about having `enum month` in a proper `month.rs`

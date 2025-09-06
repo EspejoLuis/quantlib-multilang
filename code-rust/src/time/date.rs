@@ -1745,7 +1745,7 @@ mod tests {
     }
 
     #[test]
-    fn test_increment_normal_cases() {
+    fn increment_normal_cases() {
         let cases: [(Date, Date); 3] = [
             (
                 Date::new(14, Month::February, 1989),
@@ -1769,7 +1769,7 @@ mod tests {
     }
 
     #[test]
-    fn test_increment_panic_cases() {
+    fn increment_panic_cases() {
         let cases: [Date; 1] = [
             Date::new(31, Month::December, 2199), // beyond max date
         ];
@@ -1788,7 +1788,7 @@ mod tests {
     }
 
     #[test]
-    fn test_decrement_normal_cases() {
+    fn decrement_normal_cases() {
         let cases: [(Date, Date); 4] = [
             (
                 Date::new(14, Month::February, 1989),
@@ -1816,7 +1816,7 @@ mod tests {
     }
 
     #[test]
-    fn test_decrement_panic_cases() {
+    fn decrement_panic_cases() {
         let cases: [Date; 1] = [
             Date::new(1, Month::January, 1901), // before min date
         ];
@@ -1835,7 +1835,7 @@ mod tests {
     }
 
     #[test]
-    fn test_formatted_date_normal_cases() {
+    fn formatted_date_normal_cases() {
         let cases: [(Date, &str, &str); 3] = [
             (
                 Date::new(14, Month::February, 1989),
@@ -1865,7 +1865,7 @@ mod tests {
     }
 
     #[test]
-    fn test_formatted_date_null_cases() {
+    fn formatted_date_null_cases() {
         let cases: [(Date, &str, &str); 1] = [(Date::default(), "%Y-%m-%d", "null date")];
 
         for (input, format, expected) in cases {
@@ -1879,7 +1879,7 @@ mod tests {
     }
 
     #[test]
-    fn test_formatted_date_invalid_date_panics() {
+    fn formatted_date_invalid_date_panics() {
         let cases: [Date; 1] = [
             Date { serial_number: -1 }, // bypass Date::new()
         ];
@@ -1898,7 +1898,7 @@ mod tests {
 
     #[test]
     fn advance_normal_cases() {
-        let cases: [(Date, i32, TimeUnit, Date, &str); 10] = [
+        let cases: [(Date, i32, TimeUnit, Date, &str); 14] = [
             // --- Days ---
             (
                 Date::new(14, Month::February, 1989),
@@ -1949,14 +1949,28 @@ mod tests {
                 1,
                 TimeUnit::Months,
                 Date::new(28, Month::February, 1989),
-                "months clamp to 28",
+                "months reverted to 28",
             ),
             (
                 Date::new(31, Month::January, 1992),
                 1,
                 TimeUnit::Months,
                 Date::new(29, Month::February, 1992),
-                "months clamp leap 29",
+                "months reverted to leap 29",
+            ),
+            (
+                Date::new(31, Month::December, 1992),
+                1,
+                TimeUnit::Months,
+                Date::new(31, Month::January, 1993),
+                "months to next year",
+            ),
+            (
+                Date::new(31, Month::January, 1998),
+                -1,
+                TimeUnit::Months,
+                Date::new(31, Month::December, 1997),
+                "months to previous year",
             ),
             // --- Years ---
             (
@@ -1971,7 +1985,21 @@ mod tests {
                 1,
                 TimeUnit::Years,
                 Date::new(28, Month::February, 1989),
-                "years leap adjust",
+                "years +1 on 29 leap adjust",
+            ),
+            (
+                Date::new(29, Month::February, 1988),
+                4,
+                TimeUnit::Years,
+                Date::new(29, Month::February, 1992),
+                "year +4 - leap on leap",
+            ),
+            (
+                Date::new(29, Month::January, 1990),
+                1,
+                TimeUnit::Years,
+                Date::new(29, Month::January, 1991),
+                "years +1 on 29 not February",
             ),
         ];
 
@@ -1987,18 +2015,30 @@ mod tests {
 
     #[test]
     fn advance_panics() {
-        let cases: [(Date, i32, TimeUnit, &str); 2] = [
+        let cases: [(Date, i32, TimeUnit, &str); 4] = [
             (
                 Date::new(1, Month::January, 1901),
                 -1,
                 TimeUnit::Days,
-                "before min date",
+                "before min date - Days",
             ),
             (
                 Date::new(31, Month::December, 2199),
                 1,
                 TimeUnit::Days,
-                "after max date",
+                "after max date - Days",
+            ),
+            (
+                Date::new(31, Month::December, 2199),
+                1,
+                TimeUnit::Months,
+                "after max date - Month",
+            ),
+            (
+                Date::new(31, Month::December, 2199),
+                1,
+                TimeUnit::Years,
+                "after max date - Years",
             ),
         ];
 
