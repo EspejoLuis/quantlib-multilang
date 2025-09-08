@@ -129,20 +129,18 @@
 - Implemented hash by simply adding `hash` in `#derive` definitions:
   - Unit test as well.
 
+## 8 Sep 2025 - Monday - Date - Rust:
+
+- Added check on serial number =0 for LongDate, ShortDate, IsoDate.
+
 ### TODO:
 
-- Should i call length and unit with .length or .length()
-- Remove some partialOrd where not needed
+- Should I call length and unit with .length or .length()
+- Remove some partialOrd where not needed.
 - ❓ Thinking about having `enum month` in a proper `month.rs`
 - What about using Size (usize) instead of MonthIndex or WeekDayIndex
-  Date:
 
-  - Rust: [from ChatGPT]
-
-    - Hashing
-
-      - C++ provides hash_value(const Date&).
-      - In Rust, you can implement impl std::hash::Hash for Date to support use in HashMap.
+  - Rust:
 
     - ❌ Integration tests.
     - ❌ Check coverage. Some issue

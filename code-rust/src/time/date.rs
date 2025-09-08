@@ -728,6 +728,9 @@ mod detail {
 
     impl<'a> Display for LongDate<'a> {
         fn fmt(&self, f: &mut Formatter) -> Result {
+            if self.date.serial_number == 0 {
+                return write!(f, "null date");
+            }
             // Example: "July 23, 2024"
             write!(
                 f,
@@ -740,6 +743,9 @@ mod detail {
     }
     impl<'a> Display for ShortDate<'a> {
         fn fmt(&self, f: &mut Formatter) -> Result {
+            if self.date.serial_number == 0 {
+                return write!(f, "null date");
+            }
             // Example: "05-31-2025"
             write!(
                 f,
@@ -752,6 +758,9 @@ mod detail {
     }
     impl<'a> Display for IsoDate<'a> {
         fn fmt(&self, f: &mut Formatter) -> Result {
+            if self.date.serial_number == 0 {
+                return write!(f, "null date");
+            }
             // Example: "2025-05-12"
             write!(
                 f,
