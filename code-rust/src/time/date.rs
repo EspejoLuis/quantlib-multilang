@@ -1072,18 +1072,21 @@ mod tests {
         for (d1, d2, expected, label) in cases {
             let result: std::cmp::Ordering = d1.cmp(&d2);
             assert_eq!(result, expected, "Failed cmp for {}", label);
-
             match expected {
                 std::cmp::Ordering::Less => {
                     assert!(d1 < d2, "Failed < for {}", label);
+                    assert!(d1 <= d2, "Failed <= for {}", label);
                     assert!(d1 != d2, "Failed != for {}", label);
                 }
                 std::cmp::Ordering::Greater => {
                     assert!(d1 > d2, "Failed > for {}", label);
+                    assert!(d1 >= d2, "Failed >= for {}", label);
                     assert!(d1 != d2, "Failed != for {}", label);
                 }
                 std::cmp::Ordering::Equal => {
                     assert!(d1 == d2, "Failed == for {}", label);
+                    assert!(d1 <= d2, "Failed <= for {}", label);
+                    assert!(d1 >= d2, "Failed >= for {}", label);
                     assert!(!(d1 != d2), "Failed != negation for {}", label);
                 }
             }
@@ -1496,6 +1499,7 @@ mod tests {
             );
         }
     }
+
     #[test]
     fn short_date_outputs_correct_format() {
         let cases: [(Date, &str); 4] = [
@@ -1552,6 +1556,7 @@ mod tests {
             );
         }
     }
+
     #[test]
     fn is_end_of_month_works() {
         let cases: [(Date, bool); 6] = [
@@ -1700,7 +1705,7 @@ mod tests {
     }
 
     #[test]
-    fn test_next_weekday_edge_cases() {
+    fn next_weekday_edge_cases() {
         let cases: [(Date, Weekday, Date); 3] = [
             // (start_date, target_weekday, expected_date)
             (
@@ -1727,7 +1732,7 @@ mod tests {
     }
 
     #[test]
-    fn test_nth_weekday_edge_cases() {
+    fn nth_weekday_edge_cases() {
         let cases: [(usize, Weekday, Month, Year, Date); 3] = [
             // (nth, weekday, month, year, expected_date)
             (

@@ -132,6 +132,7 @@
 ## 8 Sep 2025 - Monday - Date - Rust:
 
 - Added check on serial number =0 for LongDate, ShortDate, IsoDate.
+- Added some tests for `>=` and `<=`.
 
 ### TODO:
 
