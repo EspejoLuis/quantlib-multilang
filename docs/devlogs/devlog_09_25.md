@@ -134,6 +134,10 @@
 - Added check on serial number =0 for LongDate, ShortDate, IsoDate.
 - Added some tests for `>=` and `<=`.
 
+## 9 Sep 2025 - Tuesda - Date - Rust:
+
+- To allign with Quantlib, use `panic!` instead of `assert`
+
 ### TODO:
 
 - Should I call length and unit with .length or .length()

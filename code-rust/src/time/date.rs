@@ -100,27 +100,29 @@ impl Date {
         // TODO: ADD how to handle wrong dates
 
         // 1. Year check
-        assert!(
-            (1901..=2199).contains(&year),
-            "year {} out of bounds, must be [1901,2199]",
-            year
-        );
+        if !(1901..=2199).contains(&year) {
+            panic!("year {} out of bounds, must be [1901,2199]", year);
+        }
+
         // 2. Leap year
         let is_leap: bool = Date::is_leap(year);
+
         // 3. Month length & offset
         let month_length: i32 = Date::month_length(month, is_leap);
         let month_offset: i32 = Date::month_offset(month as MonthIndex, is_leap);
         let year_offset: i32 = Date::year_offset(year);
+
         // 4. Day check
-        assert!(
-            day > 0 && day <= month_length,
-            "day {} outside month ({}) day-range [1,{}]",
-            day,
-            month as MonthIndex,
-            month_length
-        );
+        if !(day > 0 && day <= month_length) {
+            panic!(
+                "day {} outside month ({}) day-range [1,{}]",
+                day, month as MonthIndex, month_length
+            );
+        }
+
         // 5. Serial number
         let serial_number: SerialType = day + month_offset + year_offset;
+
         // 6. Check serial number
         Date::check_serial_number(serial_number);
         Date { serial_number }
@@ -145,11 +147,9 @@ impl Date {
         - year_offset(1902) = 365
         - year_offset(1903) = 731
          */
-        assert!(
-            (1900..=2200).contains(&year),
-            "year {} outside valid range [1900,2200]",
-            year
-        );
+        if !((1900..=2200).contains(&year)) {
+            panic!("year {} outside valid range [1900,2200]", year);
+        }
 
         const YEAR_OFFSET: [i32; 301] = [
             // 1900–1909
@@ -225,11 +225,9 @@ impl Date {
         */
 
         // month_index could be 13 when called from month()
-        assert!(
-            (1..=13).contains(&month_index),
-            "Month index {} out of range [1,13]",
-            month_index
-        );
+        if !((1..=13).contains(&month_index)) {
+            panic!("Month index {} out of range [1,13]", month_index);
+        }
 
         const MONTH_OFFSET: [i32; 14] = [
             0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365,
@@ -255,11 +253,9 @@ impl Date {
         }
     }
     fn is_leap(year: Year) -> bool {
-        assert!(
-            (1900..=2200).contains(&year),
-            "year {} outside valid range [1900, 2200]",
-            year
-        );
+        if !((1900..=2200).contains(&year)) {
+            panic!("year {} outside valid range [1900, 2200]", year);
+        }
 
         const YEAR_IS_LEAP: [bool; 301] = [
             // 1900 is leap in agreement with Excel's bug
@@ -329,15 +325,16 @@ impl Date {
         YEAR_IS_LEAP[(year - 1900) as usize]
     }
     fn check_serial_number(serial_number: SerialType) {
-        assert!(
-            (Date::MIN_SERIAL..=Date::MAX_SERIAL).contains(&serial_number),
-            "Serial number {} out of bounds, must be [{}..={}] or in dates [{} - {}]",
-            serial_number,
-            Date::MIN_SERIAL,
-            Date::MAX_SERIAL,
-            Date::max_date(),
-            Date::min_date()
-        );
+        if !((Date::MIN_SERIAL..=Date::MAX_SERIAL).contains(&serial_number)) {
+            panic!(
+                "Serial number {} out of bounds, must be [{}..={}] or in dates [{} - {}]",
+                serial_number,
+                Date::MIN_SERIAL,
+                Date::MAX_SERIAL,
+                Date::max_date(),
+                Date::min_date()
+            );
+        }
     }
     // Inspectors private
 
@@ -476,8 +473,12 @@ impl Date {
             - First Monday = 5-May-2025.
 
         */
-        assert!(nth > 0, "The zeroth day of the week is not defined");
-        assert!(nth < 6, "No more the 5 weekday in a given month");
+        if !(nth > 0) {
+            panic!("The zeroth day of the week is not defined");
+        }
+        if !(nth < 6) {
+            panic!("No more the 5 weekday in a given month");
+        }
 
         let day_of_week: Day = day_of_week as Day;
         let first_day_of_week: Day = Date::new(1, month, year).weekday() as Day;
@@ -523,11 +524,9 @@ impl Date {
                     year -= 1;
                 }
 
-                assert!(
-                    (1900..=2199).contains(&year),
-                    "year {} outside valid range [1900,2199]",
-                    year
-                );
+                if !((1900..=2199).contains(&year)) {
+                    panic!("year {} outside valid range [1900,2199]", year);
+                }
 
                 let month_updated: Month = Month::from_index(month_number as usize);
 
@@ -543,11 +542,9 @@ impl Date {
                 let mut day: Day = date.day_of_month();
                 let month: Month = date.month();
                 let year: i32 = date.year() + number;
-                assert!(
-                    (1900..=2199).contains(&year),
-                    "year {} outside valid range [1900,2199]",
-                    year
-                );
+                if !((1900..=2199).contains(&year)) {
+                    panic!("year {} outside valid range [1900,2199]", year);
+                }
 
                 if day == 29 && month == Month::February && !Date::is_leap(year) {
                     day = 28
