@@ -215,7 +215,7 @@ impl Date {
 
         YEAR_OFFSET[(year - 1900) as usize]
     }
-    fn year_lenght(year: Year) -> i32 {
+    fn year_length(year: Year) -> i32 {
         if Date::is_leap(year) { 366 } else { 365 }
     }
     fn month_offset(month_index: MonthIndex, is_leap: bool) -> i32 {
@@ -1546,7 +1546,7 @@ mod tests {
 
         for (year, expected) in cases {
             assert_eq!(
-                Date::year_lenght(year),
+                Date::year_length(year),
                 expected,
                 "Failed for year {:?}",
                 year
