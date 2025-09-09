@@ -136,7 +136,9 @@
 
 ## 9 Sep 2025 - Tuesda - Date - Rust:
 
-- To allign with Quantlib, use `panic!` instead of `assert`
+- To allign with Quantlib, use `panic!` instead of `assert`.
+- Added integration tests.
+- Added null cases tests for `long_date`, `short_date`, `iso_date`.
 
 ### TODO:
 
@@ -144,12 +146,6 @@
 - Remove some partialOrd where not needed.
 - ❓ Thinking about having `enum month` in a proper `month.rs`
 - What about using Size (usize) instead of MonthIndex or WeekDayIndex
-
-  - Rust:
-
-    - ❌ Integration tests.
-    - ❌ Check coverage. Some issue
-    - ❌ Null cases
 
 - C++:
 

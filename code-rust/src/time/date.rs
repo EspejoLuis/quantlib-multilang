@@ -1536,6 +1536,35 @@ mod tests {
     }
 
     #[test]
+    fn long_date_null_case() {
+        let cases: [(Date, &str); 1] = [(Date::default(), "null date")];
+
+        for (input, expected) in cases {
+            let result: String = format!("{}", io::long_date(&input));
+            assert_eq!(result, expected, "LongDate null failed: date={:?}", input);
+        }
+    }
+
+    #[test]
+    fn short_date_null_case() {
+        let cases: [(Date, &str); 1] = [(Date::default(), "null date")];
+
+        for (input, expected) in cases {
+            let result: String = format!("{}", io::short_date(&input));
+            assert_eq!(result, expected, "ShortDate null failed: date={:?}", input);
+        }
+    }
+
+    #[test]
+    fn iso_date_null_case() {
+        let cases: [(Date, &str); 1] = [(Date::default(), "null date")];
+
+        for (input, expected) in cases {
+            let result: String = format!("{}", io::iso_date(&input));
+            assert_eq!(result, expected, "IsoDate null failed: date={:?}", input);
+        }
+    }
+    #[test]
     fn year_length_works() {
         let cases: [(Year, i32); 4] = [
             (1900, 366), // Fake leap year
