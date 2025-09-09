@@ -134,24 +134,35 @@
 - Added check on serial number =0 for LongDate, ShortDate, IsoDate.
 - Added some tests for `>=` and `<=`.
 
-## 9 Sep 2025 - Tuesda - Date - Rust:
+## 9 Sep 2025 - Tuesday - Date - Rust/C#
 
 - To allign with Quantlib, use `panic!` instead of `assert`.
 - Added integration tests.
 - Added null cases tests for `long_date`, `short_date`, `iso_date`.
+- C#:
+  - Reviewing
+  - Added null date `Date()`.
+  - Added `IsLeap()`
+
+> Note:
+>
+> - In Rust/C++: Declaring a variable const makes the code efficient because the variable doesn't need to be build every time there is a call. Important for vector like `YEAR_IS_LEAP`.
+> - In C#: use `static readonly` meaning it’s created once at class load time and you can’t reassign it.
+> - `readonly`:
+>   - For value types (like int, double, struct) --> variable can only be assigned in its declaration, or inside a constructor
+>   - For reference types (like string, arrays, classes) --> variable always points to the same array but it can be modified.
 
 ### TODO:
 
-- Should I call length and unit with .length or .length()
-- Remove some partialOrd where not needed.
-- ❓ Thinking about having `enum month` in a proper `month.rs`
-- What about using Size (usize) instead of MonthIndex or WeekDayIndex
+- C#: review everything according to new strategy:
+
+  - Unit Test:
+    - Null Date
+  - Review all tests;
+    - Unit
+    - Integration
 
 - C++:
-
-  - ❌ EVERYTHING!!!
-
-- C#: review everything according to new strategy:
 
   - ❌ EVERYTHING!!!
 
@@ -161,3 +172,10 @@
 
 - Python: Review:
   - We are using datetime + day,month,year. Is it correct ? should we store just datime so as to have one soruce of true ?
+
+Rust: to pondeer
+
+- Should I call length and unit with .length or .length()
+- Remove some partialOrd where not needed.
+- ❓ Thinking about having `enum month` in a proper `month.rs`
+- What about using Size (usize) instead of MonthIndex or WeekDayIndex

@@ -1,7 +1,9 @@
 ﻿using System.Globalization;
+using Microsoft.VisualBasic;
 
-//Not needed anymore to do namespace QuantLibCSharp{} !
 namespace QuantLibCSharp;
+
+using SerialType = System.Int32;
 
 public enum Month
 {
@@ -21,31 +23,101 @@ public enum Month
 
 public class Date : IEquatable<Date>
 {
-    private readonly DateOnly _dateonly;
-    public int Day { get; }
-    /*
-    public int Day { get; }
+    // ReadOnly so it can be assigned only in the constructor
+    private readonly SerialType _serialNumber;
+    private static readonly bool[] YEAR_IS_LEAP = [
+            // 1900 is leap in agreement with Excel's bug
+            // 1900–1909
+            true, false, false, false, true, false, false, false, true, false,
+            // 1910–1919
+            false, false, true, false, false, false, true, false, false, false,
+            // 1920–1929
+            true, false, false, false, true, false, false, false, true, false,
+            // 1930–1939
+            false, false, true, false, false, false, true, false, false, false,
+            // 1940–1949
+            true, false, false, false, true, false, false, false, true, false,
+            // 1950–1959
+            false, false, true, false, false, false, true, false, false, false,
+            // 1960–1969
+            true, false, false, false, true, false, false, false, true, false,
+            // 1970–1979
+            false, false, true, false, false, false, true, false, false, false,
+            // 1980–1989
+            true, false, false, false, true, false, false, false, true, false,
+            // 1990–1999
+            false, false, true, false, false, false, true, false, false, false,
+            // 2000–2009
+            true, false, false, false, true, false, false, false, true, false,
+            // 2010–2019
+            false, false, true, false, false, false, true, false, false, false,
+            // 2020–2029
+            true, false, false, false, true, false, false, false, true, false,
+            // 2030–2039
+            false, false, true, false, false, false, true, false, false, false,
+            // 2040–2049
+            true, false, false, false, true, false, false, false, true, false,
+            // 2050–2059
+            false, false, true, false, false, false, true, false, false, false,
+            // 2060–2069
+            true, false, false, false, true, false, false, false, true, false,
+            // 2070–2079
+            false, false, true, false, false, false, true, false, false, false,
+            // 2080–2089
+            true, false, false, false, true, false, false, false, true, false,
+            // 2090–2099
+            false, false, true, false, false, false, true, false, false, false,
+            // 2100–2109
+            false, false, true, false, false, false, true, false, false, false,
+            // 2110–2119
+            false, false, true, false, false, false, true, false, false, false,
+            // 2120–2129
+            true, false, false, false, true, false, false, false, true, false,
+            // 2130–2139
+            false, false, true, false, false, false, true, false, false, false,
+            // 2140–2149
+            true, false, false, false, true, false, false, false, true, false,
+            // 2150–2159
+            false, false, true, false, false, false, true, false, false, false,
+            // 2160–2169
+            true, false, false, false, true, false, false, false, true, false,
+            // 2170–2179
+            false, false, true, false, false, false, true, false, false, false,
+            // 2180–2189
+            true, false, false, false, true, false, false, false, true, false,
+            // 2190–2199
+            false, false, true, false, false, false, true, false, false, false, // 2200
+            false];
+    private static readonly int[] MONTH_OFFSET = [
+            0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365,
+        ];
+    private static readonly int[] MONTH_LEAP_OFFSET = [
+        0, 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366,
+    ];
 
-    In C++ it woudl have been:
-    private readonly int _day;
-
-    public int Day
-    {
-        get { return _day; }
-    }
-    */
-    public Month Month { get; }
-    public int Year { get; }
+    public Date() { _serialNumber = 0; }
     // Contructor
     public Date(int day, Month month, int year)
     {
-        // DateOnly will validate and handle leap years
-        // yyyy-MM-dd (ISO 8601 date).
-        _dateonly = new DateOnly(year, (int)month, day);
-        Day = _dateonly.Day;
-        Month = (Month)_dateonly.Month;
-        Year = _dateonly.Year;
+        // Converts to serial
     }
+
+    public Date(SerialType serial)
+    {
+        // Date from serial number
+    }
+
+    // Helpers
+    static bool IsLeap(int year)
+    {
+        if (year < 1901 || year > 2199)
+            throw new ArgumentOutOfRangeException(nameof(year), "Year out of range [1901,2199]");
+        return YEAR_IS_LEAP[year - 1900];
+    }
+    static int MonthOffSet(Month month, bool isLeap) { }
+    static int MonthLength(Month month, bool isLeap) { }
+
+    // Operators
     public static Date operator +(Date date, int days)
     {
         // AddDays(...) returns a new DateOnly,it doesn’t modify the original.
@@ -101,12 +173,15 @@ public class Date : IEquatable<Date>
     }
     public override bool Equals(object? obj)
     {
-        // Can be used in collection for example
-        // Polymorphic/object APIs call your overridden Equals(object?) like object.ReferenceEquals(left, right)
-
-        // Nullable reference ? -> object could be null
-        // The check below defined what to do in case is null
-        // If obj is not a Date, return false; otherwise, treat it as a Date and call it other
+        /*
+        -------------------------------------------------------------------------------------------------
+        Can be used in collection for example.
+        Polymorphic/object APIs call overridden Equals(object?) like object.ReferenceEquals(left, right)
+        -------------------------------------------------------------------------------------------------
+        Nullable reference ? -> object could be null
+        The check below defined what to do in case is null
+        If obj is not a Date, return false; otherwise, treat it as a Date and call it other
+        */
         if (obj is Date other)
         {
             return _dateonly.Equals(other._dateonly);
@@ -118,12 +193,18 @@ public class Date : IEquatable<Date>
     }
     public bool Equals(Date? date)
     {
-        // : IEquatable<Date> is needed to declare this.
-        // Collections will used this method over Equals(object? obj)
-        // By implementing IEquatable<Date>, you give generic collections like 
-        // List<Date>, HashSet<Date>, Dictionary<Date, …> a strongly-typed equality method
-        // This will make such generic collections faster because they will not need to cast from
-        // object from Equals(object? obj)
+        /*
+        --------------------------------------------------------------------------------------------- 
+        Without This:
+        Two Dates with the same serial number but created separately would not be equal by default.
+        ---------------------------------------------------------------------------------------------
+        - IEquatable<Date> is needed to declare this.
+        - Collections will used this method over Equals(object? obj)
+        - By implementing IEquatable<Date>, you give generic collections like 
+          List<Date>, HashSet<Date>, Dictionary<Date, …> a strongly-typed equality method
+        - This will make such generic collections faster because they will not need to cast from
+          object from Equals(object? obj)
+        */
         if (date is null)
             return false;
         return _dateonly.DayNumber == date._dateonly.DayNumber;

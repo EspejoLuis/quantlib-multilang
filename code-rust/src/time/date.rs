@@ -134,7 +134,7 @@ impl Date {
         }
     }
 
-    // Helpers
+    // Helpers (privates)
     fn year_offset(year: Year) -> i32 {
         /*
         Returns the offset in days from 31 Dec 1900 (serial 0)
@@ -336,7 +336,6 @@ impl Date {
             );
         }
     }
-    // Inspectors private
 
     // Inspectors public
     pub fn day_of_month(&self) -> Day {
@@ -599,6 +598,7 @@ impl Default for Date {
         Date { serial_number: 0 }
     }
 }
+
 // Traits - Day for Date
 impl Add<Day> for Date {
     /*
@@ -675,6 +675,7 @@ impl SubAssign<Day> for Date {
         self.serial_number -= right_hand_side
     }
 }
+
 // Traits - Period for Date
 impl AddAssign<Period> for Date {
     fn add_assign(&mut self, rhs: Period) {
