@@ -237,9 +237,9 @@ impl Date {
         ];
 
         if is_leap {
-            MONTH_LEAP_OFFSET[month_index as usize]
+            MONTH_LEAP_OFFSET[month_index]
         } else {
-            MONTH_OFFSET[month_index as usize]
+            MONTH_OFFSET[month_index]
         }
     }
     fn month_length(month: Month, is_leap: bool) -> i32 {
