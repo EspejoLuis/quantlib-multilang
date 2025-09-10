@@ -152,6 +152,25 @@
 >   - For value types (like int, double, struct) --> variable can only be assigned in its declaration, or inside a constructor
 >   - For reference types (like string, arrays, classes) --> variable always points to the same array but it can be modified.
 
+## 10 Sep 2025 - Wednesday - Date - C#
+
+- Definitely it's easier having done the rust version!
+- Constructors:
+  - `Date()`: Null date.
+  - `Date(int day, Month month, int year)`: to serial number.
+  - `Date(SerialType serialNumber)`: from serial number.
+- Methods:
+  - `IsLeap()`, `MonthOffSet()`, `MonthLength()`, `YearOffset()`, `CheckSerialNumber()`,
+  - `MinDate()`, `MaxDate()`: using cashing!
+
+> Note:
+>
+> - Maybe use cashing also for Rust ?
+> - In Rust constant can be left in the function, in C#/C++ not.
+> - Rust does not have constructors !
+> - const = carved in stone, baked into the compiled IL, zero runtime overhead.
+> - static readonly = written on a whiteboard once when the program starts, never changed again.
+
 ### TODO:
 
 - C#: review everything according to new strategy:
@@ -161,6 +180,7 @@
   - Review all tests;
     - Unit
     - Integration
+    - Coverage
 
 - C++:
 
@@ -175,6 +195,7 @@
 
 Rust: to pondeer
 
+- Do cashing ? of minDate like in C#
 - Should I call length and unit with .length or .length()
 - Remove some partialOrd where not needed.
 - ❓ Thinking about having `enum month` in a proper `month.rs`
