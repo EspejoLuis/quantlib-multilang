@@ -1,9 +1,11 @@
 ﻿using System.Globalization;
-using Microsoft.VisualBasic;
+using System.Runtime.InteropServices.Swift;
 
 namespace QuantLibCSharp;
 
-using SerialType = System.Int32;
+using SerialType = Int32;
+using Day = Int32;
+using Year = Int32;
 
 public enum Month
 {
@@ -90,9 +92,12 @@ public class Date : IEquatable<Date>
             false];
     private static readonly int[] YEAR_OFFSET = [
             // 1900–1909
-            0, 366, 731, 1096, 1461, 1827, 2192, 2557, 2922, 3288, // 1910–1919
-            3653, 4018, 4383, 4749, 5114, 5479, 5844, 6210, 6575, 6940, // 1920–1929
-            7305, 7671, 8036, 8401, 8766, 9132, 9497, 9862, 10227, 10593, // 1930–1939
+            0, 366, 731, 1096, 1461, 1827, 2192, 2557, 2922, 3288,
+            // 1910–1919
+            3653, 4018, 4383, 4749, 5114, 5479, 5844, 6210, 6575, 6940,
+            // 1920–1929
+            7305, 7671, 8036, 8401, 8766, 9132, 9497, 9862, 10227, 10593,
+            // 1930–1939
             10958, 11323, 11688, 12054, 12419, 12784, 13149, 13515, 13880, 14245,
             // 1940–1949
             14610, 14976, 15341, 15706, 16071, 16437, 16802, 17167, 17532, 17898,
@@ -150,13 +155,23 @@ public class Date : IEquatable<Date>
             109574,
         ];
     private static readonly int[] MONTH_OFFSET = [
-            0, 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365,
-        ];
-    private static readonly int[] MONTH_LEAP_OFFSET = [
-        0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366,
+        0, 31, 59, 90, 120, 151, // Jan - Jun
+        181, 212, 243, 273, 304, 334, // Jul - Dec
+        365, // For fallback case
     ];
-    private static readonly int[] MONTH_LENGTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    private static readonly int[] MONTH_LEAP_LENGTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    private static readonly int[] MONTH_LEAP_OFFSET = [
+        0, 31, 60, 91, 121, 152, // Jan - Jun
+        182, 213, 244, 274, 305, 335, // Jul - Dec
+        366, // For fallback case
+    ];
+    private static readonly int[] MONTH_LENGTH = [
+        31, 28, 31, 30, 31, 30, // Jan - Jun
+        31, 31, 30, 31, 30, 31 // Jul - Dec
+    ];
+    private static readonly int[] MONTH_LEAP_LENGTH = [
+        31, 29, 31, 30, 31, 30, // Jan - Jun
+        31, 31, 30, 31, 30, 31 // Jul - Dec
+    ];
     private static readonly Date _minDate = new(MIN_SERIAL); //Equivalent to chashing
     private static readonly Date _maxDate = new(MAX_SERIAL); //Equivalent to chashing
     private const int MIN_SERIAL = 367; // 1901-01-01
@@ -203,21 +218,20 @@ public class Date : IEquatable<Date>
 
 
     // Helpers
-    static bool IsLeap(int year)
-    {
-        if (year < 1900 || year > 2200)
-            throw new ArgumentOutOfRangeException(nameof(year), "Year out of range [1900,2200]");
-        return YEAR_IS_LEAP[year - 1900];
-    }
     static int MonthOffSet(Month month, bool isLeap)
     {
-        if ((int)month < 1 || (int)month > 12)
-            throw new ArgumentOutOfRangeException(nameof(month), "Month out of range [1,12]");
+        // No Check about the month being withi 1 and 12 because it could be 13
         return isLeap ? MONTH_LEAP_OFFSET[(int)month - 1] : MONTH_OFFSET[(int)month - 1];
     }
     static int MonthLength(Month month, bool isLeap)
     {
         return isLeap ? MONTH_LEAP_LENGTH[(int)month - 1] : MONTH_LENGTH[(int)month - 1];
+    }
+    static bool IsLeap(int year)
+    {
+        if (year < 1900 || year > 2200)
+            throw new ArgumentOutOfRangeException(nameof(year), "Year out of range [1900,2200]");
+        return YEAR_IS_LEAP[year - 1900];
     }
     static int YearOffSet(int year)
     {
@@ -225,6 +239,10 @@ public class Date : IEquatable<Date>
             throw new ArgumentOutOfRangeException(nameof(year), "Year out of range [1900,2200]");
 
         return YEAR_OFFSET[year - 1900];
+    }
+    static int YearLength(int year)
+    {
+        return IsLeap(year) ? 366 : 365;
     }
     static void CheckSerialNumber(SerialType serialNumber)
     {
@@ -245,8 +263,39 @@ public class Date : IEquatable<Date>
     public static Date MinDate() => _minDate;
     public static Date MaxDate() => _maxDate;
 
+    public Day DayOfMonth() { }
+    public Day DayOfYear()
+    {
+        return _serialNumber - YearOffSet(Year());
+    }
+    public Month Month()
+    {
+        Day dayOfYear = DayOfYear();
+        Year year = Year();
+        bool isLeap = IsLeap(year);
 
+        // Guess
+        int month = dayOfYear / 30 + 1;
 
+        while dayOfYear <= MonthOffSet(month, isLeap){
+            month -= 1;
+        }
+        while dayOfYear > MonthOffSet(month + 1, isLeap){
+            month += 1;
+        }
+
+        return month;
+    }
+    public Year Year()
+    {
+        // Guess
+        Year year = _serialNumber / 365 + 1900;
+
+        // Adjust
+        if (_serialNumber <= YearOffSet(year)) year -= 1;
+
+        return year;
+    }
 
 
 

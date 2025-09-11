@@ -171,6 +171,11 @@
 > - const = carved in stone, baked into the compiled IL, zero runtime overhead.
 > - static readonly = written on a whiteboard once when the program starts, never changed again.
 
+## 11 Sep 2025 - Thursday - Date - C#
+
+- Done: `DayOfYear()`, `Year`, `YearLength`
+- Work In Progress: `DayOfMonth()`, `Month`
+
 ### TODO:
 
 - C#: review everything according to new strategy:
@@ -195,6 +200,9 @@
 
 Rust: to pondeer
 
+- startOfTheMonth, enfOfTheMonth, isStartOfTheMonth, IsEndOfTheMonth
+- Why we are using 14 for month offset insteda of 13 ?
+- why day_of_month() ? is it needed ? because theres is day of year
 - Do cashing ? of minDate like in C#
 - Should I call length and unit with .length or .length()
 - Remove some partialOrd where not needed.
