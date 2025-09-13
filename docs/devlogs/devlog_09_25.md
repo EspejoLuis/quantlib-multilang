@@ -179,6 +179,9 @@
 ## 12 Sep 2025 - Saturday - Date - C#
 
 - 'Month()' done.
+- Better is redo the old part. Creating tmp files till I get to operators.
+- So not the best approach but I will try do the coding without the unit test for the moment, then when get to operators, delete the temp and check the coverage.
+- Refactoring Part 1.
 
 ### TODO:
 

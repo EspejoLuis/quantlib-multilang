@@ -415,7 +415,6 @@ impl Date {
         let year: Year = self.year();
         Date::new(Date::month_length(month, Date::is_leap(year)), month, year)
     }
-
     pub fn weekday(&self) -> Weekday {
         /*
         If remainder is zero then it's a Saturday

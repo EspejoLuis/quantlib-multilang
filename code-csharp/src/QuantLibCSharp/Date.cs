@@ -22,7 +22,7 @@ public enum Month
     December
 }
 
-public class Date : IEquatable<Date>
+public class Date
 {
     // ReadOnly so it can be assigned only in the constructor
     private readonly SerialType _serialNumber;
@@ -220,7 +220,7 @@ public class Date : IEquatable<Date>
     }
 
 
-    // Helpers
+    // Static Helpers (Private)
     static int MonthOffSet(Month month, bool isLeap)
     {
         // No check here coz month could be 13
@@ -262,10 +262,17 @@ public class Date : IEquatable<Date>
     }
 
 
-    // Inspectors Public
+    // Static Helpers (Public)
     public static Date MinDate() => _minDate;
     public static Date MaxDate() => _maxDate;
+    public static Date TodaysDate()
+    {
+        DateTime todayDate = DateTime.Today;
+        return new Date(todayDate.Day, (Month)todayDate.Month, todayDate.Year);
+    }
 
+
+    // Inspectors (Public) 
     public Day DayOfMonth()
     {
         return _serialNumber - YearOffSet(Year()) - MonthOffSet(Month(), IsLeap(Year()));
@@ -304,12 +311,35 @@ public class Date : IEquatable<Date>
 
         return year;
     }
+    public Day Day()
+    {
+        return DayOfMonth();
+    }
+    public SerialType SerialNumber()
+    {
+        return _serialNumber;
+    }
+    public bool IsEndOfMonth()
+    {
+        return Day() == MonthLength(Month(), IsLeap(Year()));
+    }
+    public Date EndOfMonth()
+    {
+        return new Date(MonthLength(Month(), IsLeap(Year())), Month(), Year());
+    }
+
+}
 
 
 
 
-    // Operators
-    public static Date operator +(Date date, int days)
+
+
+
+
+/* 
+// Operators
+public static Date operator +(Date date, int days)
     {
         // AddDays(...) returns a new DateOnly,it doesn’t modify the original.
         // _dateonly field stays the same, the local created is just a copy with the shifted date.
@@ -334,87 +364,87 @@ public class Date : IEquatable<Date>
             It can be overridden in a derived class to provide a different implementation!
         */
         // If not InvariantCulture, it could print
-        // if culture is (it-IT), dd-MMM-yyyy could print 01-gen-2025.
+        // if culture is (it-IT), dd-MMM-yyyy could print 01-gen-2025.  
         return _dateonly.ToString("dd-MMM-yyyy", CultureInfo.InvariantCulture);
     }
     public static int DaysInMonth(Month month, int year)
+{
+    // Can be used for EndOfMonth/IsEndOfMonth   
+    return DateTime.DaysInMonth(year, (int)month);
+}
+public static bool operator ==(Date? left, Date? right)
+{
+    // In C#, all operator overloads must be static — by language design
+    // They are not tied to an instance
+    //“Are these two variables pointing to the exact same object instance?”
+    if (object.ReferenceEquals(left, right))
     {
-        // Can be used for EndOfMonth/IsEndOfMonth   
-        return DateTime.DaysInMonth(year, (int)month);
+        return true;
     }
-    public static bool operator ==(Date? left, Date? right)
-    {
-        // In C#, all operator overloads must be static — by language design
-        // They are not tied to an instance
-        //“Are these two variables pointing to the exact same object instance?”
-        if (object.ReferenceEquals(left, right))
-        {
-            return true;
-        }
-        ;
+    ;
 
-        if (left is null || right is null)
-            return false;
+    if (left is null || right is null)
+        return false;
 
-        return left.Equals(right);
-    }
-    public static bool operator !=(Date? left, Date? right)
+    return left.Equals(right);
+}
+public static bool operator !=(Date? left, Date? right)
+{
+    return !(left == right);
+}
+public override bool Equals(object? obj)
+{
+    /*
+    -------------------------------------------------------------------------------------------------
+    Can be used in collection for example.
+    Polymorphic/object APIs call overridden Equals(object?) like object.ReferenceEquals(left, right)
+    -------------------------------------------------------------------------------------------------
+    Nullable reference ? -> object could be null
+    The check below defined what to do in case is null
+    If obj is not a Date, return false; otherwise, treat it as a Date and call it other
+    */
+    if (obj is Date other)
     {
-        return !(left == right);
+        return _dateonly.Equals(other._dateonly);
     }
-    public override bool Equals(object? obj)
+    else
     {
-        /*
-        -------------------------------------------------------------------------------------------------
-        Can be used in collection for example.
-        Polymorphic/object APIs call overridden Equals(object?) like object.ReferenceEquals(left, right)
-        -------------------------------------------------------------------------------------------------
-        Nullable reference ? -> object could be null
-        The check below defined what to do in case is null
-        If obj is not a Date, return false; otherwise, treat it as a Date and call it other
-        */
-        if (obj is Date other)
-        {
-            return _dateonly.Equals(other._dateonly);
-        }
-        else
-        {
-            return false;
-        }
-    }
-    public bool Equals(Date? date)
-    {
-        /*
-        --------------------------------------------------------------------------------------------- 
-        Without This:
-        Two Dates with the same serial number but created separately would not be equal by default.
-        ---------------------------------------------------------------------------------------------
-        - IEquatable<Date> is needed to declare this.
-        - Collections will used this method over Equals(object? obj)
-        - By implementing IEquatable<Date>, you give generic collections like 
-          List<Date>, HashSet<Date>, Dictionary<Date, …> a strongly-typed equality method
-        - This will make such generic collections faster because they will not need to cast from
-          object from Equals(object? obj)
-        */
-        if (date is null)
-            return false;
-        return _dateonly.DayNumber == date._dateonly.DayNumber;
-    }
-    public override int GetHashCode()
-    {
-        /*
-        If Equals() is overriden, also GetHashCode() has to be overriden so that:
-            if (a.Equals(b)) → then a.GetHashCode() == b.GetHashCode()
-        Otherwise, your Date objects will behave inconsistently in hash collections.
-        */
-        return _dateonly.GetHashCode();
-    }
-    public static bool operator <(Date left, Date right)
-    {
-        return left._dateonly.DayNumber < right._dateonly.DayNumber;
-    }
-    public static bool operator >(Date left, Date right)
-    {
-        return !(left < right || left == right);
+        return false;
     }
 }
+public bool Equals(Date? date)
+{
+    /*
+    --------------------------------------------------------------------------------------------- 
+    Without This:
+    Two Dates with the same serial number but created separately would not be equal by default.
+    ---------------------------------------------------------------------------------------------
+    - IEquatable<Date> is needed to declare this.
+    - Collections will used this method over Equals(object? obj)
+    - By implementing IEquatable<Date>, you give generic collections like 
+      List<Date>, HashSet<Date>, Dictionary<Date, …> a strongly-typed equality method
+    - This will make such generic collections faster because they will not need to cast from
+      object from Equals(object? obj)
+    */
+    if (date is null)
+        return false;
+    return _dateonly.DayNumber == date._dateonly.DayNumber;
+}
+public override int GetHashCode()
+{
+    /*
+    If Equals() is overriden, also GetHashCode() has to be overriden so that:
+        if (a.Equals(b)) → then a.GetHashCode() == b.GetHashCode()
+    Otherwise, your Date objects will behave inconsistently in hash collections.
+    */
+    return _dateonly.GetHashCode();
+}
+public static bool operator <(Date left, Date right)
+{
+    return left._dateonly.DayNumber < right._dateonly.DayNumber;
+}
+public static bool operator >(Date left, Date right)
+{
+    return !(left < right || left == right);
+}
+*/
