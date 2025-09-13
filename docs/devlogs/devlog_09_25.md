@@ -176,6 +176,10 @@
 - Done: `DayOfYear()`, `Year`, `YearLength`
 - Work In Progress: `DayOfMonth()`, `Month`
 
+## 12 Sep 2025 - Saturday - Date - C#
+
+- 'Month()' done.
+
 ### TODO:
 
 - C#: review everything according to new strategy:

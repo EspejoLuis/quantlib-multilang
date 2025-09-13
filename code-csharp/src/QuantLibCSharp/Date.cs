@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Runtime.InteropServices.Swift;
 
 namespace QuantLibCSharp;
 
@@ -182,19 +181,23 @@ public class Date : IEquatable<Date>
     public Date() { _serialNumber = 0; }
     public Date(int day, Month month, int year)
     {
-        // 1. Year check
+        // Year check
         if (year < 1901 || year > 2199)
             throw new ArgumentOutOfRangeException(nameof(year), "Year out of range [1901,2199]");
 
-        // 2. Leap year
+        // Month check
+        if ((int)month < 1 || (int)month > 12)
+            throw new ArgumentOutOfRangeException(nameof(month), "Month out of January-December range i.e. not in [1,12]");
+
+        // Leap year
         bool isLeap = IsLeap(year);
 
-        // 3. Month length & offset
+        // Month length & offset
         int monthLength = MonthLength(month, isLeap);
         int monthOffset = MonthOffSet(month, isLeap);
         int yearOffset = YearOffSet(year);
 
-        // 4. Day check
+        // Day check
         if (day < 1 || day > monthLength)
             throw new ArgumentOutOfRangeException(nameof(day), day,
             $"""
@@ -203,10 +206,10 @@ public class Date : IEquatable<Date>
             """
             );
 
-        // 5. Serial number
+        // Serial number
         SerialType serialNumber = day + monthOffset + yearOffset;
 
-        // 6. Check serial number
+        // Check serial number
         CheckSerialNumber(serialNumber);
         _serialNumber = serialNumber;
     }
@@ -220,7 +223,7 @@ public class Date : IEquatable<Date>
     // Helpers
     static int MonthOffSet(Month month, bool isLeap)
     {
-        // No Check about the month being withi 1 and 12 because it could be 13
+        // No check here coz month could be 13
         return isLeap ? MONTH_LEAP_OFFSET[(int)month - 1] : MONTH_OFFSET[(int)month - 1];
     }
     static int MonthLength(Month month, bool isLeap)
@@ -263,7 +266,10 @@ public class Date : IEquatable<Date>
     public static Date MinDate() => _minDate;
     public static Date MaxDate() => _maxDate;
 
-    public Day DayOfMonth() { }
+    public Day DayOfMonth()
+    {
+        return _serialNumber - YearOffSet(Year()) - MonthOffSet(Month(), IsLeap(Year()));
+    }
     public Day DayOfYear()
     {
         return _serialNumber - YearOffSet(Year());
@@ -277,14 +283,16 @@ public class Date : IEquatable<Date>
         // Guess
         int month = dayOfYear / 30 + 1;
 
-        while dayOfYear <= MonthOffSet(month, isLeap){
+        while (dayOfYear <= MonthOffSet((Month)month, isLeap))
+        {
             month -= 1;
         }
-        while dayOfYear > MonthOffSet(month + 1, isLeap){
+        while (dayOfYear > MonthOffSet((Month)(month + 1), isLeap))
+        {
             month += 1;
         }
 
-        return month;
+        return (Month)month;
     }
     public Year Year()
     {
