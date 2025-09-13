@@ -350,6 +350,13 @@ impl Date {
     pub fn max_date() -> Date {
         Date::from_serial_number(Date::MAX_SERIAL)
     }
+    pub fn todays_date() -> Date {
+        let today: NaiveDate = Local::now().date_naive();
+        let year: Year = today.year();
+        let month: Month = Month::from_index(today.month() as MonthIndex);
+        let day: Day = today.day() as Day;
+        Date::new(day, month, year)
+    }
 
     // Inspectors public
     pub fn day_of_month(&self) -> Day {
@@ -408,13 +415,7 @@ impl Date {
         let year: Year = self.year();
         Date::new(Date::month_length(month, Date::is_leap(year)), month, year)
     }
-    pub fn todays_date() -> Date {
-        let today: NaiveDate = Local::now().date_naive();
-        let year: Year = today.year();
-        let month: Month = Month::from_index(today.month() as MonthIndex);
-        let day: Day = today.day() as Day;
-        Date::new(day, month, year)
-    }
+
     pub fn weekday(&self) -> Weekday {
         /*
         If remainder is zero then it's a Saturday
