@@ -343,6 +343,14 @@ impl Date {
         }
     }
 
+    // Static Like
+    pub fn min_date() -> Date {
+        Date::from_serial_number(Date::MIN_SERIAL)
+    }
+    pub fn max_date() -> Date {
+        Date::from_serial_number(Date::MAX_SERIAL)
+    }
+
     // Inspectors public
     pub fn day_of_month(&self) -> Day {
         let year: Year = self.year();
@@ -391,12 +399,6 @@ impl Date {
     }
     pub fn to_serial_number(&self) -> SerialType {
         self.serial_number
-    }
-    pub fn min_date() -> Date {
-        Date::from_serial_number(Date::MIN_SERIAL)
-    }
-    pub fn max_date() -> Date {
-        Date::from_serial_number(Date::MAX_SERIAL)
     }
     pub fn is_end_of_month(&self) -> bool {
         self.day() == Date::month_length(self.month(), Date::is_leap(self.year()))
