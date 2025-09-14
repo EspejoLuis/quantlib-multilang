@@ -186,7 +186,7 @@
 ## 14 Sep 2025 - Sunday - Date - C#
 
 - Refactoring Part 2
-- Unit Tests for Date.
+- Unit Tests for `Date`, `Period`, `Frequency`
 
 ### TODO:
 

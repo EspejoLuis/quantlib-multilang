@@ -5,6 +5,7 @@ public class Period
     private readonly int _length;
     private readonly TimeUnit _units;
 
+
     // Constructor
     public Period(int length, TimeUnit units)
     {
@@ -37,6 +38,7 @@ public class Period
             nameof(frequency), frequency, "Unknown frequency")
         };
     }
+
 
     // Inspectors (Public) 
     public int Length() => _length;
