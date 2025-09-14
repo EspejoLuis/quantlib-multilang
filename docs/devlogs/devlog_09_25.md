@@ -176,12 +176,17 @@
 - Done: `DayOfYear()`, `Year`, `YearLength`
 - Work In Progress: `DayOfMonth()`, `Month`
 
-## 12 Sep 2025 - Saturday - Date - C#
+## 13 Sep 2025 - Saturday - Date - C#
 
 - 'Month()' done.
 - Better is redo the old part. Creating tmp files till I get to operators.
 - So not the best approach but I will try do the coding without the unit test for the moment, then when get to operators, delete the temp and check the coverage.
 - Refactoring Part 1.
+
+## 14 Sep 2025 - Sunday - Date - C#
+
+- Refactoring Part 2
+- Unit Tests for Date.
 
 ### TODO:
 

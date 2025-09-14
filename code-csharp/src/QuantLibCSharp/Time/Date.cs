@@ -1,4 +1,7 @@
 ﻿using System.Globalization;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("QuantLibCSharp.UnitTests")]
 
 namespace QuantLibCSharp.Time;
 
@@ -221,33 +224,33 @@ public class Date
 
 
     // Static Helpers (Private)
-    static int MonthOffSet(Month month, bool isLeap)
+    internal static int MonthOffSet(Month month, bool isLeap)
     {
         // No check here coz month could be 13
         return isLeap ? MONTH_LEAP_OFFSET[(int)month - 1] : MONTH_OFFSET[(int)month - 1];
     }
-    static int MonthLength(Month month, bool isLeap)
+    internal static int MonthLength(Month month, bool isLeap)
     {
         return isLeap ? MONTH_LEAP_LENGTH[(int)month - 1] : MONTH_LENGTH[(int)month - 1];
     }
-    static bool IsLeap(int year)
+    internal static bool IsLeap(int year)
     {
         if (year < 1900 || year > 2200)
             throw new ArgumentOutOfRangeException(nameof(year), "Year out of range [1900,2200]");
         return YEAR_IS_LEAP[year - 1900];
     }
-    static int YearOffSet(int year)
+    internal static int YearOffSet(int year)
     {
         if (year < 1900 || year > 2200)
             throw new ArgumentOutOfRangeException(nameof(year), "Year out of range [1900,2200]");
 
         return YEAR_OFFSET[year - 1900];
     }
-    static int YearLength(int year)
+    internal static int YearLength(int year)
     {
         return IsLeap(year) ? 366 : 365;
     }
-    static void CheckSerialNumber(SerialType serialNumber)
+    internal static void CheckSerialNumber(SerialType serialNumber)
     {
         if (serialNumber < MIN_SERIAL || serialNumber > MAX_SERIAL)
         {
