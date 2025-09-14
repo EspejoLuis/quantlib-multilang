@@ -370,6 +370,7 @@ impl Sub<Period> for Period {
         self
     }
 }
+
 // Traits - i32 for Period
 impl DivAssign<i32> for Period {
     fn div_assign(&mut self, divider: i32) {
