@@ -188,6 +188,10 @@
 - Refactoring Part 2
 - Unit Tests for `Date`, `Period`, `Frequency`
 
+## 16 Sep 2025 - Tueday - Period - C#
+
+- `ToFrequency()` implemented. Unit Tests as well.
+
 ### TODO:
 
 - C#: review everything according to new strategy:

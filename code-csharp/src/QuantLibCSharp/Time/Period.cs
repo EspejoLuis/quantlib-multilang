@@ -1,3 +1,4 @@
+using System;
 namespace QuantLibCSharp.Time;
 
 public class Period
@@ -43,5 +44,39 @@ public class Period
     // Inspectors (Public) 
     public int Length() => _length;
     public TimeUnit Units() => _units;
+    public Frequency ToFrequency()
+    {
+        // Period -> Frequency
+        int abs_length = Math.Abs(_length);
+        TimeUnit units = _units;
 
+        if (abs_length == 0)
+        {
+            return (units == TimeUnit.Years)
+            ? Frequency.Once
+            : Frequency.NoFrequency;
+        }
+
+        return units switch
+        {
+            TimeUnit.Years => abs_length == 1
+                ? Frequency.Annual
+                : Frequency.OtherFrequency,
+            TimeUnit.Months => (abs_length <= 12 && 12 % abs_length == 0)
+                ? FrequencyUtils.FromNthTimesPerYear(12 / abs_length)
+                : Frequency.OtherFrequency,
+            TimeUnit.Weeks => abs_length switch
+            {
+                1 => Frequency.Weekly,
+                2 => Frequency.Biweekly,
+                4 => Frequency.EveryFourthWeek,
+                _ => Frequency.OtherFrequency,
+            },
+            TimeUnit.Days => abs_length == 1
+                ? Frequency.Daily
+                : Frequency.OtherFrequency,
+            _ => throw new NotImplementedException($"TimeUnit {units} not implemented"),
+        };
+    }
 }
+
