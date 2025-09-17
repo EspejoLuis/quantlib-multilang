@@ -3,8 +3,8 @@ namespace QuantLibCSharp.Time;
 
 public class Period
 {
-    private readonly int _length;
-    private readonly TimeUnit _units;
+    private int _length;
+    private TimeUnit _units;
 
 
     // Constructor
@@ -78,5 +78,34 @@ public class Period
             _ => throw new NotImplementedException($"TimeUnit {units} not implemented"),
         };
     }
+
+    public void Normalize()
+    {
+        if (_length == 0) { _units = TimeUnit.Days; }
+        else
+        {
+            switch (_units)
+            {
+                case TimeUnit.Months:
+                    if ((_length % 12) == 0)
+                    {
+                        _length /= 12;
+                        _units = TimeUnit.Years;
+                    }
+                    break;
+                case TimeUnit.Days:
+                    if ((_length % 7) == 0)
+                    {
+                        _length /= 7;
+                        _units = TimeUnit.Weeks;
+                    }
+                    break;
+                case TimeUnit.Weeks or TimeUnit.Years:
+                    break;
+            }
+        }
+    }
+
 }
+
 

@@ -192,6 +192,10 @@
 
 - `ToFrequency()` implemented. Unit Tests as well.
 
+## 17 Sep 2025 - Wednesday - Period - C#
+
+- `Normalize()`. Unit Test to DO!!!
+
 ### TODO:
 
 - C#: review everything according to new strategy:
