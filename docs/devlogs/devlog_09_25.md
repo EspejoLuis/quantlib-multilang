@@ -196,6 +196,18 @@
 
 - `Normalize()`. Unit Test to DO!!!
 
+## 25 Sep 2025 - Thursday - Period C#:
+
+- C++/Rust in `Normalized()` creates a copy of the period. In C# doing the following:
+
+  ```csharp
+  Period CopyPeriod = this;
+  ```
+
+  will create a reference to the object not a copy i.e. if I modify `CopyPeriod`. `this` will be modified. We need a `new Period(... , ...)`.
+
+- Unit test for `Normalized()`. Still have some red parts.
+
 ### TODO:
 
 - C#: review everything according to new strategy:

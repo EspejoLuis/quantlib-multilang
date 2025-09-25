@@ -1,4 +1,5 @@
 using System;
+using System.Reflection.Metadata.Ecma335;
 namespace QuantLibCSharp.Time;
 
 public class Period
@@ -105,6 +106,14 @@ public class Period
             }
         }
     }
+
+    public Period Normalized()
+    {
+        Period CopyPeriod = new(_length, _units); ;
+        CopyPeriod.Normalize();
+        return CopyPeriod;
+    }
+
 
 }
 
