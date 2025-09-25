@@ -113,7 +113,7 @@ impl Period {
         }
     }
     pub fn normalized(&self) -> Period {
-        //If want a normalized copy without touching the original
+        // Normalized copy without touching the original
         let mut period: Period = *self; // Create copy of the object
         period.normalize();
         period
@@ -765,11 +765,11 @@ mod tests {
             ),
             (
                 Period {
-                    length: 25,
+                    length: -25,
                     units: TimeUnit::Months,
                 },
                 Period {
-                    length: 25,
+                    length: -25,
                     units: TimeUnit::Months,
                 },
             ),
@@ -855,11 +855,11 @@ mod tests {
             ),
             (
                 Period {
-                    length: 17,
+                    length: -17,
                     units: TimeUnit::Days,
                 },
                 Period {
-                    length: 17,
+                    length: -17,
                     units: TimeUnit::Days,
                 },
             ),
