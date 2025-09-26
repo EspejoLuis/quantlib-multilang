@@ -910,15 +910,15 @@ mod tests {
 
     #[test]
     fn years_works() {
-        let cases = vec![
+        let cases: [(i32, TimeUnit, f64); 3] = [
             (0, TimeUnit::Years, 0.0),
             (1, TimeUnit::Years, 1.0),
             (24, TimeUnit::Months, 2.0),
         ];
 
         for (len, unit, expected) in cases {
-            let p = Period::new(len, unit);
-            let result = p.years();
+            let p: Period = Period::new(len, unit);
+            let result: f64 = p.years();
             assert!(
                 (result - expected).abs() < 1e-12,
                 "years(): failed for {:?} {:?}, got {}, expected {}",
@@ -932,7 +932,7 @@ mod tests {
 
     #[test]
     fn years_panics_timeunit_implemented() {
-        let cases = vec![(10, TimeUnit::Days), (5, TimeUnit::Weeks)];
+        let cases: [(i32, TimeUnit); 2] = [(10, TimeUnit::Days), (5, TimeUnit::Weeks)];
 
         for (len, unit) in cases {
             let p = Period::new(len, unit);
@@ -948,7 +948,7 @@ mod tests {
 
     #[test]
     fn months_works() {
-        let cases = vec![
+        let cases: [(i32, TimeUnit, f64); 3] = [
             (0, TimeUnit::Months, 0.0),
             (12, TimeUnit::Months, 12.0),
             (2, TimeUnit::Years, 24.0),
@@ -970,7 +970,7 @@ mod tests {
 
     #[test]
     fn months_panic_timeunit_implemented() {
-        let cases = vec![(7, TimeUnit::Days), (3, TimeUnit::Weeks)];
+        let cases: [(i32, TimeUnit); 2] = [(7, TimeUnit::Days), (3, TimeUnit::Weeks)];
 
         for (len, unit) in cases {
             let p = Period::new(len, unit);
@@ -986,7 +986,7 @@ mod tests {
 
     #[test]
     fn weeks_works() {
-        let cases = vec![
+        let cases: [(i32, TimeUnit, f64); 3] = [
             (0, TimeUnit::Weeks, 0.0),
             (2, TimeUnit::Weeks, 2.0),
             (14, TimeUnit::Days, 2.0),
