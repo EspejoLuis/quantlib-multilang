@@ -1,5 +1,4 @@
 using System;
-using System.Reflection.Metadata.Ecma335;
 namespace QuantLibCSharp.Time;
 
 public class Period
@@ -79,7 +78,6 @@ public class Period
             _ => throw new NotImplementedException($"TimeUnit {units} not implemented"),
         };
     }
-
     public void Normalize()
     {
         if (_length == 0) { _units = TimeUnit.Days; }
@@ -106,15 +104,38 @@ public class Period
             }
         }
     }
-
     public Period Normalized()
     {
         Period CopyPeriod = new(_length, _units); ;
         CopyPeriod.Normalize();
         return CopyPeriod;
     }
+    public double Years()
+    {
+        if (_length == 0) { return 0.0; }
 
+        return _units switch
+        {
+            TimeUnit.Days => throw new NotImplementedException($"Cannot convert {_units} into Years"),
+            TimeUnit.Weeks => throw new NotImplementedException($"Cannot convert {_units} into Years"),
+            TimeUnit.Months => (double)_length / 12.0,
+            TimeUnit.Years => (double)_length,
+            _ => throw new ArgumentOutOfRangeException(nameof(_units), _units, "Unknown time units"),
+        };
+    }
+    public double Months()
+    {
+        if (_length == 0) { return 0.0; }
 
+        return _units switch
+        {
+            TimeUnit.Days => throw new NotImplementedException($"Cannot convert {_units} into Months"),
+            TimeUnit.Weeks => throw new NotImplementedException($"Cannot convert {_units} into Months"),
+            TimeUnit.Months => (double)_length,
+            TimeUnit.Years => (double)_length * 12.0,
+            _ => throw new ArgumentOutOfRangeException(nameof(_units), _units, "Unknown time units"),
+        };
+    }
 }
 
 

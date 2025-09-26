@@ -196,7 +196,7 @@
 
 - `Normalize()`. Unit Test to DO!!!
 
-## 25 Sep 2025 - Thursday - Period C#:
+## 25 Sep 2025 - Thursday - Period C#
 
 - C++/Rust in `Normalized()` creates a copy of the period. In C# doing the following:
 
@@ -208,10 +208,16 @@
 
 - Unit test for `Normalized()`. Still have some red parts.
 
+## 26 Sep 2025 - Friday - Period C#
+
+- Added `Years()` and `Months()` that convert `Period` into years/months.
+- Added unit tests for `Years()`.
+
 ### TODO:
 
 - C#: review everything according to new strategy:
 
+  - Check other unit test with errors throwing
   - Unit Test:
     - Null Date
   - Review all tests;

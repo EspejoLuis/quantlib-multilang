@@ -51,13 +51,17 @@ public class PeriodUnitTests
     }
 
     [Test]
-    [TestCase(Frequency.OtherFrequency)]
-    [TestCase((Frequency)12345)] // unmapped frequency
-    public void Test_Period_FromFrequency_Invalid(Frequency frequency)
+    [TestCase(Frequency.OtherFrequency, typeof(ArgumentOutOfRangeException), "Unknown frequency")]
+    [TestCase((Frequency)12345, typeof(ArgumentOutOfRangeException), "Unknown frequency")]
+    public void Test_Period_FromFrequency_Invalid(
+       Frequency frequency,
+       Type expectedException,
+       string expectedMessageFragment)
     {
-        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => new Period(frequency));
-        Assert.That(ex!.Message, Does.Contain("Unknown frequency"));
+        var ex = Assert.Throws(expectedException, () => new Period(frequency));
+        Assert.That(ex!.Message, Does.Contain(expectedMessageFragment));
     }
+
 
     [Test]
     [TestCase(0, TimeUnit.Years, Frequency.Once)]
@@ -137,6 +141,47 @@ public class PeriodUnitTests
         });
 
     }
+
+    [Test]
+    [TestCase(-10, TimeUnit.Years, -10.0)]   // negative years
+    [TestCase(0, TimeUnit.Years, 0.0)]   // zero years
+    [TestCase(5, TimeUnit.Years, 5.0)]   // positive years
+
+    // Months → Years
+    [TestCase(24, TimeUnit.Months, 2.0)]   // exact multiple of 12
+    [TestCase(-24, TimeUnit.Months, -2.0)]   // negative multiple of 12
+    [TestCase(12, TimeUnit.Months, 1.0)]   // exactly one year
+    [TestCase(18, TimeUnit.Months, 1.5)]   // fractional year
+    [TestCase(1, TimeUnit.Months, 1.0 / 12.0)] // smallest non-zero
+    [TestCase(0, TimeUnit.Months, 0.0)]   // zero months
+
+    public void Test_Years(
+        int length, TimeUnit units,
+        double expectedNumber)
+    {
+        var p = new Period(length, units);
+        double result = p.Years();
+        Assert.That(result, Is.EqualTo(expectedNumber).Within(1e-12));
+    }
+
+    [Test]
+    [TestCase(7, TimeUnit.Days, typeof(NotImplementedException), "Cannot convert Days into Years")]
+    [TestCase(-7, TimeUnit.Days, typeof(NotImplementedException), "Cannot convert Days into Years")]
+    [TestCase(2, TimeUnit.Weeks, typeof(NotImplementedException), "Cannot convert Weeks into Years")]
+    [TestCase(-2, TimeUnit.Weeks, typeof(NotImplementedException), "Cannot convert Weeks into Years")]
+    [TestCase(1, (TimeUnit)999, typeof(ArgumentOutOfRangeException), "Unknown time units")]
+    public void Test_Years_InvalidUnits_Throws(
+        int length,
+        TimeUnit units,
+        Type expectedException,
+        string expectedMessageFragment)
+    {
+        var p = new Period(length, units);
+        var ex = Assert.Throws(expectedException, () => p.Years());
+        Assert.That(ex!.Message, Does.Contain(expectedMessageFragment));
+    }
+
+
 
 
 }
