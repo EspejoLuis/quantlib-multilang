@@ -212,6 +212,8 @@
 
 - Added `Years()` and `Months()` that convert `Period` into years/months.
 - Added unit tests for `Years()`.
+- Added `Weeks()` and `Days()`.
+- Added unit test for `Months()`,`Years()`,`Days()`.
 
 ### TODO:
 

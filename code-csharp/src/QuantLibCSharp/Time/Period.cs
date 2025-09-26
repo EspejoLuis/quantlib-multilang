@@ -53,8 +53,8 @@ public class Period
         if (abs_length == 0)
         {
             return (units == TimeUnit.Years)
-            ? Frequency.Once
-            : Frequency.NoFrequency;
+                ? Frequency.Once
+                : Frequency.NoFrequency;
         }
 
         return units switch
@@ -118,8 +118,8 @@ public class Period
         {
             TimeUnit.Days => throw new NotImplementedException($"Cannot convert {_units} into Years"),
             TimeUnit.Weeks => throw new NotImplementedException($"Cannot convert {_units} into Years"),
-            TimeUnit.Months => (double)_length / 12.0,
-            TimeUnit.Years => (double)_length,
+            TimeUnit.Months => _length / 12.0,
+            TimeUnit.Years => _length,
             _ => throw new ArgumentOutOfRangeException(nameof(_units), _units, "Unknown time units"),
         };
     }
@@ -131,8 +131,34 @@ public class Period
         {
             TimeUnit.Days => throw new NotImplementedException($"Cannot convert {_units} into Months"),
             TimeUnit.Weeks => throw new NotImplementedException($"Cannot convert {_units} into Months"),
-            TimeUnit.Months => (double)_length,
-            TimeUnit.Years => (double)_length * 12.0,
+            TimeUnit.Months => _length,
+            TimeUnit.Years => _length * 12.0,
+            _ => throw new ArgumentOutOfRangeException(nameof(_units), _units, "Unknown time units"),
+        };
+    }
+    public double Weeks()
+    {
+        if (_length == 0) { return 0.0; }
+
+        return _units switch
+        {
+            TimeUnit.Days => _length / 7.0,
+            TimeUnit.Weeks => _length,
+            TimeUnit.Months => throw new NotImplementedException($"Cannot convert {_units} into Weeks"),
+            TimeUnit.Years => throw new NotImplementedException($"Cannot convert {_units} into Weeks"),
+            _ => throw new ArgumentOutOfRangeException(nameof(_units), _units, "Unknown time units"),
+        };
+    }
+    public double Days()
+    {
+        if (_length == 0) { return 0.0; }
+
+        return _units switch
+        {
+            TimeUnit.Days => _length,
+            TimeUnit.Weeks => _length * 7.0,
+            TimeUnit.Months => throw new NotImplementedException($"Cannot convert {_units} into Days"),
+            TimeUnit.Years => throw new NotImplementedException($"Cannot convert {_units} into Days"),
             _ => throw new ArgumentOutOfRangeException(nameof(_units), _units, "Unknown time units"),
         };
     }

@@ -18,7 +18,6 @@ public class PeriodUnitTests
     public void Test_Period(int length, TimeUnit units)
     {
         var p = new Period(length, units);
-
         Assert.Multiple(() =>
         {
             Assert.That(p.Length(), Is.EqualTo(length), "Length mismatch");
@@ -42,7 +41,6 @@ public class PeriodUnitTests
     public void Test_Period_FromFrequency_Valid(Frequency frequency, int expectedLength, TimeUnit expectedUnits)
     {
         var p = new Period(frequency);
-
         Assert.Multiple(() =>
         {
             Assert.That(p.Length(), Is.EqualTo(expectedLength), $"Length mismatch for {frequency}");
@@ -91,7 +89,8 @@ public class PeriodUnitTests
     public void Test_ToFrequency_NotImplemented()
     {
         var p = new Period(1, (TimeUnit)999);
-        Assert.Throws<NotImplementedException>(() => p.ToFrequency());
+        var ex = Assert.Throws<NotImplementedException>(() => p.ToFrequency());
+        Assert.That(ex!.Message, Does.Contain("TimeUnit 999 not implemented"));
     }
 
     [Test]
@@ -147,14 +146,13 @@ public class PeriodUnitTests
     [TestCase(0, TimeUnit.Years, 0.0)]   // zero years
     [TestCase(5, TimeUnit.Years, 5.0)]   // positive years
 
-    // Months → Years
+    // Convert Months into Years
     [TestCase(24, TimeUnit.Months, 2.0)]   // exact multiple of 12
     [TestCase(-24, TimeUnit.Months, -2.0)]   // negative multiple of 12
     [TestCase(12, TimeUnit.Months, 1.0)]   // exactly one year
     [TestCase(18, TimeUnit.Months, 1.5)]   // fractional year
     [TestCase(1, TimeUnit.Months, 1.0 / 12.0)] // smallest non-zero
     [TestCase(0, TimeUnit.Months, 0.0)]   // zero months
-
     public void Test_Years(
         int length, TimeUnit units,
         double expectedNumber)
@@ -181,7 +179,117 @@ public class PeriodUnitTests
         Assert.That(ex!.Message, Does.Contain(expectedMessageFragment));
     }
 
+    [Test]
+    [TestCase(-10, TimeUnit.Months, -10.0)]   // negative years
+    [TestCase(0, TimeUnit.Months, 0.0)]   // zero years
+    [TestCase(5, TimeUnit.Months, 5.0)]   // positive years
 
+    // Convert Years into Months
+    [TestCase(2, TimeUnit.Years, 24.0)]
+    [TestCase(-2, TimeUnit.Years, -24.0)]
+    [TestCase(1, TimeUnit.Years, 12.0)]
+    [TestCase(3, TimeUnit.Years, 36.0)]
+    [TestCase(24, TimeUnit.Years, 24 * 12.0)]
+    [TestCase(0, TimeUnit.Years, 0.0)]
+    public void Test_Months(
+           int length, TimeUnit units,
+           double expectedNumber)
+    {
+        var p = new Period(length, units);
+        double result = p.Months();
+        Assert.That(result, Is.EqualTo(expectedNumber).Within(1e-12));
+    }
 
+    [Test]
+    [TestCase(127, TimeUnit.Days, typeof(NotImplementedException), "Cannot convert Days into Months")]
+    [TestCase(-7312, TimeUnit.Days, typeof(NotImplementedException), "Cannot convert Days into Months")]
+    [TestCase(21, TimeUnit.Weeks, typeof(NotImplementedException), "Cannot convert Weeks into Months")]
+    [TestCase(-212, TimeUnit.Weeks, typeof(NotImplementedException), "Cannot convert Weeks into Months")]
+    [TestCase(1, (TimeUnit)726, typeof(ArgumentOutOfRangeException), "Unknown time units")]
+    public void Test_Months_InvalidUnits_Throws(
+        int length,
+        TimeUnit units,
+        Type expectedException,
+        string expectedMessageFragment)
+    {
+        var p = new Period(length, units);
+        var ex = Assert.Throws(expectedException, () => p.Months());
+        Assert.That(ex!.Message, Does.Contain(expectedMessageFragment));
+    }
 
+    [Test]
+    [TestCase(-10, TimeUnit.Weeks, -10.0)]
+    [TestCase(0, TimeUnit.Weeks, 0.0)]
+    [TestCase(5, TimeUnit.Weeks, 5.0)]
+
+    // Convert Days into Weeks
+    [TestCase(14, TimeUnit.Days, 2.0)]
+    [TestCase(-14, TimeUnit.Days, -2.0)]
+    [TestCase(7, TimeUnit.Days, 1.0)]
+    [TestCase(19, TimeUnit.Days, 19.0 / 7.0)]
+    [TestCase(1, TimeUnit.Days, 1.0 / 7.0)]
+    [TestCase(0, TimeUnit.Days, 0.0)]
+    public void Test_Weeks(
+        int length, TimeUnit units,
+        double expectedNumber)
+    {
+        var p = new Period(length, units);
+        double result = p.Weeks();
+        Assert.That(result, Is.EqualTo(expectedNumber).Within(1e-12));
+    }
+
+    [Test]
+    [TestCase(127, TimeUnit.Months, typeof(NotImplementedException), "Cannot convert Months into Weeks")]
+    [TestCase(-7312, TimeUnit.Months, typeof(NotImplementedException), "Cannot convert Months into Weeks")]
+    [TestCase(21, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Weeks")]
+    [TestCase(-212, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Weeks")]
+    [TestCase(1, (TimeUnit)123, typeof(ArgumentOutOfRangeException), "Unknown time units")]
+    public void Test_Weeks_InvalidUnits_Throws(
+       int length,
+       TimeUnit units,
+       Type expectedException,
+       string expectedMessageFragment)
+    {
+        var p = new Period(length, units);
+        var ex = Assert.Throws(expectedException, () => p.Weeks());
+        Assert.That(ex!.Message, Does.Contain(expectedMessageFragment));
+    }
+
+    [Test]
+    [TestCase(-10, TimeUnit.Days, -10.0)]
+    [TestCase(0, TimeUnit.Days, 0.0)]
+    [TestCase(5, TimeUnit.Days, 5.0)]
+
+    // Convert Weeks into Days
+    [TestCase(2, TimeUnit.Weeks, 14.0)]
+    [TestCase(-2, TimeUnit.Weeks, -14.0)]
+    [TestCase(12, TimeUnit.Weeks, 12.0 * 7.0)]
+    [TestCase(15, TimeUnit.Weeks, 15 * 7.0)]
+    [TestCase(1, TimeUnit.Weeks, 7.0)]
+    [TestCase(0, TimeUnit.Weeks, 0.0)]
+    public void Test_Days(
+        int length, TimeUnit units,
+        double expectedNumber)
+    {
+        var p = new Period(length, units);
+        double result = p.Days();
+        Assert.That(result, Is.EqualTo(expectedNumber).Within(1e-12));
+    }
+
+    [Test]
+    [TestCase(127, TimeUnit.Months, typeof(NotImplementedException), "Cannot convert Months into Days")]
+    [TestCase(-7312, TimeUnit.Months, typeof(NotImplementedException), "Cannot convert Months into Days")]
+    [TestCase(21, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Days")]
+    [TestCase(-212, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Days")]
+    [TestCase(1, (TimeUnit)921, typeof(ArgumentOutOfRangeException), "Unknown time units")]
+    public void Test_Days_InvalidUnits_Throws(
+           int length,
+           TimeUnit units,
+           Type expectedException,
+           string expectedMessageFragment)
+    {
+        var p = new Period(length, units);
+        var ex = Assert.Throws(expectedException, () => p.Days());
+        Assert.That(ex!.Message, Does.Contain(expectedMessageFragment));
+    }
 }
