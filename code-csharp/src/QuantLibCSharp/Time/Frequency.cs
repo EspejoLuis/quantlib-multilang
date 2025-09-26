@@ -17,7 +17,6 @@ public enum Frequency
     OtherFrequency = 999, // some other unknown frequency
 }
 
-
 // Helper class
 public static class FrequencyUtils
 {
