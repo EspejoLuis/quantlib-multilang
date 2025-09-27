@@ -290,6 +290,12 @@ impl AddAssign<Period> for Period {
     // for Period -> left hand side
     // No Output, no new Date returned. SAME Period modified!
     fn add_assign(&mut self, rhs: Period) -> () {
+        // Asssumption: use rhs as base i.e. if different time
+        // units, rhs units is used as reference
+
+        // If zero, then the length is determine by rhs
+        // We dont care about lhs units because
+        // zero weeks,days,months,years are just zero
         if self.length == 0 {
             self.length = rhs.length();
             self.units = rhs.units();
