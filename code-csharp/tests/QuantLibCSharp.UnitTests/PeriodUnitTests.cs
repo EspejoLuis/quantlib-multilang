@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Runtime;
 using NUnit.Framework;
 using QuantLibCSharp.Time;
@@ -38,7 +39,7 @@ public class PeriodUnitTests
     [TestCase(Frequency.Biweekly, 2, TimeUnit.Weeks)]
     [TestCase(Frequency.Weekly, 1, TimeUnit.Weeks)]
     [TestCase(Frequency.Daily, 1, TimeUnit.Days)]
-    public void Test_Period_FromFrequency_Valid(Frequency frequency, int expectedLength, TimeUnit expectedUnits)
+    public void Test_Period_FromFrequency(Frequency frequency, int expectedLength, TimeUnit expectedUnits)
     {
         var p = new Period(frequency);
         Assert.Multiple(() =>
@@ -51,7 +52,7 @@ public class PeriodUnitTests
     [Test]
     [TestCase(Frequency.OtherFrequency, typeof(ArgumentOutOfRangeException), "Unknown frequency")]
     [TestCase((Frequency)12345, typeof(ArgumentOutOfRangeException), "Unknown frequency")]
-    public void Test_Period_FromFrequency_Invalid(
+    public void Test_Period_FromFrequency_ThrowsException(
        Frequency frequency,
        Type expectedException,
        string expectedMessageFragment)
@@ -59,7 +60,6 @@ public class PeriodUnitTests
         var ex = Assert.Throws(expectedException, () => new Period(frequency));
         Assert.That(ex!.Message, Does.Contain(expectedMessageFragment));
     }
-
 
     [Test]
     [TestCase(0, TimeUnit.Years, Frequency.Once)]
@@ -86,7 +86,7 @@ public class PeriodUnitTests
     }
 
     [Test]
-    public void Test_ToFrequency_NotImplemented()
+    public void Test_ToFrequency_ThrowsException()
     {
         var p = new Period(1, (TimeUnit)999);
         var ex = Assert.Throws<NotImplementedException>(() => p.ToFrequency());
@@ -124,13 +124,8 @@ public class PeriodUnitTests
         int length, TimeUnit units,
         int expectedLength, TimeUnit expectedUnits)
     {
-        // Arrange
         var p = new Period(length, units);
-
-        // Act
         Period result = p.Normalized();
-
-        // Assert
         Assert.Multiple(() =>
         {
             // Check that original period p did not mutate after Normalized()
@@ -139,6 +134,18 @@ public class PeriodUnitTests
             Assert.That((result.Length(), result.Units()), Is.EqualTo((expectedLength, expectedUnits)));
         });
 
+    }
+
+    [Test]
+    [TestCase(1, (TimeUnit)999)]
+    [TestCase(1, (TimeUnit)9994)]
+    public void Test_Normalzed_ThrowsException(
+        int length,
+        TimeUnit units)
+    {
+        var p = new Period(length, units);
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => p.Normalized());
+        Assert.That(ex!.Message, Does.Contain("Unknown time units"));
     }
 
     [Test]
@@ -168,7 +175,7 @@ public class PeriodUnitTests
     [TestCase(2, TimeUnit.Weeks, typeof(NotImplementedException), "Cannot convert Weeks into Years")]
     [TestCase(-2, TimeUnit.Weeks, typeof(NotImplementedException), "Cannot convert Weeks into Years")]
     [TestCase(1, (TimeUnit)999, typeof(ArgumentOutOfRangeException), "Unknown time units")]
-    public void Test_Years_InvalidUnits_Throws(
+    public void Test_Years_ThrowsException(
         int length,
         TimeUnit units,
         Type expectedException,
@@ -206,7 +213,7 @@ public class PeriodUnitTests
     [TestCase(21, TimeUnit.Weeks, typeof(NotImplementedException), "Cannot convert Weeks into Months")]
     [TestCase(-212, TimeUnit.Weeks, typeof(NotImplementedException), "Cannot convert Weeks into Months")]
     [TestCase(1, (TimeUnit)726, typeof(ArgumentOutOfRangeException), "Unknown time units")]
-    public void Test_Months_InvalidUnits_Throws(
+    public void Test_Months_ThrowsException(
         int length,
         TimeUnit units,
         Type expectedException,
@@ -244,7 +251,7 @@ public class PeriodUnitTests
     [TestCase(21, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Weeks")]
     [TestCase(-212, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Weeks")]
     [TestCase(1, (TimeUnit)123, typeof(ArgumentOutOfRangeException), "Unknown time units")]
-    public void Test_Weeks_InvalidUnits_Throws(
+    public void Test_Weeks_ThrowsException(
        int length,
        TimeUnit units,
        Type expectedException,
@@ -281,15 +288,94 @@ public class PeriodUnitTests
     [TestCase(-7312, TimeUnit.Months, typeof(NotImplementedException), "Cannot convert Months into Days")]
     [TestCase(21, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Days")]
     [TestCase(-212, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Days")]
-    [TestCase(1, (TimeUnit)921, typeof(ArgumentOutOfRangeException), "Unknown time units")]
-    public void Test_Days_InvalidUnits_Throws(
-           int length,
-           TimeUnit units,
-           Type expectedException,
-           string expectedMessageFragment)
+    [TestCase(1, (TimeUnit)9199, typeof(ArgumentOutOfRangeException), "Unknown time units")]
+    public void Test_Days_ThrowsException(
+        int length,
+        TimeUnit units,
+        Type expectedException,
+        string expectedMessageFragment)
     {
         var p = new Period(length, units);
         var ex = Assert.Throws(expectedException, () => p.Days());
         Assert.That(ex!.Message, Does.Contain(expectedMessageFragment));
     }
+
+    [Test]
+    [TestCase(0, TimeUnit.Years, 3, TimeUnit.Months, 3, TimeUnit.Months)]
+    [TestCase(2, TimeUnit.Years, 3, TimeUnit.Years, 5, TimeUnit.Years)]
+    [TestCase(2, TimeUnit.Years, 6, TimeUnit.Months, 30, TimeUnit.Months)] // 24M + 6M
+    [TestCase(6, TimeUnit.Months, 2, TimeUnit.Years, 30, TimeUnit.Months)] // 6M + 24M
+    [TestCase(2, TimeUnit.Weeks, 3, TimeUnit.Days, 17, TimeUnit.Days)]     // 14D + 3D
+    [TestCase(3, TimeUnit.Days, 2, TimeUnit.Weeks, 17, TimeUnit.Days)]     // 3D + 14D
+    [TestCase(5, TimeUnit.Days, 3, TimeUnit.Days, 8, TimeUnit.Days)]
+    public void Test_OperatorPlus(
+             int lhsLen, TimeUnit lhsUnit,
+             int rhsLen, TimeUnit rhsUnit,
+             int expectedLen, TimeUnit expectedUnit)
+    {
+        var lhs = new Period(lhsLen, lhsUnit);
+        var rhs = new Period(rhsLen, rhsUnit);
+        var result = lhs + rhs;
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Length(), Is.EqualTo(expectedLen),
+                $"Expected length {expectedLen}, got {result.Length()}");
+            Assert.That(result.Units(), Is.EqualTo(expectedUnit),
+                $"Expected units {expectedUnit}, got {result.Units()}");
+        });
+    }
+
+    [Test]
+    [TestCase(1, TimeUnit.Years, 5, TimeUnit.Days)]
+    [TestCase(1, TimeUnit.Years, 2, TimeUnit.Weeks)]
+    [TestCase(1, TimeUnit.Months, 5, TimeUnit.Days)]
+    [TestCase(1, TimeUnit.Months, 2, TimeUnit.Weeks)]
+    [TestCase(1, TimeUnit.Weeks, 1, TimeUnit.Years)]
+    [TestCase(1, TimeUnit.Weeks, 2, TimeUnit.Months)]
+    [TestCase(1, TimeUnit.Days, 1, TimeUnit.Years)]
+    [TestCase(1, TimeUnit.Days, 2, TimeUnit.Months)]
+    public void Test_OperatorPlus_ThrowsOnInvalidCombinations(
+        int lhsLen, TimeUnit lhsUnit,
+        int rhsLen, TimeUnit rhsUnit)
+    {
+        var lhs = new Period(lhsLen, lhsUnit);
+        var rhs = new Period(rhsLen, rhsUnit);
+        var ex = Assert.Throws<ArgumentException>(() => { var _ = lhs + rhs; });
+        Assert.That(ex!.Message,
+            Is.EqualTo($"Impossible addition between {lhs} and {rhs}"));
+    }
+
+    [Test]
+    [TestCase(1, (TimeUnit)999, 2, TimeUnit.Years)]
+    [TestCase(1, (TimeUnit)999, 2, TimeUnit.Months)]
+    [TestCase(2, TimeUnit.Months, 3, (TimeUnit)999)]
+    [TestCase(2, TimeUnit.Years, 2, (TimeUnit)999)]
+    [TestCase(1, (TimeUnit)999, 2, TimeUnit.Weeks)]
+    [TestCase(1, (TimeUnit)999, 2, TimeUnit.Days)]
+    [TestCase(2, TimeUnit.Weeks, 3, (TimeUnit)999)]
+    [TestCase(2, TimeUnit.Days, 2, (TimeUnit)999)]
+    public void Test_OperatorPlus_ThrowsOnUnknownTimeUnits(
+            int lhsLen, TimeUnit lhsUnit,
+            int rhsLen, TimeUnit rhsUnit)
+    {
+        var lhs = new Period(lhsLen, lhsUnit);
+        var rhs = new Period(rhsLen, rhsUnit);
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => { var _ = lhs + rhs; });
+        Assert.That(ex!.Message, Does.Contain("Unknown time units"));
+    }
+
+    [Test]
+    [TestCase(1, TimeUnit.Years, -1, TimeUnit.Years)]
+    [TestCase(-1, TimeUnit.Weeks, 1, TimeUnit.Weeks)]
+    [TestCase(-1, TimeUnit.Months, 1, TimeUnit.Months)]
+    [TestCase(45, TimeUnit.Days, -45, TimeUnit.Days)]
+    public void Test_UnaryOperatorMinus(int length, TimeUnit units, int expectedLength, TimeUnit expectedUnits)
+    {
+        var period = new Period(length, units);
+        var negativePeriod = -period;
+        Assert.That((negativePeriod.Length(), negativePeriod.Units()), Is.EqualTo((expectedLength, expectedUnits)));
+    }
+
+
+
 }

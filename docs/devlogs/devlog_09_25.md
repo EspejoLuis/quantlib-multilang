@@ -218,6 +218,8 @@
 ## 27 September 2025 - Saturday - Period C#
 
 - Implemented `operator+()`. In Rust/C++, `+=` is implemented and then `+` is derived from it. In C#, the opposite has to be done i.e. implement `+` and then `+=` will determine automatically (no implementation needed).
+- Added unit tests for `operator+()` and `operator -(Period period)`.
+- Implemented unary `operator -(Period period)`
 
 ### TODO:
 

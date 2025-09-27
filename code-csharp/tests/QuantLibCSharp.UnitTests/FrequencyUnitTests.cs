@@ -13,7 +13,7 @@ public class FrequencyUnitTests
     [TestCase(3, Frequency.EveryFourthMonth)]
     [TestCase(2, Frequency.Semiannual)]
     [TestCase(1, Frequency.Annual)]
-    public void Test_FromNthTimesPerYear_Valid(int nthTimes, Frequency expected)
+    public void Test_FromNthTimesPerYear(int nthTimes, Frequency expected)
     {
         var freq = FrequencyUtils.FromNthTimesPerYear(nthTimes);
         Assert.That(freq, Is.EqualTo(expected), $"nThTimes={nthTimes}");
@@ -26,7 +26,7 @@ public class FrequencyUnitTests
     [TestCase(8)]
     [TestCase(10)]
     [TestCase(100)]
-    public void Test_FromNthTimesPerYear_Invalid(int nthTimes)
+    public void Test_FromNthTimesPerYear_OtherFrequency(int nthTimes)
     {
         var freq = FrequencyUtils.FromNthTimesPerYear(nthTimes);
         Assert.That(freq, Is.EqualTo(Frequency.OtherFrequency), $"nThTimes={nthTimes}");

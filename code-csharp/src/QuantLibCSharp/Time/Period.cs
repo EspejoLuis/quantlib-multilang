@@ -173,8 +173,12 @@ public class Period
     // Arithmetic 
     public static Period operator +(Period lhs, Period rhs)
     {
-        // Asssumption: use rhs as base i.e. if different time
-        // units, rhs units is used as reference
+        // Asssumption: 
+        // Months + Years --> Months
+        // Years + Months --> Months
+        // Weeks + Days --> Days
+        // Days + Weeks --> Days
+
         int length = lhs._length;
         TimeUnit units = lhs._units;
 
@@ -215,7 +219,6 @@ public class Period
                     switch (rhs._units)
                     {
                         case TimeUnit.Years:
-                            units = rhs._units;
                             length += rhs._length * 12;
                             break;
                         case TimeUnit.Weeks:
@@ -247,7 +250,6 @@ public class Period
                     switch (rhs._units)
                     {
                         case TimeUnit.Weeks:
-                            units = rhs._units;
                             length += rhs._length * 7;
                             break;
                         case TimeUnit.Years:

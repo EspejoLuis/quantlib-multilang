@@ -45,7 +45,7 @@ public class DateUnitTests
     [TestCase(30, Month.February, 2001)] // Invalid day (non-leap Feb)
     [TestCase(32, Month.January, 2001)]  // Invalid day (too high)
     [TestCase(0, Month.January, 2001)]   // Invalid day (too low)
-    public void Test_Constructor_DayMonthYear_Invalid(int day, Month month, int year)
+    public void Test_Constructor_DayMonthYear_ThrowsException(int day, Month month, int year)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new Date(day, month, year));
     }
@@ -73,7 +73,7 @@ public class DateUnitTests
     [Test]
     [TestCase(366)]      // Serial too low
     [TestCase(109575)]   // Serial too high
-    public void Test_Constructor_SerialNumber_Invalid(int serial)
+    public void Test_Constructor_SerialNumber_ThrowsException(int serial)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new Date(serial));
     }
@@ -112,7 +112,7 @@ public class DateUnitTests
     [TestCase(2001, false)] // non-leap
     [TestCase(1900, true)]  // Excel bug (treated as leap)
     [TestCase(2100, false)] // non-leap
-    public void Test_IsLeap_Valid(int year, bool expected)
+    public void Test_IsLeap(int year, bool expected)
     {
         Assert.That(Date.IsLeap(year), Is.EqualTo(expected));
     }
@@ -120,7 +120,7 @@ public class DateUnitTests
     [Test]
     [TestCase(1899)]
     [TestCase(2201)]
-    public void Test_IsLeap_Invalid(int year)
+    public void Test_IsLeap_ThrowsException(int year)
     {
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() => Date.IsLeap(year));
         Assert.That(ex!.Message, Does.Contain("Year out of range [1900,2200]"));
@@ -132,7 +132,7 @@ public class DateUnitTests
     [TestCase(1901, 366)]
     [TestCase(2000, 36525)]
     [TestCase(2199, 109209)]  // last year start
-    public void Test_YearOffSet_Valid(int year, int expectedOffset)
+    public void Test_YearOffSet(int year, int expectedOffset)
     {
         Assert.That(Date.YearOffSet(year), Is.EqualTo(expectedOffset));
     }
@@ -140,7 +140,7 @@ public class DateUnitTests
     [Test]
     [TestCase(1899)]
     [TestCase(2201)]
-    public void Test_YearOffSet_Invalid(int year)
+    public void Test_YearOffSet_ThrowsException(int year)
     {
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() => Date.YearOffSet(year));
         Assert.That(ex!.Message, Does.Contain("Year out of range [1900,2200]"));
@@ -160,7 +160,7 @@ public class DateUnitTests
     [TestCase(367)]     // min
     [TestCase(109574)]  // max
     [TestCase(36585)]   // valid mid-range
-    public void Test_CheckSerialNumber_Valid(int serial)
+    public void Test_CheckSerialNumber(int serial)
     {
         Assert.DoesNotThrow(() => Date.CheckSerialNumber(serial));
     }
@@ -168,7 +168,7 @@ public class DateUnitTests
     [Test]
     [TestCase(366)]
     [TestCase(109575)]
-    public void Test_CheckSerialNumber_Invalid(int serial)
+    public void Test_CheckSerialNumber_ThrowsException(int serial)
     {
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() => Date.CheckSerialNumber(serial));
         Assert.That(ex!.Message, Does.Contain("Serial"));
