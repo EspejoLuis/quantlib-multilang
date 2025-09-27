@@ -290,8 +290,11 @@ impl AddAssign<Period> for Period {
     // for Period -> left hand side
     // No Output, no new Date returned. SAME Period modified!
     fn add_assign(&mut self, rhs: Period) -> () {
-        // Asssumption: use rhs as base i.e. if different time
-        // units, rhs units is used as reference
+        // Asssumption:
+        // Months + Years --> Months
+        // Years + Months --> Months
+        // Weeks + Days --> Days
+        // Days + Weeks --> Days
 
         // If zero, then the length is determine by rhs
         // We dont care about lhs units because
@@ -1229,7 +1232,7 @@ mod tests {
         ];
 
         for (lhs, rhs, (expected_len, expected_unit)) in cases {
-            let result = lhs + rhs;
+            let result: Period = lhs + rhs;
             assert_eq!(
                 (result.length(), result.units()),
                 (expected_len, expected_unit),
@@ -1418,7 +1421,7 @@ mod tests {
         ];
 
         for (lhs, divider, (expected_len, expected_unit)) in cases {
-            let result = lhs / divider;
+            let result: Period = lhs / divider;
             assert_eq!(
                 (result.length(), result.units()),
                 (expected_len, expected_unit),
