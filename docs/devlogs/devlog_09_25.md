@@ -1,11 +1,11 @@
 # September
 
-## 1 September 2025 - Rust:
+## 1 September 2025 - Rust
 
 - Checking coverage in period --> completed.
 - ✅ Formatting (Display / long_period, short_period) with unit test!
 
-## 2 September 2025 - Date - Rust:
+## 2 September 2025 - Date - Rust
 
 - Asked ChatGPT to list the differences. Added the list below.
 - `check_serial_number` added. Have to add it in ++d and --d but dont have them so have to create them.
@@ -58,49 +58,55 @@
 
 - Implemented `default()` as trait for `Default`
 
-## 3 September 2025 - Date - Rust:
+## 3 September 2025 - Date - Rust
 
 - Change to lifetime `'a`:
   - In C++, const Date& means “borrow this Date, don’t copy it.”
   - In Rust, this is expressed with &'a Date: a reference tied to a lifetime 'a.
   - The impl<'a> tells Rust: this implementation works for any lifetime 'a:
+
   ```rust
   impl<'a> Display for IsoDate<'a> {
       fn fmt(&self, f: &mut Formatter) -> Result { ... }
   }
   ```
+
   - The public API must also carry the lifetime forward, ensuring the returned object cannot outlive the borrowed date:
+
   ```rust
   pub fn iso_date<'a>(d: &'a Date) -> impl Display + 'a {
       detail::IsoDate { date: d }
   }
   ```
+  
   - `impl<'a> Display for IsoDate<'a>` -> implement Display for borrowed dates with lifetime 'a.
-  - `impl Display + 'a ` -> the returned object implements Display and is valid only as long as the borrowed Date lives.
+  - `impl Display + 'a` -> the returned object implements Display and is valid only as long as the borrowed Date lives.
     This makes Rust’s API faithful to QuantLib: borrowed views of a Date instead of copying.
 
-## 4 September 2025 - Thursday - Date - Rust:
+## 4 September 2025 - Thursday - Date - Rust
 
 - Updated `period.rs` with lifetime `'a`.
 - Update `weekday.rs` with lifetime `'a`:
+
   ```rust
   pub(crate) struct LongWeekday<'a> {
       pub(crate) weekday: &'a Weekday,
   }
   ```
+
   'a does not exist at runtime. It’s not a variable, not memory, not data. It’s purely for the compiler to enforce borrowing rules. Example with a car:
   Imagine 'a is a parking permit:
   - You borrow a car (&Weekday) but the permit says you can only keep it until 'a expires.
   - LongWeekday<'a> is the parking lot that stores the borrowed car.
   - When 'a ends, you must return the car — you can’t keep using it.
 
-## 5 September 2025 - Friday - Date - Rust:
+## 5 September 2025 - Friday - Date - Rust
 
 - Modified MonthIndex for `month_length()`. Didn't need to pass MonthIndex. Month was better
 - Implement `advance()` to increase `date` by a timeunit. Unit test but check coverage.
 - Note: `year_offset()` allows you to have 2200 because year=2200 gives you the offset for 31-Dec-2199. But `year` cannot be higher than 2199.
 
-## 6 September 2025 - Saturday - Date - Rust:
+## 6 September 2025 - Saturday - Date - Rust
 
 - Checked and completed coverage unit test for `advance()`
 - Adjust `add`,`sub`,`div`from
@@ -129,12 +135,12 @@
 - Implemented hash by simply adding `hash` in `#derive` definitions:
   - Unit test as well.
 
-## 8 September 2025 - Monday - Date - Rust:
+## 8 September 2025 - Monday - Date - Rust
 
 - Added check on serial number =0 for LongDate, ShortDate, IsoDate.
 - Added some tests for `>=` and `<=`.
 
-## 9 September 2025 - Tuesday - Date - Rust/C#
+## 9 September 2025 - Tuesday - Date - Rust/C\#
 
 - To allign with Quantlib, use `panic!` instead of `assert`.
 - Added integration tests.
@@ -152,7 +158,7 @@
 >   - For value types (like int, double, struct) --> variable can only be assigned in its declaration, or inside a constructor
 >   - For reference types (like string, arrays, classes) --> variable always points to the same array but it can be modified.
 
-## 10 September 2025 - Wednesday - Date - C#
+## 10 September 2025 - Wednesday - Date - C\#
 
 - Definitely it's easier having done the rust version!
 - Constructors:
@@ -171,32 +177,32 @@
 > - const = carved in stone, baked into the compiled IL, zero runtime overhead.
 > - static readonly = written on a whiteboard once when the program starts, never changed again.
 
-## 11 September 2025 - Thursday - Date - C#
+## 11 September 2025 - Thursday - Date - C\#
 
 - Done: `DayOfYear()`, `Year`, `YearLength`
 - Work In Progress: `DayOfMonth()`, `Month`
 
-## 13 September 2025 - Saturday - Date - C#
+## 13 September 2025 - Saturday - Date - C\#
 
 - 'Month()' done.
 - Better is redo the old part. Creating tmp files till I get to operators.
 - So not the best approach but I will try do the coding without the unit test for the moment, then when get to operators, delete the temp and check the coverage.
 - Refactoring Part 1.
 
-## 14 September 2025 - Sunday - Date - C#
+## 14 September 2025 - Sunday - Date - C\#
 
 - Refactoring Part 2
 - Unit Tests for `Date`, `Period`, `Frequency`
 
-## 16 September 2025 - Tueday - Period - C#
+## 16 September 2025 - Tueday - Period - C\#
 
 - `ToFrequency()` implemented. Unit Tests as well.
 
-## 17 September 2025 - Wednesday - Period - C#
+## 17 September 2025 - Wednesday - Period - C\#
 
 - `Normalize()`. Unit Test to DO!!!
 
-## 25 September 2025 - Thursday - Period C#
+## 25 September 2025 - Thursday - Period C\#
 
 - C++/Rust in `Normalized()` creates a copy of the period. In C# doing the following:
 
@@ -208,20 +214,20 @@
 
 - Unit test for `Normalized()`. Still have some red parts.
 
-## 26 September 2025 - Friday - Period C#
+## 26 September 2025 - Friday - Period C\#
 
 - Added `Years()` and `Months()` that convert `Period` into years/months.
 - Added unit tests for `Years()`.
 - Added `Weeks()` and `Days()`.
 - Added unit test for `Months()`,`Years()`,`Days()`.
 
-## 27 September 2025 - Saturday - Period C#
+## 27 September 2025 - Saturday - Period C\#
 
 - Implemented `operator+()`. In Rust/C++, `+=` is implemented and then `+` is derived from it. In C#, the opposite has to be done i.e. implement `+` and then `+=` will determine automatically (no implementation needed).
 - Added unit tests for `operator+()` and `operator -(Period period)`.
 - Implemented unary `operator -(Period period)`
 
-### TODO:
+### TODO
 
 - C#: review everything according to new strategy:
 
