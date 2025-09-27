@@ -3,6 +3,7 @@ namespace QuantLibCSharp.Time;
 
 public class Period
 {
+    // Variables
     private int _length;
     private TimeUnit _units;
 
@@ -32,6 +33,7 @@ public class Period
             or Frequency.Weekly => (52 / (int)frequency, TimeUnit.Weeks),
 
             Frequency.Daily => (1, TimeUnit.Days),
+
             Frequency.OtherFrequency => throw new ArgumentOutOfRangeException(
             nameof(frequency), frequency, "Unknown frequency"),
 
@@ -99,8 +101,11 @@ public class Period
                         _units = TimeUnit.Weeks;
                     }
                     break;
-                case TimeUnit.Weeks or TimeUnit.Years:
+                case TimeUnit.Weeks:
+                case TimeUnit.Years:
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(_units), _units, "Unknown time units");
             }
         }
     }
@@ -162,6 +167,111 @@ public class Period
             _ => throw new ArgumentOutOfRangeException(nameof(_units), _units, "Unknown time units"),
         };
     }
+
+
+    // Operators
+    // Arithmetic 
+    public static Period operator +(Period lhs, Period rhs)
+    {
+        // Asssumption: use rhs as base i.e. if different time
+        // units, rhs units is used as reference
+        int length = lhs._length;
+        TimeUnit units = lhs._units;
+
+        if (length == 0)
+        {
+            // If zero, then the length is determine by rhs
+            // We dont care about lhs units because
+            // zero weeks,days,months,years are just zero
+            length = rhs._length;
+            units = rhs._units;
+        }
+        else if (units == rhs._units)
+        {
+            // Same units
+            length += rhs._length;
+        }
+        else
+        {
+            switch (units)
+            {
+                case TimeUnit.Years:
+                    switch (rhs._units)
+                    {
+                        case TimeUnit.Months:
+                            units = rhs._units;
+                            length = length * 12 + rhs._length;
+                            break;
+                        case TimeUnit.Weeks:
+                        case TimeUnit.Days:
+                            throw new ArgumentException(
+                                        $"Impossible addition between {lhs} and {rhs}");
+                        default:
+                            throw new ArgumentOutOfRangeException(
+                                nameof(rhs), rhs._units, "Unknown time units");
+                    }
+                    break;
+                case TimeUnit.Months:
+                    switch (rhs._units)
+                    {
+                        case TimeUnit.Years:
+                            units = rhs._units;
+                            length += rhs._length * 12;
+                            break;
+                        case TimeUnit.Weeks:
+                        case TimeUnit.Days:
+                            throw new ArgumentException(
+                                        $"Impossible addition between {lhs} and {rhs}");
+                        default:
+                            throw new ArgumentOutOfRangeException(
+                                nameof(rhs), rhs._units, "Unknown time units");
+                    }
+                    break;
+                case TimeUnit.Weeks:
+                    switch (rhs._units)
+                    {
+                        case TimeUnit.Days:
+                            units = rhs._units;
+                            length = length * 7 + rhs._length;
+                            break;
+                        case TimeUnit.Years:
+                        case TimeUnit.Months:
+                            throw new ArgumentException(
+                                        $"Impossible addition between {lhs} and {rhs}");
+                        default:
+                            throw new ArgumentOutOfRangeException(
+                                nameof(rhs), rhs._units, "Unknown time units");
+                    }
+                    break;
+                case TimeUnit.Days:
+                    switch (rhs._units)
+                    {
+                        case TimeUnit.Weeks:
+                            units = rhs._units;
+                            length += rhs._length * 7;
+                            break;
+                        case TimeUnit.Years:
+                        case TimeUnit.Months:
+                            throw new ArgumentException(
+                                        $"Impossible addition between {lhs} and {rhs}");
+                        default:
+                            throw new ArgumentOutOfRangeException(
+                                nameof(rhs), rhs._units, "Unknown time units");
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(
+                                    nameof(rhs), rhs._units, "Unknown time units");
+            }
+        }
+        return new Period(length, units);
+    }
+    public static Period operator -(Period period)
+    {
+        return new Period(-period._length, period._units);
+    }
+    // Comparison
+
 }
 
 
