@@ -322,6 +322,10 @@ public class Period
         }
         return new Period(lengthDivided, units);
     }
+    public static Period operator *(Period period, int multiplier)
+    {
+        return new Period(period._length * multiplier, period._units);
+    }
 
     // Comparison
 }

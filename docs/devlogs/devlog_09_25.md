@@ -231,8 +231,11 @@
 
 - Implemented `operator \()` and `operator-()`
 - Added unit test. Used ChatGPT and added a message to all of them so it's easier to identify the message.
+- Added `operator *()` and unit tests.
 
 ### TODO
+
+- Write Down what done so far. Let finish review C# then before starting Python/C++ let's write down
 
 - C#: review everything according to new strategy:
 

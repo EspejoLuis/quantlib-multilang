@@ -39,7 +39,8 @@ public class PeriodUnitTests
     [TestCase(Frequency.Biweekly, 2, TimeUnit.Weeks)]
     [TestCase(Frequency.Weekly, 1, TimeUnit.Weeks)]
     [TestCase(Frequency.Daily, 1, TimeUnit.Days)]
-    public void Test_Period_FromFrequency(Frequency frequency, int expectedLength, TimeUnit expectedUnits)
+    public void Test_Period_FromFrequency(
+        Frequency frequency, int expectedLength, TimeUnit expectedUnits)
     {
         var p = new Period(frequency);
         Assert.Multiple(() =>
@@ -175,7 +176,8 @@ public class PeriodUnitTests
     [TestCase(-7, TimeUnit.Days, "Cannot convert Days into Years")]
     [TestCase(2, TimeUnit.Weeks, "Cannot convert Weeks into Years")]
     [TestCase(-2, TimeUnit.Weeks, "Cannot convert Weeks into Years")]
-    public void Test_Years_ThrowsNotImplementedException(int length, TimeUnit units, string expectedMessageFragment)
+    public void Test_Years_ThrowsNotImplementedException(
+        int length, TimeUnit units, string expectedMessageFragment)
     {
         var p = new Period(length, units);
         var ex = Assert.Throws<NotImplementedException>(() => p.Years());
@@ -224,7 +226,9 @@ public class PeriodUnitTests
     [TestCase(-7312, TimeUnit.Days, typeof(NotImplementedException), "Cannot convert Days into Months")]
     [TestCase(21, TimeUnit.Weeks, typeof(NotImplementedException), "Cannot convert Weeks into Months")]
     [TestCase(-212, TimeUnit.Weeks, typeof(NotImplementedException), "Cannot convert Weeks into Months")]
-    public void Test_Months_ThrowsException(int length, TimeUnit units, Type expectedException, string expectedMessageFragment)
+    public void Test_Months_ThrowsException(
+        int length, TimeUnit units,
+        Type expectedException, string expectedMessageFragment)
     {
         var p = new Period(length, units);
         var ex = Assert.Throws(expectedException, () => p.Months());
@@ -273,7 +277,9 @@ public class PeriodUnitTests
     [TestCase(-7312, TimeUnit.Months, typeof(NotImplementedException), "Cannot convert Months into Weeks")]
     [TestCase(21, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Weeks")]
     [TestCase(-212, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Weeks")]
-    public void Test_Weeks_ThrowsNotImplementedException(int length, TimeUnit units, Type expectedException, string expectedMessageFragment)
+    public void Test_Weeks_ThrowsNotImplementedException(
+        int length, TimeUnit units,
+        Type expectedException, string expectedMessageFragment)
     {
         var p = new Period(length, units);
         var ex = Assert.Throws(expectedException, () => p.Weeks());
@@ -322,7 +328,9 @@ public class PeriodUnitTests
     [TestCase(-7312, TimeUnit.Months, typeof(NotImplementedException), "Cannot convert Months into Days")]
     [TestCase(21, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Days")]
     [TestCase(-212, TimeUnit.Years, typeof(NotImplementedException), "Cannot convert Years into Days")]
-    public void Test_Days_ThrowsException(int length, TimeUnit units, Type expectedException, string expectedMessageFragment)
+    public void Test_Days_ThrowsException(
+        int length, TimeUnit units,
+        Type expectedException, string expectedMessageFragment)
     {
         var p = new Period(length, units);
         var ex = Assert.Throws(expectedException, () => p.Days());
@@ -390,7 +398,9 @@ public class PeriodUnitTests
     [TestCase(1, TimeUnit.Weeks, 2, TimeUnit.Months)]
     [TestCase(1, TimeUnit.Days, 1, TimeUnit.Years)]
     [TestCase(1, TimeUnit.Days, 2, TimeUnit.Months)]
-    public void Test_OperatorPlus_ThrowsOnInvalidCombinations(int lhsLen, TimeUnit lhsUnit, int rhsLen, TimeUnit rhsUnit)
+    public void Test_OperatorPlus_ThrowsOnInvalidCombinations(
+        int lhsLen, TimeUnit lhsUnit,
+        int rhsLen, TimeUnit rhsUnit)
     {
         var lhs = new Period(lhsLen, lhsUnit);
         var rhs = new Period(rhsLen, rhsUnit);
@@ -409,7 +419,9 @@ public class PeriodUnitTests
     [TestCase(1, (TimeUnit)999, 2, TimeUnit.Days)]
     [TestCase(2, TimeUnit.Weeks, -3, (TimeUnit)999)]
     [TestCase(2, TimeUnit.Days, 2, (TimeUnit)999)]
-    public void Test_OperatorPlus_ThrowsOnUnknownTimeUnits(int lhsLen, TimeUnit lhsUnit, int rhsLen, TimeUnit rhsUnit)
+    public void Test_OperatorPlus_ThrowsOnUnknownTimeUnits(
+        int lhsLen, TimeUnit lhsUnit,
+        int rhsLen, TimeUnit rhsUnit)
     {
         var lhs = new Period(lhsLen, lhsUnit);
         var rhs = new Period(rhsLen, rhsUnit);
@@ -430,7 +442,9 @@ public class PeriodUnitTests
     [TestCase(-1, TimeUnit.Weeks, 1, TimeUnit.Weeks)]
     [TestCase(-1, TimeUnit.Months, 1, TimeUnit.Months)]
     [TestCase(45, TimeUnit.Days, -45, TimeUnit.Days)]
-    public void Test_UnaryOperatorMinus(int length, TimeUnit units, int expectedLength, TimeUnit expectedUnits)
+    public void Test_UnaryOperatorMinus(
+        int length, TimeUnit units,
+        int expectedLength, TimeUnit expectedUnits)
     {
         var period = new Period(length, units);
         var negativePeriod = -period;
@@ -445,7 +459,10 @@ public class PeriodUnitTests
     [TestCase(-2, TimeUnit.Weeks, 2, -1, TimeUnit.Weeks)]
     [TestCase(-10, TimeUnit.Days, 2, -5, TimeUnit.Days)]
     [TestCase(6, TimeUnit.Months, 3, 2, TimeUnit.Months)]
-    public void Test_OperatorDivide(int length, TimeUnit unit, int divider, int expectedLength, TimeUnit expectedUnit)
+    public void Test_OperatorDivide(
+        int length, TimeUnit unit,
+        int divider,
+        int expectedLength, TimeUnit expectedUnit)
     {
         var p = new Period(length, unit);
         var result = p / divider;
@@ -464,7 +481,8 @@ public class PeriodUnitTests
     [TestCase(5, TimeUnit.Months, 2)]
     [TestCase(-5, TimeUnit.Days, 2)]
     [TestCase(-5, TimeUnit.Weeks, 2)]
-    public void Test_OperatorDivide_ThrowsInvalidOperationException(int length, TimeUnit unit, int divider)
+    public void Test_OperatorDivide_ThrowsInvalidOperationException(
+        int length, TimeUnit unit, int divider)
     {
         var p = new Period(length, unit);
         var ex = Assert.Throws<InvalidOperationException>(() => { var _ = p / divider; });
@@ -524,6 +542,30 @@ public class PeriodUnitTests
                 $"lhs={lhs}, rhs={rhs} : Expected length {expectedLen}, but got {result.Length()}");
             Assert.That(result.Units(), Is.EqualTo(expectedUnit),
                 $"lhs={lhs}, rhs={rhs} : Expected units {expectedUnit}, but got {result.Units()}");
+        });
+    }
+
+
+    [Test]
+    [TestCase(12, TimeUnit.Months, 3, 36, TimeUnit.Months)]
+    [TestCase(1, TimeUnit.Years, 2, 2, TimeUnit.Years)]
+    [TestCase(-2, TimeUnit.Weeks, 2, -4, TimeUnit.Weeks)]
+    [TestCase(-10, TimeUnit.Days, 2, -20, TimeUnit.Days)]
+    [TestCase(6, TimeUnit.Months, 3, 18, TimeUnit.Months)]
+    public void Test_OperatorMultiply(
+        int length, TimeUnit unit,
+        int multiplier,
+        int expectedLength, TimeUnit expectedUnit)
+    {
+        var p = new Period(length, unit);
+        var result = p * multiplier;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Length(), Is.EqualTo(expectedLength),
+                $"Period({length}, {unit})*{multiplier} : Expected length {expectedLength}, but got {result.Length()}");
+            Assert.That(result.Units(), Is.EqualTo(expectedUnit),
+                $"Period({length}, {unit})*{multiplier} : Expected units {expectedUnit}, but got {result.Units()}");
         });
     }
 
