@@ -1,4 +1,8 @@
 using System;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("QuantLibCSharp.UnitTests")]
+
 namespace QuantLibCSharp.Time;
 
 public class Period
@@ -168,7 +172,29 @@ public class Period
         };
     }
 
+    // Private
+    internal static (int, int) DaysMinMax(Period period)
+    {
+        /*
+        It takes a Period (length + unit) and returns a range of possible days (min_days, max_days).
+        This is needed because some periods (like “1 month”) don’t map to a fixed number of days.
+        */
+        (int minLength, int maxLength) = period._units switch
+        {
+            // Min and Max are the same in days
+            TimeUnit.Days => (period._length, period._length),
+            // Min and Max are the the same in days
+            TimeUnit.Weeks => (period._length * 7, period._length * 7),
+            // Min and Max could be different in days according to the month
+            TimeUnit.Months => (period._length * 28, period._length * 31),
+            // Min and Max could be different in days according to the year
+            TimeUnit.Years => (period._length * 365, period._length * 366),
+            _ => throw new ArgumentOutOfRangeException(
+                                    nameof(period), period._units, "Unknown time units")
+        };
 
+        return (minLength, maxLength);
+    }
     // Operators
     // Arithmetic 
     public static Period operator +(Period lhs, Period rhs)
@@ -331,7 +357,7 @@ public class Period
         return new Period(period._length * multiplier, period._units);
     }
 
-    // Comparison
+
 }
 
 

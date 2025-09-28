@@ -234,6 +234,18 @@
 - Added `operator *()` and unit tests for both:
   - Period * multiplier
   - Multiplier * Period
+- Added `DaysMinMax()`. This is `private` method. To test it, need to add:
+
+  ```csharp
+  using System.Runtime.CompilerServices;
+  [assembly: InternalsVisibleTo("QuantLibCSharp.UnitTests")]
+  ```
+
+  and declare the method as `internal` instead of `private`:
+
+  ```csharp
+  internal static (int, int) DaysMinMax(Period period)
+  ```
 
 ### TODO
 

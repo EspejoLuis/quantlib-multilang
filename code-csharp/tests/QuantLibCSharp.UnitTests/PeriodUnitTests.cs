@@ -591,4 +591,39 @@ public class PeriodUnitTests
                 $"Period({length}, {unit})*{multiplier} : Expected units {expectedUnit}, but got {result.Units()}");
         });
     }
+
+
+    [Test]
+    [TestCase(5, TimeUnit.Days, 5, 5)]
+    [TestCase(3, TimeUnit.Weeks, 21, 21)]
+    [TestCase(1, TimeUnit.Months, 28, 31)]
+    [TestCase(2, TimeUnit.Years, 730, 732)]
+    public void Test_DaysMinMax(int length, TimeUnit unit, int expectedMin, int expectedMax)
+    {
+        var period = new Period(length, unit);
+        var (min, max) = Period.DaysMinMax(period);
+        Assert.Multiple(() =>
+        {
+            Assert.That(min, Is.EqualTo(expectedMin),
+             $"Period({length}, {unit}) : Expected min length {expectedMin}, but got {min}");
+            Assert.That(max, Is.EqualTo(expectedMax),
+             $"Period({length}, {unit}) : Expected max length {expectedMax}, but got {max}");
+        });
+    }
+
+    [Test]
+    public void Test_DaysMinMax_ThrowsOutOfRangeException()
+    {
+        var p = new Period(5, (TimeUnit)999);
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => { var _ = Period.DaysMinMax(p); });
+        Assert.Multiple(() =>
+        {
+            Assert.That(ex!.ParamName, Is.EqualTo("period"),
+                $"Unexpected ParamName for invalid TimeUnit in {p}");
+            Assert.That(ex.ActualValue, Is.EqualTo((TimeUnit)999),
+                $"Unexpected ActualValue for invalid TimeUnit in {p}");
+            Assert.That(ex.Message, Does.Contain("Unknown time units"),
+                $"Unexpected exception message for invalid TimeUnit in {p}");
+        });
+    }
 }
