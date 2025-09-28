@@ -225,7 +225,7 @@ public class Date
     }
 
 
-    // Static Helpers (Private)
+    // Static Helpers (Private) - Used `internal`
     internal static int MonthOffSet(Month month, bool isLeap)
     {
         // No check here coz month could be 13
