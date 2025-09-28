@@ -150,7 +150,7 @@ Had crazy idea to add also Rust. Maybe it is too much ? I'll do it anyway: - Ins
       - `cargo test` to test both unit and integration tests
       - serial_conversion_works_correctly()
       - add_then_subtract_returns_original_date_correctly():
-        - This created some issues because I was using a variable that was already moved. Need to implement Add<i32> for &Date instead of just for Date --> To support borrowing and gives me the possibility of reusing the variable.
+        - This created some issues because I was using a variable that was already moved. Need to implement Add\<i32> for &Date instead of just for Date --> To support borrowing and gives me the possibility of reusing the variable.
       - Added also unit test:
         - subtract_days_by_reference_works_correctly()
         - subtract_days_value_works_correctly()

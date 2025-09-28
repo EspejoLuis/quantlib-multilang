@@ -34,6 +34,7 @@
 - Trying to get the coverage of tests in C++ using catch2:
   - Install `brew install lcov`
   - Add in the `CMakeLists.txt:`
+
   ```cmake
       if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
       message(STATUS "Building with coverage flags")
@@ -41,6 +42,7 @@
       add_link_options(--coverage)
       endif()
   ```
+
   - Configure CMake for coverage: `cmake -DCMAKE_BUILD_TYPE=Coverage ..`
   - Build: `cmake build .`
   - Run: `./date_tests`
@@ -84,7 +86,7 @@
       - `cmake --build build-coverage`
       - `cmake --build build-coverage --target coverage`
       - From build-coverage folder: `./date_tests`
-      - `open build-coverage/coverage_html/index.html `
+      - `open build-coverage/coverage_html/index.html`
     - From `code-ccp`
       - `cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug`
       - `cmake --build build --target date_tests`
@@ -136,22 +138,28 @@
 
 - Checked test: `dotnet test QuantLibCSharp.sln`.
 - Adding a coverage tool also for C#:
-  ```
+
+  ```terminal
   cd code-csharp/QuantLibCSharp.Tests
   dotnet add package coverlet.collector
   dotnet build
   ```
+
 - From test folder:
-  ```
+
+  ```terminal
   cd code-csharp/QuantLibCSharp.Tests
   dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults
   ```
+
 - From c# root:
-  ```
+
+  ```terminal
   cd code-csharp
   dotnet new tool-manifest
   dotnet tool install dotnet-reportgenerator-globaltool
   ```
+
 - Run `dotnet tool run reportgenerator -reports:"tests/QuantLibCSharp.Tests/TestResults/**/coverage.cobertura.xml"  -targetdir:"CoverageReport" -reporttypes:"Html;TextSummary"`
 - Created a bash file in [scripts](/code-csharp/scripts/)
 - Added units tests! Many. Only `GetHashCode` missing.
@@ -223,7 +231,7 @@
   - ✅ Leap year awareness
 - Used ChatGPT to create .sh scripts to run automatically coverage and tests.
 
-## 19 August 2025: Rust Date:
+## 19 August 2025: Rust Date
 
 - ✅ Add normalize()
 - ✅ Overflow when adding days, normalize
@@ -233,7 +241,7 @@
   - ✅ from serial
   - ✅ to serial
 
-## 20 August 2025: Rust Date:
+## 20 August 2025: Rust Date
 
 - Normalize is actually not implemented in Quantlibe. Deleted.
 - Implemented `days_in_month()` and `Month::fromi32()`
@@ -266,19 +274,22 @@
   - Ord --> Enables full ordering (like sorting) --> Rules out NaN cases!
   - Using asser_eq!(d1, d1, "xxx") mean Rust will try to show the value when the test fails but to do that `Debug` is needed
   - Copy: Means values of this type can be copied bit-for-bit instead of moved. For Month, that’s fine: it’s just a tiny integer under the hood (the discriminant).
-  ```
-  Effect: you can do:
+
+  ```rust
   let m1 = Month::March;
   let m2 = m1;      // this makes a *copy*, not a move
   let m3 = m1;      // ❌ still works, m1 is still valid
+  ```
+
   If Month were not Copy, the assignment would “move” it, and m1 couldn’t be used anymore.
-  ```
+
   - Clone: Gives you a .clone() method that makes an explicit copy. Normally, Clone can mean deep copies (like duplicating a vector). For a Copy type like Month, .clone() just does the same as assignment.
-  ```
-  Example:
+
+  ```rust
   let m1 = Month::April;
   let m2 = m1.clone();  // same as m1
   ```
+
   - Started `weekdays.rs` file and updating `date.rs` with:
     - `iso_date`, `short_date`, `long_date`.
     - `is_end_of_month`,`end_of_month`.
@@ -342,6 +353,7 @@
   | 13         | false              | (skipped)                   | false      | ✅ A=false case covered |
 
 - Added `normalize()` and `normalized()`. C++ code uses the below in `period.hpp`
+
   ```cpp
   inline Period Period::normalized() const {
           Period p = *this;
@@ -349,6 +361,7 @@
           return p;
       }
   ```
+
   - Small function inline in the header means it doesn’t get compiled into its own symbol in the .o file.
   - Instead, its body is copied directly into every caller at compile time.
 
@@ -381,6 +394,7 @@
 - `days_min_max`: It takes a Period (length + unit) and returns a range of possible days (min_days, max_days).This is needed because some periods (like “1 month”) don’t map to a fixed number of days.
 - Wanted to implement just `<` like C++ does. But cannot do the same in Rust. Have to implement all the `partila_ord` trait. Kinda Annoying because this means that i have to have one specific cases for Great/Less/Equal
 - Note:
+
   ```md
   Once == and < exist, you can always write the others in terms of them:
   a > b → b < a
