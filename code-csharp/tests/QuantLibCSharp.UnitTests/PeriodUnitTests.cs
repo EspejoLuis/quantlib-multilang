@@ -552,7 +552,7 @@ public class PeriodUnitTests
     [TestCase(-2, TimeUnit.Weeks, 2, -4, TimeUnit.Weeks)]
     [TestCase(-10, TimeUnit.Days, 2, -20, TimeUnit.Days)]
     [TestCase(6, TimeUnit.Months, 3, 18, TimeUnit.Months)]
-    public void Test_OperatorMultiply(
+    public void Test_OperatorMultiply_PeriodTimesMultiplier(
         int length, TimeUnit unit,
         int multiplier,
         int expectedLength, TimeUnit expectedUnit)
@@ -569,4 +569,26 @@ public class PeriodUnitTests
         });
     }
 
+    [Test]
+    [TestCase(12, TimeUnit.Months, 3, 36, TimeUnit.Months)]
+    [TestCase(1, TimeUnit.Years, 2, 2, TimeUnit.Years)]
+    [TestCase(-2, TimeUnit.Weeks, 2, -4, TimeUnit.Weeks)]
+    [TestCase(-10, TimeUnit.Days, 2, -20, TimeUnit.Days)]
+    [TestCase(6, TimeUnit.Months, 3, 18, TimeUnit.Months)]
+    public void Test_OperatorMultiply_MultiplierTimesPeriod(
+           int length, TimeUnit unit,
+           int multiplier,
+           int expectedLength, TimeUnit expectedUnit)
+    {
+        var p = new Period(length, unit);
+        var result = multiplier * p;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Length(), Is.EqualTo(expectedLength),
+                $"Period({length}, {unit})*{multiplier} : Expected length {expectedLength}, but got {result.Length()}");
+            Assert.That(result.Units(), Is.EqualTo(expectedUnit),
+                $"Period({length}, {unit})*{multiplier} : Expected units {expectedUnit}, but got {result.Units()}");
+        });
+    }
 }

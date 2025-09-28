@@ -231,7 +231,9 @@
 
 - Implemented `operator \()` and `operator-()`
 - Added unit test. Used ChatGPT and added a message to all of them so it's easier to identify the message.
-- Added `operator *()` and unit tests.
+- Added `operator *()` and unit tests for both:
+  - Period * multiplier
+  - Multiplier * Period
 
 ### TODO
 
