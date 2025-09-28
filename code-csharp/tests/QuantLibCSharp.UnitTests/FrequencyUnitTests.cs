@@ -16,7 +16,8 @@ public class FrequencyUnitTests
     public void Test_FromNthTimesPerYear(int nthTimes, Frequency expected)
     {
         var freq = FrequencyUtils.FromNthTimesPerYear(nthTimes);
-        Assert.That(freq, Is.EqualTo(expected), $"nThTimes={nthTimes}");
+        Assert.That(freq, Is.EqualTo(expected),
+            $"FromNthTimesPerYear({nthTimes}) : Expected {expected}, but got {freq}");
     }
 
     [Test]
@@ -29,7 +30,7 @@ public class FrequencyUnitTests
     public void Test_FromNthTimesPerYear_OtherFrequency(int nthTimes)
     {
         var freq = FrequencyUtils.FromNthTimesPerYear(nthTimes);
-        Assert.That(freq, Is.EqualTo(Frequency.OtherFrequency), $"nThTimes={nthTimes}");
+        Assert.That(freq, Is.EqualTo(Frequency.OtherFrequency),
+            $"FromNthTimesPerYear({nthTimes}) : Expected Frequency.OtherFrequency, but got {freq}");
     }
-
 }

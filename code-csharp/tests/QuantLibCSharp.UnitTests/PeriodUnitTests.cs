@@ -92,7 +92,7 @@ public class PeriodUnitTests
         var p = new Period(length, units);
         var result = p.ToFrequency();
         Assert.That(result, Is.EqualTo(expected),
-            $"Period({length}, {units}) → Expected Frequency={expected}, but got {result}");
+            $"Period({length}, {units}) : Expected Frequency={expected}, but got {result}");
     }
 
     [Test]
@@ -167,7 +167,7 @@ public class PeriodUnitTests
         var p = new Period(length, units);
         double result = p.Years();
         Assert.That(result, Is.EqualTo(expectedNumber).Within(1e-12),
-            $"Period({length}, {units}) → Expected Years={expectedNumber}, but got {result}");
+            $"Period({length}, {units}) : Expected Years={expectedNumber}, but got {result}");
     }
 
     [Test]
@@ -216,7 +216,7 @@ public class PeriodUnitTests
         var p = new Period(length, units);
         double result = p.Months();
         Assert.That(result, Is.EqualTo(expectedNumber).Within(1e-12),
-            $"Period({length}, {units}) → Expected Months={expectedNumber}, but got {result}");
+            $"Period({length}, {units}) : Expected Months={expectedNumber}, but got {result}");
     }
 
     [Test]
@@ -265,7 +265,7 @@ public class PeriodUnitTests
         var p = new Period(length, units);
         double result = p.Weeks();
         Assert.That(result, Is.EqualTo(expectedNumber).Within(1e-12),
-            $"Period({length}, {units}) → Expected Weeks={expectedNumber}, but got {result}");
+            $"Period({length}, {units}) : Expected Weeks={expectedNumber}, but got {result}");
     }
 
     [Test]
@@ -314,7 +314,7 @@ public class PeriodUnitTests
         var p = new Period(length, units);
         double result = p.Days();
         Assert.That(result, Is.EqualTo(expectedNumber).Within(1e-12),
-            $"Period({length}, {units}) → Expected Days={expectedNumber}, but got {result}");
+            $"Period({length}, {units}) : Expected Days={expectedNumber}, but got {result}");
     }
 
     [Test]
@@ -375,9 +375,9 @@ public class PeriodUnitTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Length(), Is.EqualTo(expectedLen),
-                $"lhs={lhs}, rhs={rhs} → Expected length {expectedLen}, but got {result.Length()}");
+                $"lhs={lhs}, rhs={rhs} : Expected length {expectedLen}, but got {result.Length()}");
             Assert.That(result.Units(), Is.EqualTo(expectedUnit),
-                $"lhs={lhs}, rhs={rhs} → Expected units {expectedUnit}, but got {result.Units()}");
+                $"lhs={lhs}, rhs={rhs} : Expected units {expectedUnit}, but got {result.Units()}");
         });
     }
 
@@ -436,7 +436,7 @@ public class PeriodUnitTests
         var negativePeriod = -period;
         Assert.That((negativePeriod.Length(), negativePeriod.Units()),
             Is.EqualTo((expectedLength, expectedUnits)),
-            $"Period({length}, {units}) → Expected negated ({expectedLength},{expectedUnits}), but got ({negativePeriod.Length()},{negativePeriod.Units()})");
+            $"Period({length}, {units}) : Expected negated ({expectedLength},{expectedUnits}), but got ({negativePeriod.Length()},{negativePeriod.Units()})");
     }
 
     [Test]
@@ -453,9 +453,9 @@ public class PeriodUnitTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Length(), Is.EqualTo(expectedLength),
-                $"Period({length}, {unit})/{divider} → Expected length {expectedLength}, but got {result.Length()}");
+                $"Period({length}, {unit})/{divider} : Expected length {expectedLength}, but got {result.Length()}");
             Assert.That(result.Units(), Is.EqualTo(expectedUnit),
-                $"Period({length}, {unit})/{divider} → Expected units {expectedUnit}, but got {result.Units()}");
+                $"Period({length}, {unit})/{divider} : Expected units {expectedUnit}, but got {result.Units()}");
         });
     }
 
@@ -521,9 +521,9 @@ public class PeriodUnitTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Length(), Is.EqualTo(expectedLen),
-                $"lhs={lhs}, rhs={rhs} → Expected length {expectedLen}, but got {result.Length()}");
+                $"lhs={lhs}, rhs={rhs} : Expected length {expectedLen}, but got {result.Length()}");
             Assert.That(result.Units(), Is.EqualTo(expectedUnit),
-                $"lhs={lhs}, rhs={rhs} → Expected units {expectedUnit}, but got {result.Units()}");
+                $"lhs={lhs}, rhs={rhs} : Expected units {expectedUnit}, but got {result.Units()}");
         });
     }
 
