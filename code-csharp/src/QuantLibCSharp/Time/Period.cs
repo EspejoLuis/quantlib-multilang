@@ -50,6 +50,7 @@ public class Period
     // Inspectors (Public) 
     public int Length() => _length;
     public TimeUnit Units() => _units;
+
     public Frequency ToFrequency()
     {
         // Period -> Frequency
@@ -195,6 +196,7 @@ public class Period
 
         return (minLength, maxLength);
     }
+
     // Operators
     // Arithmetic 
     public static Period operator +(Period lhs, Period rhs)
@@ -294,14 +296,17 @@ public class Period
         }
         return new Period(length, units);
     }
+
     public static Period operator -(Period period)
     {
         return new Period(-period._length, period._units);
     }
+
     public static Period operator -(Period lhs, Period rhs)
     {
         return lhs + (-rhs);
     }
+
     public static Period operator /(Period period, int divider)
     {
         if (divider == 0)
@@ -348,16 +353,84 @@ public class Period
         }
         return new Period(lengthDivided, units);
     }
+
     public static Period operator *(Period period, int multiplier)
     {
         return new Period(period._length * multiplier, period._units);
     }
+
     public static Period operator *(int multiplier, Period period)
     {
         return new Period(period._length * multiplier, period._units);
     }
 
+    // Comparison
+    public static bool operator <(Period lhs, Period rhs)
+    {
+        // [Easy conversion from C++]
+        // Special cases 
+        if (lhs._length == 0)
+            return rhs._length > 0;
+        if (rhs._length == 0)
+            return lhs._length < 0;
 
+        // Exact comparisons
+        if (lhs._units == rhs._units)
+            return lhs._length < rhs._length;
+        if (lhs._units == TimeUnit.Months && rhs._units == TimeUnit.Years)
+            return lhs._length < 12 * rhs._length;
+        if (lhs._units == TimeUnit.Years && rhs._units == TimeUnit.Months)
+            return 12 * lhs._length < rhs._length;
+        if (lhs._units == TimeUnit.Days && rhs._units == TimeUnit.Weeks)
+            return lhs._length < 7 * rhs._length;
+        if (lhs._units == TimeUnit.Weeks && rhs._units == TimeUnit.Days)
+            return 7 * lhs._length < rhs._length;
+
+        // inexact comparisons (handled by converting to days and using limits)
+        (int minLhs, int maxLhs) = DaysMinMax(lhs);
+        (int minRhs, int maxRhs) = DaysMinMax(rhs);
+
+        // If Max of left period is lower than Min of right period --> 
+        // Right is higher
+        if (maxLhs < minRhs)
+            return true;
+        // If Min of left period is higher than Max of right period --> 
+        // Left is higher
+        else if (minLhs > maxRhs)
+            return false;
+        else
+            throw new InvalidOperationException(
+                $"Undecidable comparison between {lhs} and {rhs}");
+    }
+
+    public static bool operator >(Period lhs, Period rhs)
+    {
+        return rhs < lhs;
+    }
+
+    public static bool operator ==(Period lhs, Period rhs)
+    {
+        // If left is null , true only if right is null
+        if (lhs is null) return rhs is null;
+        // If left not null, but right is then false
+        if (rhs is null) return false;
+        return lhs._length == rhs._length && lhs._units == rhs._units;
+    }
+
+    public static bool operator !=(Period lhs, Period rhs)
+        => !(lhs == rhs);
+    public override bool Equals(object? obj)
+        => obj is Period other && this == other;
+    public override int GetHashCode()
+        => HashCode.Combine(_length, _units);
+
+    public static bool operator <=(Period lhs, Period rhs)
+        => lhs < rhs || lhs == rhs;
+
+    public static bool operator >=(Period lhs, Period rhs)
+        => lhs > rhs || lhs == rhs;
+
+    // Override ToString!
 }
 
 

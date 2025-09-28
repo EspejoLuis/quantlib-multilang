@@ -247,6 +247,15 @@
   internal static (int, int) DaysMinMax(Period period)
   ```
 
+- Added comparisons operators
+  - `<`/`>`/`==`/`!=`/`>=`/`<=`,`EqualsTo()`,`GetHashCode()`
+  - Unit tests.
+
+> Note:
+> Equality in Quantlib does not consider normalization, meaning
+> 12M != 1Y
+> -36M != -3Y
+
 ### TODO
 
 - Write Down what done so far. Let finish review C# then before starting Python/C++ let's write down
@@ -282,3 +291,4 @@ Rust: to pondeer
 - Remove some partialOrd where not needed.
 - ❓ Thinking about having `enum month` in a proper `month.rs`
 - What about using Size (usize) instead of MonthIndex or WeekDayIndex
+- Are there test to check if comparisons taken into account for normalization or not like in C#? (search for `NORMALIZED` )
