@@ -208,7 +208,7 @@ public class Period
                             break;
                         case TimeUnit.Weeks:
                         case TimeUnit.Days:
-                            throw new ArgumentException(
+                            throw new InvalidOperationException(
                                         $"Impossible addition between {lhs} and {rhs}");
                         default:
                             throw new ArgumentOutOfRangeException(
@@ -223,7 +223,7 @@ public class Period
                             break;
                         case TimeUnit.Weeks:
                         case TimeUnit.Days:
-                            throw new ArgumentException(
+                            throw new InvalidOperationException(
                                         $"Impossible addition between {lhs} and {rhs}");
                         default:
                             throw new ArgumentOutOfRangeException(
@@ -239,7 +239,7 @@ public class Period
                             break;
                         case TimeUnit.Years:
                         case TimeUnit.Months:
-                            throw new ArgumentException(
+                            throw new InvalidOperationException(
                                         $"Impossible addition between {lhs} and {rhs}");
                         default:
                             throw new ArgumentOutOfRangeException(
@@ -254,7 +254,7 @@ public class Period
                             break;
                         case TimeUnit.Years:
                         case TimeUnit.Months:
-                            throw new ArgumentException(
+                            throw new InvalidOperationException(
                                         $"Impossible addition between {lhs} and {rhs}");
                         default:
                             throw new ArgumentOutOfRangeException(
@@ -272,8 +272,61 @@ public class Period
     {
         return new Period(-period._length, period._units);
     }
-    // Comparison
+    public static Period operator -(Period lhs, Period rhs)
+    {
+        return lhs + (-rhs);
+    }
+    public static Period operator /(Period period, int divider)
+    {
+        if (divider == 0)
+        {
+            throw new
+                DivideByZeroException("Period cannot be divided by zero");
+        }
 
+        int length = period._length;
+        TimeUnit units = period._units;
+        int lengthDivided;
+
+        if (length % divider == 0)
+        {
+            lengthDivided = length / divider;
+        }
+        else
+        {
+            switch (units)
+            {
+                case TimeUnit.Years:
+                    units = TimeUnit.Months;
+                    length *= 12;
+                    break;
+                case TimeUnit.Weeks:
+                    units = TimeUnit.Days;
+                    length *= 7;
+                    break;
+                case TimeUnit.Months:
+                case TimeUnit.Days:
+                    break;
+                /* Days, Months — no conversion attempted */ //Should i put a log ?
+                default:
+                    throw new ArgumentOutOfRangeException(
+                                                   nameof(period), period._units, "Unknown time units");
+
+            }
+            if (length % divider != 0)
+            {
+                throw new
+                    InvalidOperationException($"{period} cannot be divided by {divider}");
+            }
+            lengthDivided = length / divider;
+        }
+        return new Period(lengthDivided, units);
+    }
+
+    // Comparison
 }
+
+
+
 
 

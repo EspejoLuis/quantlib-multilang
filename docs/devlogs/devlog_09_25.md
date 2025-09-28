@@ -227,6 +227,11 @@
 - Added unit tests for `operator+()` and `operator -(Period period)`.
 - Implemented unary `operator -(Period period)`
 
+## 28 September 2025 - Sunday - Period C\#
+
+- Implemented `operator \()` and `operator-()`
+- Added unit test. Used ChatGPT and added a message to all of them so it's easier to identify the message.
+
 ### TODO
 
 - C#: review everything according to new strategy:
