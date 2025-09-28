@@ -43,18 +43,39 @@ public class DateUnitTests
     }
 
     [Test]
-    [TestCase(1, Month.January, 1900)]
-    [TestCase(1, Month.January, 2200)]
-    [TestCase(1, (Month)0, 2000)]
-    [TestCase(1, (Month)13, 2000)]
-    [TestCase(30, Month.February, 2001)]
-    [TestCase(32, Month.January, 2001)]
-    [TestCase(0, Month.January, 2001)]
-    public void Test_Constructor_DayMonthYear_ThrowsException(int day, Month month, int year)
+    [TestCase(1, Month.January, 1900,
+        "year", 1900, "Year out of range [1901,2199]")]
+    [TestCase(1, Month.January, 2200,
+        "year", 2200, "Year out of range [1901,2199]")]
+
+    [TestCase(1, (Month)0, 2000,
+        "month", (Month)0, "Month out of January-December range i.e. not in [1,12]")]
+    [TestCase(1, (Month)13, 2000,
+        "month", (Month)13, "Month out of January-December range i.e. not in [1,12]")]
+
+    [TestCase(30, Month.February, 2001,
+        "day", 30, "Day 30 outside month February")]
+    [TestCase(32, Month.January, 2001,
+        "day", 32, "Day 32 outside month January")]
+    [TestCase(0, Month.January, 2001,
+        "day", 0, "Day 0 outside month January")]
+    public void Test_Constructor_DayMonthYear_ThrowsException(
+        int day, Month month, int year,
+        string expectedParamName, object expectedValue, string expectedMessageFragment)
     {
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() => new Date(day, month, year));
-        Assert.That(ex!.Message, Does.Contain("out of range"),
-            $"Expected exception message for invalid Date({day},{month},{year})");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(ex!.ParamName, Is.EqualTo(expectedParamName),
+                $"For Date({day},{month},{year}), expected ParamName='{expectedParamName}' but got '{ex.ParamName}'");
+
+            Assert.That(ex.ActualValue, Is.EqualTo(expectedValue),
+                $"For Date({day},{month},{year}), expected ActualValue={expectedValue} but got {ex.ActualValue}");
+
+            Assert.That(ex.Message, Does.Contain(expectedMessageFragment),
+                $"For Date({day},{month},{year}), expected message to contain '{expectedMessageFragment}' but got '{ex.Message}'");
+        });
     }
 
     [Test]

@@ -186,11 +186,13 @@ public class Date
     {
         // Year check
         if (year < 1901 || year > 2199)
-            throw new ArgumentOutOfRangeException(nameof(year), "Year out of range [1901,2199]");
+            throw new ArgumentOutOfRangeException(nameof(year), year,
+            "Year out of range [1901,2199]");
 
         // Month check
         if ((int)month < 1 || (int)month > 12)
-            throw new ArgumentOutOfRangeException(nameof(month), "Month out of January-December range i.e. not in [1,12]");
+            throw new ArgumentOutOfRangeException(nameof(month), month,
+            "Month out of January-December range i.e. not in [1,12]");
 
         // Leap year
         bool isLeap = IsLeap(year);
