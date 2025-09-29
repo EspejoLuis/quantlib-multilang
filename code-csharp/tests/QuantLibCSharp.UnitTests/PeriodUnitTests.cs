@@ -978,7 +978,8 @@ public class PeriodUnitTests
                 string expectedShort)
     {
         var p = new Period(length, unit);
-        Assert.That(p.ToString(), Is.EqualTo(expectedShort));
+        Assert.That(p.ToString(), Is.EqualTo(expectedShort),
+        $"{p.ToString()} expected to be equal to {expectedShort}");
     }
 
     [Test]
@@ -995,7 +996,8 @@ public class PeriodUnitTests
                 string expectedShort)
     {
         var p = new Period(length, unit);
-        Assert.That(PeriodIO.ShortFormat(p), Is.EqualTo(expectedShort));
+        Assert.That(PeriodIO.ShortFormat(p), Is.EqualTo(expectedShort),
+        $"{PeriodIO.ShortFormat(p)} expected to be equal to {expectedShort}");
     }
 
     [Test]
@@ -1012,7 +1014,8 @@ public class PeriodUnitTests
                string expectedLong)
     {
         var p = new Period(length, unit);
-        Assert.That(PeriodIO.LongFormat(p), Is.EqualTo(expectedLong));
+        Assert.That(PeriodIO.LongFormat(p), Is.EqualTo(expectedLong),
+        $"{PeriodIO.LongFormat(p)} expected to be equal to {expectedLong}");
     }
 
     [Test]
