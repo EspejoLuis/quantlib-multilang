@@ -258,11 +258,10 @@
 
 ## 29 September 2025 - Monday - Period C\#
 
-- Added `ToString()`:
-  - Created private static string `LongFormatter()` and `ShortFormatter()`.
-  - Ovverridden `ToString`.
-  - Create internal static string `LongFormat` and `ShortFormat` that can access respectively `LongFormatter()` and `ShortFormatter()`.
-  - Created public static class `PeriodIO()` that access the internal static string`LongFormat` and `ShortFormat`.
+- String format for Period:
+  - Created private static string `LongFormatter()` and `ShortFormatter()`. This has been put in specific `Detail.cs`.
+  - Ovverridden `ToString()` in `Period()`.
+  - Created public static class `PeriodIO()` that access the internal static string`LongFormat` and `ShortFormat`. This has been put in specific `IO.cs`.
 - Unit tests
 
 ### TODO
