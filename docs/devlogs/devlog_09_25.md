@@ -256,6 +256,15 @@
 > 12M != 1Y
 > -36M != -3Y
 
+## 29 September 2025 - Monday - Period C\#
+
+- Added `ToString()`:
+  - Created private static string `LongFormatter()` and `ShortFormatter()`.
+  - Ovverridden `ToString`.
+  - Create internal static string `LongFormat` and `ShortFormat` that can access respectively `LongFormatter()` and `ShortFormatter()`.
+  - Created public static class `PeriodIO()` that access the internal static string`LongFormat` and `ShortFormat`.
+- Unit tests
+
 ### TODO
 
 - Write Down what done so far. Let finish review C# then before starting Python/C++ let's write down

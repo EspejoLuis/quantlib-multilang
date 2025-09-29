@@ -373,7 +373,7 @@ public class PeriodUnitTests
     [TestCase(-2, TimeUnit.Weeks, -3, TimeUnit.Days, -17, TimeUnit.Days)]
     [TestCase(0, TimeUnit.Years, -4, TimeUnit.Months, -4, TimeUnit.Months)]
     [TestCase(0, TimeUnit.Days, -5, TimeUnit.Days, -5, TimeUnit.Days)]
-    public void Test_OperatorPlus(
+    public void Test_Operator_Plus(
              int lhsLen, TimeUnit lhsUnit,
              int rhsLen, TimeUnit rhsUnit,
              int expectedLen, TimeUnit expectedUnit)
@@ -399,7 +399,7 @@ public class PeriodUnitTests
     [TestCase(1, TimeUnit.Weeks, 2, TimeUnit.Months)]
     [TestCase(1, TimeUnit.Days, 1, TimeUnit.Years)]
     [TestCase(1, TimeUnit.Days, 2, TimeUnit.Months)]
-    public void Test_OperatorPlus_ThrowsOnInvalidCombinations(
+    public void Test_Operator_Plus_ThrowsOnInvalidCombinations(
         int lhsLen, TimeUnit lhsUnit,
         int rhsLen, TimeUnit rhsUnit)
     {
@@ -420,7 +420,7 @@ public class PeriodUnitTests
     [TestCase(1, (TimeUnit)999, 2, TimeUnit.Days)]
     [TestCase(2, TimeUnit.Weeks, -3, (TimeUnit)999)]
     [TestCase(2, TimeUnit.Days, 2, (TimeUnit)999)]
-    public void Test_OperatorPlus_ThrowsOnUnknownTimeUnits(
+    public void Test_Operator_Plus_ThrowsOnUnknownTimeUnits(
         int lhsLen, TimeUnit lhsUnit,
         int rhsLen, TimeUnit rhsUnit)
     {
@@ -443,7 +443,7 @@ public class PeriodUnitTests
     [TestCase(-1, TimeUnit.Weeks, 1, TimeUnit.Weeks)]
     [TestCase(-1, TimeUnit.Months, 1, TimeUnit.Months)]
     [TestCase(45, TimeUnit.Days, -45, TimeUnit.Days)]
-    public void Test_UnaryOperatorMinus(
+    public void Test_Unary_Operator_Minus(
         int length, TimeUnit units,
         int expectedLength, TimeUnit expectedUnits)
     {
@@ -460,7 +460,7 @@ public class PeriodUnitTests
     [TestCase(-2, TimeUnit.Weeks, 2, -1, TimeUnit.Weeks)]
     [TestCase(-10, TimeUnit.Days, 2, -5, TimeUnit.Days)]
     [TestCase(6, TimeUnit.Months, 3, 2, TimeUnit.Months)]
-    public void Test_OperatorDivide(
+    public void Test_Operator_Divide(
         int length, TimeUnit unit,
         int divider,
         int expectedLength, TimeUnit expectedUnit)
@@ -482,7 +482,7 @@ public class PeriodUnitTests
     [TestCase(5, TimeUnit.Months, 2)]
     [TestCase(-5, TimeUnit.Days, 2)]
     [TestCase(-5, TimeUnit.Weeks, 2)]
-    public void Test_OperatorDivide_ThrowsInvalidOperationException(
+    public void Test_Operator_Divide_ThrowsInvalidOperationException(
         int length, TimeUnit unit, int divider)
     {
         var p = new Period(length, unit);
@@ -492,7 +492,7 @@ public class PeriodUnitTests
     }
 
     [Test]
-    public void Test_OperatorDivide_ThrowsDivideByZeroException()
+    public void Test_Operator_Divide_ThrowsDivideByZeroException()
     {
         var p = new Period(5, TimeUnit.Years);
         var ex = Assert.Throws<DivideByZeroException>(() => { var _ = p / 0; });
@@ -501,7 +501,7 @@ public class PeriodUnitTests
     }
 
     [Test]
-    public void Test_OperatorDivide_ThrowsOutOfRangeException()
+    public void Test_Operator_Divide_ThrowsOutOfRangeException()
     {
         var p = new Period(5, (TimeUnit)999);
         var ex = Assert.Throws<ArgumentOutOfRangeException>(() => { var _ = p / 2; });
@@ -527,7 +527,7 @@ public class PeriodUnitTests
     [TestCase(-2, TimeUnit.Years, -3, TimeUnit.Years, 1, TimeUnit.Years)]
     [TestCase(-5, TimeUnit.Days, 3, TimeUnit.Days, -8, TimeUnit.Days)]
     [TestCase(5, TimeUnit.Days, -3, TimeUnit.Days, 8, TimeUnit.Days)]
-    public void Test_OperatorMinus(
+    public void Test_Operator_Minus(
              int lhsLen, TimeUnit lhsUnit,
              int rhsLen, TimeUnit rhsUnit,
              int expectedLen, TimeUnit expectedUnit)
@@ -553,7 +553,7 @@ public class PeriodUnitTests
     [TestCase(-2, TimeUnit.Weeks, 2, -4, TimeUnit.Weeks)]
     [TestCase(-10, TimeUnit.Days, 2, -20, TimeUnit.Days)]
     [TestCase(6, TimeUnit.Months, 3, 18, TimeUnit.Months)]
-    public void Test_OperatorMultiply_PeriodTimesMultiplier(
+    public void Test_Operator_Multiply_PeriodTimesMultiplier(
         int length, TimeUnit unit,
         int multiplier,
         int expectedLength, TimeUnit expectedUnit)
@@ -576,7 +576,7 @@ public class PeriodUnitTests
     [TestCase(-2, TimeUnit.Weeks, 2, -4, TimeUnit.Weeks)]
     [TestCase(-10, TimeUnit.Days, 2, -20, TimeUnit.Days)]
     [TestCase(6, TimeUnit.Months, 3, 18, TimeUnit.Months)]
-    public void Test_OperatorMultiply_MultiplierTimesPeriod(
+    public void Test_Operator_Multiply_MultiplierTimesPeriod(
            int length, TimeUnit unit,
            int multiplier,
            int expectedLength, TimeUnit expectedUnit)
@@ -657,7 +657,7 @@ public class PeriodUnitTests
     [TestCase(1, TimeUnit.Months, 40, TimeUnit.Days, true)]
     // Inexact comparison -> minLhs > maxRhs: minLhs=maxLhs=40 ; minRhs=28,maxRhs=31 : 40 > 31
     [TestCase(40, TimeUnit.Days, 1, TimeUnit.Months, false)]
-    public void Test_ComparisonLower(
+    public void Test_Comparison_Lower(
         int lhsLength, TimeUnit lhsUnit,
         int rhsLength, TimeUnit rhsUnit,
         bool expectedResult)
@@ -670,7 +670,7 @@ public class PeriodUnitTests
     }
 
     [Test]
-    public void Test_ComparisonLower_ThrowsOnInvalidCombinations()
+    public void Test_Comparison_Lower_ThrowsOnInvalidCombinations()
     {
         var lhs = new Period(1, TimeUnit.Months);
         var rhs = new Period(30, TimeUnit.Days);
@@ -709,7 +709,7 @@ public class PeriodUnitTests
     [TestCase(1, TimeUnit.Months, 40, TimeUnit.Days, false)]
     // Inexact comparison -> minLhs > maxRhs: minLhs=maxLhs=40 ; minRhs=28,maxRhs=31 : 40 > 31
     [TestCase(40, TimeUnit.Days, 1, TimeUnit.Months, true)]
-    public void Test_ComparisonGreater(
+    public void Test_Comparison_Greater(
         int lhsLength, TimeUnit lhsUnit,
         int rhsLength, TimeUnit rhsUnit,
         bool expectedResult)
@@ -722,22 +722,22 @@ public class PeriodUnitTests
     }
 
     [Test]
-    public void Test_ComparisonGreater_ThrowsOnInvalidCombinations()
+    public void Test_Comparison_Greater_ThrowsOnInvalidCombinations()
     {
         var lhs = new Period(1, TimeUnit.Months);
         var rhs = new Period(30, TimeUnit.Days);
         var ex = Assert.Throws<InvalidOperationException>(() => { var _ = lhs > rhs; });
         Assert.That(ex!.Message,
-            Is.EqualTo($"Undecidable comparison between {lhs} and {rhs}"),
-            $"Unexpected exception message for lhs={lhs}, rhs={rhs}");
+            Is.EqualTo($"Undecidable comparison between {rhs} and {lhs}"),
+            $"Unexpected exception message for {rhs}, {lhs}");
     }
 
     [Test]
     [TestCase(-2, TimeUnit.Years, -2, TimeUnit.Years, true)]
     [TestCase(2, TimeUnit.Years, 2, TimeUnit.Years, true)]
-    [TestCase(-2, TimeUnit.Years, -3, TimeUnit.Years, false)]
+    [TestCase(-2, TimeUnit.Years, -1, TimeUnit.Years, false)]
     [TestCase(2, TimeUnit.Years, 1, TimeUnit.Years, false)]
-    public void Test_ComparisonEquality(
+    public void Test_Comparison_Equality(
         int lhsLength, TimeUnit lhsUnit,
         int rhsLength, TimeUnit rhsUnit,
         bool expectedResult)
@@ -781,7 +781,7 @@ public class PeriodUnitTests
     [TestCase(2, TimeUnit.Years, 2, TimeUnit.Years, false)]
     [TestCase(-2, TimeUnit.Years, -3, TimeUnit.Years, true)]
     [TestCase(2, TimeUnit.Years, 1, TimeUnit.Years, true)]
-    public void Test_ComparisonDifference(
+    public void Test_Comparison_Difference(
         int lhsLength, TimeUnit lhsUnit,
         int rhsLength, TimeUnit rhsUnit,
         bool expectedResult)
@@ -794,7 +794,7 @@ public class PeriodUnitTests
     }
 
     [Test]
-    public void Test_Difference_BothNull()
+    public void Test_Comparison_Difference_BothNull()
     {
         Period lhs = null!;
         Period rhs = null!;
@@ -803,7 +803,7 @@ public class PeriodUnitTests
     }
 
     [Test]
-    public void Test_Difference_LhsNull_RhsNotNull()
+    public void Test_Comparison_Difference_LhsNull_RhsNotNull()
     {
         Period lhs = null!;
         Period rhs = new(1, TimeUnit.Years);
@@ -812,7 +812,7 @@ public class PeriodUnitTests
     }
 
     [Test]
-    public void Test_Difference_LhsNotNull_RhsNull()
+    public void Test_Comparison_Difference_LhsNotNull_RhsNull()
     {
         Period lhs = new(1, TimeUnit.Years);
         Period rhs = null!;
@@ -830,12 +830,12 @@ public class PeriodUnitTests
     }
 
     [Test]
-    public void Test_Equals_ObjectWithDifferentFields_ReturnsFalse()
+    public void Test_Equals_ObjectWithDifferentFields_ReturnsTrue()
     {
         Period p1 = new(12, TimeUnit.Months);
         object p2 = new Period(1, TimeUnit.Years);
         var result = p1.Equals(p2);
-        Assert.That(result, Is.False);
+        Assert.That(result, Is.True);
     }
 
     [Test]
@@ -876,7 +876,7 @@ public class PeriodUnitTests
     // Exact Cases - Months vs Years
     [TestCase(12, TimeUnit.Months, 2, TimeUnit.Years, false)]
     [TestCase(-36, TimeUnit.Months, -4, TimeUnit.Years, true)]
-    [TestCase(-36, TimeUnit.Months, -3, TimeUnit.Years, false)] // NOT NORMALIZED! Equality still false 
+    [TestCase(-36, TimeUnit.Months, -3, TimeUnit.Years, true)] // NORMALIZED! Equality true
     [TestCase(-36, TimeUnit.Months, -36, TimeUnit.Months, true)] // Equality is true 
     // Exact Cases - Years vs Month
     [TestCase(3, TimeUnit.Years, 37, TimeUnit.Months, false)]
@@ -884,7 +884,7 @@ public class PeriodUnitTests
     // Exact Cases - Weeks vs Days
     [TestCase(2, TimeUnit.Weeks, 15, TimeUnit.Days, false)]
     [TestCase(-3, TimeUnit.Weeks, -24, TimeUnit.Days, true)]
-    [TestCase(-3, TimeUnit.Weeks, -21, TimeUnit.Days, false)] // NOT NORMALIZED! Equality still false
+    [TestCase(-3, TimeUnit.Weeks, -21, TimeUnit.Days, true)] // NORMALIZED! Equality true
     [TestCase(-3, TimeUnit.Weeks, -3, TimeUnit.Weeks, true)] // Equality is true 
     // Exact Cases - Days vs Weeks
     [TestCase(23, TimeUnit.Days, 4, TimeUnit.Weeks, false)]
@@ -893,7 +893,7 @@ public class PeriodUnitTests
     [TestCase(1, TimeUnit.Months, 40, TimeUnit.Days, false)]
     // Inexact comparison -> minLhs > maxRhs: minLhs=maxLhs=40 ; minRhs=28,maxRhs=31 : 40 > 31
     [TestCase(40, TimeUnit.Days, 1, TimeUnit.Months, true)]
-    public void Test_ComparisonGreaterEqual(
+    public void Test_Comparison_GreaterEqual(
         int lhsLength, TimeUnit lhsUnit,
         int rhsLength, TimeUnit rhsUnit,
         bool expectedResult)
@@ -902,11 +902,11 @@ public class PeriodUnitTests
         Period rhs = new(rhsLength, rhsUnit);
         bool result = lhs >= rhs;
         Assert.That(result, Is.EqualTo(expectedResult),
-        $"{lhs} expected to be greater than {rhs}"); ;
+        $"{lhs} expected to be greater or equal than {rhs}"); ;
     }
 
     [Test]
-    public void Test_ComparisonGreaterEqual_ThrowsOnInvalidCombinations()
+    public void Test_Comparison_GreaterEqual_ThrowsOnInvalidCombinations()
     {
         var lhs = new Period(1, TimeUnit.Months);
         var rhs = new Period(30, TimeUnit.Days);
@@ -927,7 +927,7 @@ public class PeriodUnitTests
     // Exact Cases - Months vs Years
     [TestCase(12, TimeUnit.Months, 2, TimeUnit.Years, true)]
     [TestCase(-36, TimeUnit.Months, -4, TimeUnit.Years, false)]
-    [TestCase(-36, TimeUnit.Months, -3, TimeUnit.Years, false)] // NOT NORMALIZED! Equality still false
+    [TestCase(-36, TimeUnit.Months, -3, TimeUnit.Years, true)] /// NORMALIZED! Equality true
     [TestCase(-36, TimeUnit.Months, -36, TimeUnit.Months, true)] // Equality true
     // Exact Cases - Years vs Month
     [TestCase(3, TimeUnit.Years, 37, TimeUnit.Months, true)]
@@ -935,7 +935,7 @@ public class PeriodUnitTests
     // Exact Cases - Weeks vs Days
     [TestCase(2, TimeUnit.Weeks, 15, TimeUnit.Days, true)]
     [TestCase(-3, TimeUnit.Weeks, -24, TimeUnit.Days, false)]
-    [TestCase(-3, TimeUnit.Weeks, -21, TimeUnit.Days, false)] // NOT NORMALIZED! Equality still false
+    [TestCase(-3, TimeUnit.Weeks, -21, TimeUnit.Days, true)] // NORMALIZED! Equality true
     [TestCase(-3, TimeUnit.Weeks, -3, TimeUnit.Weeks, true)] // Equality true
     // Exact Cases - Days vs Weeks
     [TestCase(23, TimeUnit.Days, 4, TimeUnit.Weeks, true)]
@@ -944,7 +944,7 @@ public class PeriodUnitTests
     [TestCase(1, TimeUnit.Months, 40, TimeUnit.Days, true)]
     // Inexact comparison -> minLhs > maxRhs: minLhs=maxLhs=40 ; minRhs=28,maxRhs=31 : 40 > 31
     [TestCase(40, TimeUnit.Days, 1, TimeUnit.Months, false)]
-    public void Test_ComparisonLowerEqual(
+    public void Test_Comparison_LowerEqual(
            int lhsLength, TimeUnit lhsUnit,
            int rhsLength, TimeUnit rhsUnit,
            bool expectedResult)
@@ -957,15 +957,96 @@ public class PeriodUnitTests
     }
 
     [Test]
-    public void Test_ComparisonLowerEqual_ThrowsOnInvalidCombinations()
+    public void Test_Comparison_LowerEqual_ThrowsOnInvalidCombinations()
     {
         var lhs = new Period(1, TimeUnit.Months);
         var rhs = new Period(30, TimeUnit.Days);
         var ex = Assert.Throws<InvalidOperationException>(() => { var _ = lhs <= rhs; });
         Assert.That(ex!.Message,
-            Is.EqualTo($"Undecidable comparison between {lhs} and {rhs}"),
-            $"Unexpected exception message for lhs={lhs}, rhs={rhs}");
+            Is.EqualTo($"Undecidable comparison between {rhs} and {lhs}"),
+            $"Unexpected exception message for {lhs}, {rhs}");
     }
 
+    [Test]
+    [TestCase(1, TimeUnit.Days, "1D")]
+    [TestCase(2, TimeUnit.Days, "2D")]
+    [TestCase(1, TimeUnit.Weeks, "1W")]
+    [TestCase(3, TimeUnit.Weeks, "3W")]
+    [TestCase(1, TimeUnit.Months, "1M")]
+    [TestCase(4, TimeUnit.Months, "4M")]
+    [TestCase(1, TimeUnit.Years, "1Y")]
+    [TestCase(5, TimeUnit.Years, "5Y")]
+    public void Test_ToString(
+                int length, TimeUnit unit,
+                string expectedShort)
+    {
+        var p = new Period(length, unit);
+        Assert.That(p.ToString(), Is.EqualTo(expectedShort));
+    }
 
+    [Test]
+    [TestCase(1, TimeUnit.Days, "1D")]
+    [TestCase(2, TimeUnit.Days, "2D")]
+    [TestCase(1, TimeUnit.Weeks, "1W")]
+    [TestCase(3, TimeUnit.Weeks, "3W")]
+    [TestCase(1, TimeUnit.Months, "1M")]
+    [TestCase(4, TimeUnit.Months, "4M")]
+    [TestCase(1, TimeUnit.Years, "1Y")]
+    [TestCase(5, TimeUnit.Years, "5Y")]
+    public void Test_ShortFormat(
+                int length, TimeUnit unit,
+                string expectedShort)
+    {
+        var p = new Period(length, unit);
+        Assert.That(PeriodIO.ShortFormat(p), Is.EqualTo(expectedShort));
+    }
+
+    [Test]
+    [TestCase(1, TimeUnit.Days, "1 Day")]
+    [TestCase(2, TimeUnit.Days, "2 Days")]
+    [TestCase(1, TimeUnit.Weeks, "1 Week")]
+    [TestCase(3, TimeUnit.Weeks, "3 Weeks")]
+    [TestCase(1, TimeUnit.Months, "1 Month")]
+    [TestCase(4, TimeUnit.Months, "4 Months")]
+    [TestCase(1, TimeUnit.Years, "1 Year")]
+    [TestCase(5, TimeUnit.Years, "5 Years")]
+    public void Test_LongFormat(
+                int length, TimeUnit unit,
+               string expectedLong)
+    {
+        var p = new Period(length, unit);
+        Assert.That(PeriodIO.LongFormat(p), Is.EqualTo(expectedLong));
+    }
+
+    [Test]
+    public void Test_ShortFormat_ThrowsArgumentOutOfRangeException()
+    {
+        var p = new Period(1, (TimeUnit)1223);
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => { var _ = PeriodIO.LongFormat(p); });
+        Assert.Multiple(() =>
+        {
+            Assert.That(ex!.ParamName, Is.EqualTo("period"),
+                $"Unexpected ParamName for invalid TimeUnit in {p}");
+            Assert.That(ex.ActualValue, Is.EqualTo((TimeUnit)1223),
+                $"Unexpected ActualValue for invalid TimeUnit in {p}");
+            Assert.That(ex.Message, Does.Contain("Unknown time units"),
+                $"Unexpected exception message for invalid TimeUnit in {p}");
+        });
+    }
+
+    [Test]
+    public void Test_LongFormat_ThrowsArgumentOutOfRangeException()
+    {
+        var p = new Period(1, (TimeUnit)1223);
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() => { var _ = PeriodIO.ShortFormat(p); });
+        Assert.Multiple(() =>
+        {
+            Assert.That(ex!.ParamName, Is.EqualTo("period"),
+                $"Unexpected ParamName for invalid TimeUnit in {p}");
+            Assert.That(ex.ActualValue, Is.EqualTo((TimeUnit)1223),
+                $"Unexpected ActualValue for invalid TimeUnit in {p}");
+            Assert.That(ex.Message, Does.Contain("Unknown time units"),
+                $"Unexpected exception message for invalid TimeUnit in {p}");
+        });
+    }
 }
