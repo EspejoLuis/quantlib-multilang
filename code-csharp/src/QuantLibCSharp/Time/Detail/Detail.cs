@@ -32,7 +32,66 @@ internal static class PeriodFormatter
                 "Unknown time units")
         };
     }
+}
 
+internal static class WeekdayFormatter
+{
+    internal static string LongFormatter(Weekday weekday)
+    {
+        return weekday switch
+        {
+            Weekday.Monday => "Monday",
+            Weekday.Tuesday => "Tuesday",
+            Weekday.Wednesday => "Wednesday",
+            Weekday.Thursday => "Thursday",
+            Weekday.Friday => "Friday",
+            Weekday.Saturday => "Saturday",
+            Weekday.Sunday => "Sunday",
+            _ => throw new ArgumentOutOfRangeException(
+                            nameof(weekday),
+                            weekday,
+                            "Unknown weekday")
+
+        };
+    }
+
+    internal static string ShortFormatter(Weekday weekday)
+    {
+        return weekday switch
+        {
+            Weekday.Monday => "Mon",
+            Weekday.Tuesday => "Tue",
+            Weekday.Wednesday => "Wed",
+            Weekday.Thursday => "Thu",
+            Weekday.Friday => "Fri",
+            Weekday.Saturday => "Sat",
+            Weekday.Sunday => "Sun",
+            _ => throw new ArgumentOutOfRangeException(
+                            nameof(weekday),
+                            weekday,
+                            "Unknown weekday")
+
+        };
+    }
+
+    internal static string ShortestFormatter(Weekday weekday)
+    {
+        return weekday switch
+        {
+            Weekday.Monday => "Mo",
+            Weekday.Tuesday => "Tu",
+            Weekday.Wednesday => "We",
+            Weekday.Thursday => "Th",
+            Weekday.Friday => "Fr",
+            Weekday.Saturday => "Sa",
+            Weekday.Sunday => "Su",
+            _ => throw new ArgumentOutOfRangeException(
+                            nameof(weekday),
+                            weekday,
+                            "Unknown weekday")
+
+        };
+    }
 }
 
 

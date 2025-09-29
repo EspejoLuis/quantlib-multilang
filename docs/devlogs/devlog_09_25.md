@@ -264,6 +264,8 @@
   - Created public static class `PeriodIO()` that access the internal static string`LongFormat` and `ShortFormat`. This has been put in specific `IO.cs`.
 - Unit tests
 
+- Implementing `Weekday()` and unit test for `LongFormat`, `ShortFormat`, `ShortestFormat`.
+
 ### TODO
 
 - Write Down what done so far. Let finish review C# then before starting Python/C++ let's write down
