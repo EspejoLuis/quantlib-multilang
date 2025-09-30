@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.CompilerServices;
 using QuantLibCSharp.Time.IO;
 
@@ -428,6 +427,8 @@ namespace QuantLibCSharp.Time
 
         public static bool operator >=(Period lhs, Period rhs)
             => !(lhs < rhs);
+
+        // Format
         public override string ToString()
         {
             return PeriodIO.ShortFormat(this).ToString();
