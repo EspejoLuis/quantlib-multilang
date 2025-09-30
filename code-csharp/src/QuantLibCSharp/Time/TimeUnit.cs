@@ -2,7 +2,10 @@ namespace QuantLibCSharp.Time;
 
 public enum TimeUnit
 {
-    Days, Weeks, Months, Years
+    Days,
+    Weeks,
+    Months,
+    Years
 }
 
 /*
