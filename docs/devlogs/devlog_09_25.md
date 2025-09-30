@@ -266,6 +266,10 @@
 
 - Implementing `Weekday()` and unit test for `LongFormat`, `ShortFormat`, `ShortestFormat`.
 
+## 30 September 2025 - Tuesday - Date C\#
+
+- Implemented `Weekday()`
+
 ### TODO
 
 - Write Down what done so far. Let finish review C# then before starting Python/C++ let's write down

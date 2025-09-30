@@ -359,4 +359,21 @@ public class DateUnitTests
                 $"Serial {serial} : Expected EndOfMonth to be true, but got false");
         });
     }
+
+    [Test]
+    [TestCase(367, Weekday.Tuesday)]
+    [TestCase(368, Weekday.Wednesday)]
+    [TestCase(369, Weekday.Thursday)]
+    [TestCase(370, Weekday.Friday)]
+    [TestCase(371, Weekday.Saturday)]
+    [TestCase(372, Weekday.Sunday)]
+    [TestCase(373, Weekday.Monday)]
+    [TestCase(379, Weekday.Sunday)]
+    [TestCase(380, Weekday.Monday)]
+    public void Test_Weekday_PositiveSerials(int serial, Weekday expected)
+    {
+        var d = new Date(serial);
+        Assert.That(d.Weekday(), Is.EqualTo(expected),
+            $"Serial {serial} expected {expected} but got {d.Weekday()}");
+    }
 }

@@ -328,5 +328,9 @@ public class Date
     {
         return new Date(MonthLength(Month(), IsLeap(Year())), Month(), Year());
     }
-
+    public Weekday Weekday()
+    {
+        int dayOfTheWeek = _serialNumber % 7;
+        return (Weekday)(dayOfTheWeek == 0 ? 7 : dayOfTheWeek);
+    }
 }
