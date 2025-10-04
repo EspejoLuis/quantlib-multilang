@@ -1,5 +1,3 @@
-using System.Runtime;
-using NUnit.Framework;
 using QuantLibCSharp.Time;
 
 namespace QuantLibCSharp.UnitTests;
@@ -25,7 +23,9 @@ public class DateUnitTests
     [TestCase(15, Month.July, 2024, 45488)]
     [TestCase(31, Month.December, 2000, 36891)]
     [TestCase(31, Month.December, 2001, 37256)]
-    public void Test_Constructor_DayMonthYear(int day, Month month, int year, int expectedSerial)
+    public void Test_Constructor_DayMonthYear(
+        int day, Month month, int year,
+        int expectedSerial)
     {
         var d = new Date(day, month, year);
 
@@ -370,10 +370,44 @@ public class DateUnitTests
     [TestCase(373, Weekday.Monday)]
     [TestCase(379, Weekday.Sunday)]
     [TestCase(380, Weekday.Monday)]
-    public void Test_Weekday_PositiveSerials(int serial, Weekday expected)
+    public void Test_Weekday(int serial, Weekday expected)
     {
         var d = new Date(serial);
         Assert.That(d.Weekday(), Is.EqualTo(expected),
             $"Serial {serial} expected {expected} but got {d.Weekday()}");
     }
+
+
+    [Test]
+    [TestCase(367, Weekday.Tuesday, 367)]   // same day
+    [TestCase(367, Weekday.Monday, 373)]    // forward into next week
+    [TestCase(367, Weekday.Wednesday, 368)] // forward within same week
+    [TestCase(368, Weekday.Wednesday, 368)] // same day
+    [TestCase(368, Weekday.Friday, 370)]    // forward within same week
+    [TestCase(368, Weekday.Monday, 373)]    // forward into next week
+    [TestCase(372, Weekday.Sunday, 372)]    // same day
+    [TestCase(372, Weekday.Tuesday, 374)]   // forward into next week
+    public void Test_NextWeekday(int serial, Weekday target, int expectedSerial)
+    {
+        var d = new Date(serial);
+        var next = d.NextWeekday(target);
+        Assert.That(next.SerialNumber(), Is.EqualTo(expectedSerial),
+            $"From {d.Weekday()} (serial {serial}) expected next {target} at serial {expectedSerial}, but got {next.SerialNumber()} ({next.Weekday()})");
+    }
+
+    [Test]
+    [TestCase(367, 1, 368)]     // Jan 1, 1901 + 1 day = Jan 2, 1901
+    [TestCase(368, -1, 367)]    // Jan 2, 1901 - 1 day = Jan 1, 1901
+    [TestCase(36585, 1, 36586)] // Feb 29, 2000 + 1 day = Mar 1, 2000 (leap year)
+    [TestCase(36891, 1, 36892)] // Dec 31, 2000 + 1 day = Jan 1, 2001
+    [TestCase(36950, -1, 36949)]// Feb 28, 2001 - 1 day = Feb 27, 2001 (non-leap)
+    [TestCase(45488, 0, 45488)] // Jul 15, 2024 + 0 days = same date
+    public void Test_Operator_Plus_Day(int serial, int offset, int expectedSerial)
+    {
+        var d = new Date(serial);
+        var result = d + offset;
+        Assert.That(result.SerialNumber(), Is.EqualTo(expectedSerial),
+            $"Serial {serial} + {offset} : Expected {expectedSerial}, but got {result.SerialNumber()}");
+    }
+
 }

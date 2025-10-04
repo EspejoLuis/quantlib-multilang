@@ -175,7 +175,7 @@ public class Date
     ];
     private static readonly Date _minDate = new(MIN_SERIAL); //Equivalent to chashing
     private static readonly Date _maxDate = new(MAX_SERIAL); //Equivalent to chashing
-    private const int MIN_SERIAL = 367; // 1901-01-01
+    private const int MIN_SERIAL = 367; // 1901-01-01 Tuesday
     private const int MAX_SERIAL = 109574; // 2199-12-31
 
 
@@ -332,5 +332,21 @@ public class Date
     {
         int dayOfTheWeek = _serialNumber % 7;
         return (Weekday)(dayOfTheWeek == 0 ? 7 : dayOfTheWeek);
+    }
+    public Date NextWeekday(Weekday targetWeekday)
+    {
+        // Starting from a given date, move forward until you hit the requested Weekday.
+        // New Date
+        Day currentDay = (Day)Weekday();
+        Day targetDay = (Day)targetWeekday;
+        Day dayFactor = currentDay > targetDay ? 7 : 0;
+        Day differenceToAdd = dayFactor - currentDay + targetDay;
+        return this + differenceToAdd;
+    }
+
+    // Operators
+    public static Date operator +(Date date, Day day)
+    {
+        return new Date(date._serialNumber + day);
     }
 }

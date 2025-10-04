@@ -269,6 +269,7 @@
 ## 30 September 2025 - Tuesday - Date C\#
 
 - Implemented `Weekday()`
+- Added `NextWeekDay()` and `operator+` for date + day, unit test
 
 ### TODO
 

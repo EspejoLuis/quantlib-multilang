@@ -197,8 +197,7 @@ namespace QuantLibCSharp.Time
             return (minLength, maxLength);
         }
 
-        // Operators
-        // Arithmetic 
+        // Operators 
         public static Period operator +(Period lhs, Period rhs)
         {
             // Asssumption: 
