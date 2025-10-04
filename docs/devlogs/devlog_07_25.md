@@ -19,7 +19,7 @@
 ## 21 July 2025 - Day Two: setting python and C# environment
 
 - Python:
-  - `uv venv --python=/opt/homebrew/bin/python3.11` to create the uv environemnt with python 3.11
+  - `uv venv --python=/opt/homebrew/opt/python@3.13/bin/python3.13 .venv` to create the uv environemnt with python 3.11
   - Activate environment `source .venv/bin/activate`
   - `uv pip install -U pip setuptools wheel` to install some basic libraries
   - Create the pyproject.toml with polars version.
